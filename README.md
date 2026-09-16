@@ -70,3 +70,7 @@ Veja [docs/architecture.md](docs/architecture.md) e as skills em `.claude/skills
 
 Projeto independente, sem relação com a Iron Gate ou a Coffee Stain. Valheim é marca dos seus
 respectivos donos.
+
+## Licença
+
+[MIT](LICENSE). Valheim é marca da Iron Gate AB; este projeto não é afiliado nem endossado por ela.

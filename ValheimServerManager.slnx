@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/ValheimServerManager.App/ValheimServerManager.App.csproj">
+      <Platform Project="x64" />
+    </Project>
     <Project Path="src/ValheimServerManager.Cli/ValheimServerManager.Cli.csproj" />
     <Project Path="src/ValheimServerManager.Core/ValheimServerManager.Core.csproj" />
   </Folder>

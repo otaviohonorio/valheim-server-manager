@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ValheimServerManager.App.Views.WorldPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:vm="using:ValheimServerManager.App.ViewModels">
+
+    <Page.Resources>
+        <DataTemplate x:Key="OptionTemplate" x:DataType="vm:OptionItem">
+            <StackPanel Padding="0,2" ToolTipService.ToolTip="{x:Bind Description}">
+                <TextBlock Text="{x:Bind Label}" />
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer>
+            <StackPanel MaxWidth="{StaticResource PageMaxWidth}" Padding="{StaticResource PagePadding}" Spacing="{StaticResource SettingsCardSpacing}">
+                <TextBlock Style="{StaticResource PageTitleStyle}" Text="Mundo" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}" Text="Qual mundo o servidor carrega, as regras dele e o estado dos arquivos." />
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Issues}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:IssueItem">
+                            <InfoBar Margin="0,0,0,4" IsClosable="False" IsOpen="True" Message="{x:Bind Message}" Severity="{x:Bind Severity}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <toolkit:SettingsCard Description="Nome da pasta dentro de worlds_local (maiúsculas contam). Um nome que não existe cria um mundo novo — o app pede confirmação antes." Header="Mundo carregado">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE909;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <ComboBox
+                            MinWidth="240"
+                            IsEditable="True"
+                            ItemsSource="{x:Bind ViewModel.Worlds}"
+                            Text="{x:Bind ViewModel.WorldName, Mode=TwoWay}" />
+                        <Button AutomationProperties.Name="Abrir pasta dos mundos" Command="{x:Bind ViewModel.OpenWorldFolderCommand}" ToolTipService.ToolTip="Abrir worlds_local">
+                            <FontIcon FontSize="14" Glyph="&#xE838;" />
+                        </Button>
+                        <Button AutomationProperties.Name="Atualizar" Command="{x:Bind ViewModel.RefreshWorldInfoCommand}" ToolTipService.ToolTip="Atualizar">
+                            <FontIcon FontSize="14" Glyph="&#xE72C;" />
+                        </Button>
+                    </StackPanel>
+                </toolkit:SettingsCard>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Estado dos arquivos" />
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Health}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:IssueItem">
+                            <InfoBar Margin="0,0,0,4" IsClosable="False" IsOpen="True" Message="{x:Bind Message}" Severity="{x:Bind Severity}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Border Style="{StaticResource CardBorderStyle}" Visibility="{x:Bind helpers:Ui.VisibleIfAny(ViewModel.Details.Count), Mode=OneWay}">
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.Details}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DetailItem">
+                                <Grid Padding="0,4" ColumnSpacing="16">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="200" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Label}" />
+                                    <TextBlock Grid.Column="1" IsTextSelectionEnabled="True" Text="{x:Bind Value}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Regras do mundo" />
+                <toolkit:SettingsCard Description="{x:Bind ViewModel.PresetDescription, Mode=OneWay}" Header="Preset">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE790;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PresetItems}" SelectedIndex="{x:Bind ViewModel.PresetIndex, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsExpander Description="{x:Bind ViewModel.OverrideHint, Mode=OneWay}" Header="Ajustes finos" IsExpanded="True">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE9E9;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard Description="Dano causado pelos inimigos." Header="Combate">
+                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.CombatItems}" SelectedIndex="{x:Bind ViewModel.CombatIndex, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Description="O que acontece com itens e habilidades ao morrer. Passe o mouse nas opções para detalhes." Header="Penalidade de morte">
+                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.DeathItems}" SelectedIndex="{x:Bind ViewModel.DeathIndex, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Description="Multiplicador de coleta (arredonda para cima)." Header="Recursos">
+                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.ResourceItems}" SelectedIndex="{x:Bind ViewModel.ResourceIndex, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Description="Frequência dos ataques à base." Header="Raids">
+                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.RaidItems}" SelectedIndex="{x:Bind ViewModel.RaidIndex, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Description="O que pode passar pelos portais." Header="Portais">
+                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PortalItems}" SelectedIndex="{x:Bind ViewModel.PortalIndex, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+                <toolkit:SettingsCard Description="Raids e eventos acontecem conforme o progresso de cada jogador, não do mundo." Header="Eventos por jogador">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE77B;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.PlayerEvents, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Inimigos só atacam se forem provocados." Header="Inimigos passivos">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE9CE;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.PassiveMobs, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Desativa o mapa e o minimapa." Header="Sem mapa">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE826;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.NoMap, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Modo criativo" />
+                <InfoBar IsClosable="False" IsOpen="{x:Bind ViewModel.IsHammer, Mode=OneWay}" Message="O preset Martelo já é criativo; este interruptor não o desliga." Severity="Informational" />
+                <toolkit:SettingsCard Header="Construção e craft sem custo">
+                    <toolkit:SettingsCard.Description>
+                        <TextBlock TextWrapping="Wrap">
+                            Vale para todos que estiverem no servidor e bloqueia conquistas enquanto estiver ligado. Com o preset sempre presente na linha de comando, desligar remove a chave do mundo no próximo início — o app confere isso no primeiro save.
+                        </TextBlock>
+                    </toolkit:SettingsCard.Description>
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE70F;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="Normal" OnContent="Criativo" />
+                </toolkit:SettingsCard>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Diagnóstico" />
+                <toolkit:SettingsExpander Description="Procura nos chunks peças que só jogadores constroem (bancadas, baús, portais, fornalhas…). Útil para confirmar que um mundo restaurado é o seu." Header="Construções encontradas">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE80F;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <Button Command="{x:Bind ViewModel.ScanBuildingsCommand}" Content="Analisar" />
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <ProgressBar IsIndeterminate="True" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind ViewModel.BuildingsSummary, Mode=OneWay}" TextWrapping="Wrap" />
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.Buildings}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:DetailItem">
+                                            <Grid Padding="0,2" ColumnSpacing="16">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="240" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Style="{StaticResource MonoTextStyle}" Text="{x:Bind Label}" />
+                                                <TextBlock Grid.Column="1" Text="{x:Bind Value}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border
+            Grid.Row="1"
+            Padding="36,12"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid MaxWidth="{StaticResource PageMaxWidth}" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.SavedMessage, Mode=OneWay}" />
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource VsmAmberBrush}" Text="Alterações não salvas" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsDirty), Mode=OneWay}" />
+                </StackPanel>
+                <Button Grid.Column="1" Command="{x:Bind ViewModel.DiscardCommand}" Content="Descartar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" />
+                <Button Grid.Column="2" MinWidth="120" Command="{x:Bind ViewModel.SaveCommand}" Content="Salvar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

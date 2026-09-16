@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ValheimServerManager.App.Views.DashboardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:vm="using:ValheimServerManager.App.ViewModels">
+
+    <ScrollViewer>
+        <StackPanel MaxWidth="{StaticResource PageMaxWidth}" Padding="{StaticResource PagePadding}" Spacing="12">
+
+            <!--  Hero  -->
+            <Border Style="{StaticResource CardBorderStyle}" Padding="24">
+                <Grid ColumnSpacing="24" RowSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Grid Width="14" Height="14" VerticalAlignment="Center">
+                                <Ellipse Fill="{x:Bind helpers:Ui.StateBrush(ViewModel.Status.State), Mode=OneWay}" />
+                            </Grid>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{x:Bind helpers:Ui.StateBrush(ViewModel.Status.State), Mode=OneWay}"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="{x:Bind helpers:Ui.StateText(ViewModel.Status.State), Mode=OneWay}" />
+                            <Border
+                                Padding="8,2"
+                                VerticalAlignment="Center"
+                                BorderBrush="{ThemeResource VsmCreativeBrush}"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsCreative), Mode=OneWay}">
+                                <TextBlock Foreground="{ThemeResource VsmCreativeBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="Modo criativo" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource TitleLargeTextBlockStyle}" Text="{x:Bind ViewModel.Title, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.Subtitle, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+                        <Button
+                            MinWidth="130"
+                            Command="{x:Bind ViewModel.StartCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Visibility="{x:Bind helpers:Ui.Collapsed(ViewModel.Status.IsActive), Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="16" Glyph="&#xE768;" />
+                                <TextBlock Text="Iniciar" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            MinWidth="170"
+                            Command="{x:Bind ViewModel.StopCommand}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            ToolTipService.ToolTip="Envia Ctrl+C: o servidor salva o mundo e desliga."
+                            Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.IsActive), Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="16" Glyph="&#xE71A;" />
+                                <TextBlock Text="Parar com segurança" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{x:Bind ViewModel.RestartCommand}" ToolTipService.ToolTip="Salvar, desligar e iniciar de novo" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.IsActive), Mode=OneWay}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon FontSize="16" Glyph="&#xE72C;" />
+                                <TextBlock Text="Reiniciar" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="6" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}">
+                        <ProgressBar IsIndeterminate="True" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.BusyText, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!--  Alerts  -->
+            <InfoBar
+                Title="Servidor encerrado para proteger o mundo"
+                IsClosable="False"
+                IsOpen="{x:Bind helpers:Ui.HasText(ViewModel.Status.Emergency), Mode=OneWay}"
+                Message="{x:Bind ViewModel.Status.Emergency, Mode=OneWay}"
+                Severity="Error">
+                <InfoBar.ActionButton>
+                    <Button Command="{x:Bind ViewModel.GoToBackupsCommand}" Content="Ir para Backups" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+            <InfoBar
+                Title="Última parada"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.LastExitWasBad, Mode=OneWay}"
+                Message="{x:Bind ViewModel.ExitText, Mode=OneWay}"
+                Severity="Warning" />
+            <InfoBar
+                Title="Servidor iniciado fora do gerenciador"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.Status.IsAttached, Mode=OneWay}"
+                Message="O gerenciador está acompanhando este servidor, mas a janela dele ainda pode ser fechada no X (sem salvar). Use Reiniciar: ele desliga com segurança e volta sem janela, com todas as proteções."
+                Severity="Warning" />
+            <InfoBar
+                Title="Configuração alterada"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasPendingChanges, Mode=OneWay}"
+                Message="O servidor está rodando com a configuração anterior. Reinicie para aplicar."
+                Severity="Informational" />
+            <InfoBar
+                Title="Desligamento demorando"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.Status.StopTimedOut, Mode=OneWay}"
+                Message="O servidor ainda não confirmou o save. Aguarde; forçar o encerramento perde o progresso não salvo."
+                Severity="Warning" />
+
+            <!--  Stats  -->
+            <Grid ColumnSpacing="12" RowSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Border Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource StatLabelStyle}" Text="Jogadores online" />
+                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.PlayersText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <Grid>
+                        <StackPanel Spacing="4">
+                            <TextBlock Style="{StaticResource StatLabelStyle}" Text="Código de convite (crossplay)" />
+                            <TextBlock IsTextSelectionEnabled="True" Style="{StaticResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.JoinCodeText, Mode=OneWay}" />
+                        </StackPanel>
+                        <Button
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            AutomationProperties.Name="Copiar código"
+                            Command="{x:Bind ViewModel.CopyJoinCodeCommand}"
+                            Style="{StaticResource SubtleButtonStyle}"
+                            ToolTipService.ToolTip="Copiar">
+                            <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+                        </Button>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource StatLabelStyle}" Text="Tempo online" />
+                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.Uptime, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource StatLabelStyle}" Text="Último save" />
+                        <TextBlock Style="{StaticResource StatValueStyle}" Text="{x:Bind ViewModel.LastSaveText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource StatLabelStyle}" Text="Último backup" />
+                        <TextBlock Style="{StaticResource StatValueStyle}" Text="{x:Bind ViewModel.LastBackupText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource CardBorderStyle}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Style="{StaticResource StatLabelStyle}" Text="Endereço" />
+                        <TextBlock IsTextSelectionEnabled="True" Style="{StaticResource StatValueStyle}" Text="{x:Bind ViewModel.AddressText, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!--  Mode  -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon VerticalAlignment="Center" FontSize="28" Glyph="&#xE70F;" />
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.ModeText, Mode=OneWay}" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.ModeDetail, Mode=OneWay}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <Button Grid.Column="2" VerticalAlignment="Center" Command="{x:Bind ViewModel.ToggleModeCommand}" Content="{x:Bind ViewModel.ToggleModeText, Mode=OneWay}" />
+                </Grid>
+            </Border>
+
+            <!--  World  -->
+            <InfoBar
+                Title="{x:Bind ViewModel.WorldHealthTitle, Mode=OneWay}"
+                IsClosable="False"
+                IsOpen="True"
+                Message="{x:Bind ViewModel.WorldHealthMessage, Mode=OneWay}"
+                Severity="{x:Bind ViewModel.WorldHealthSeverity, Mode=OneWay}">
+                <InfoBar.Content>
+                    <StackPanel Margin="0,0,0,12" Spacing="10">
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.WorldSummary, Mode=OneWay}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Command="{x:Bind ViewModel.BackupNowCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE8F1;" />
+                                    <TextBlock Text="Backup agora" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.OpenWorldFolderCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE838;" />
+                                    <TextBlock Text="Pasta do mundo" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.OpenLogFileCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <FontIcon FontSize="14" Glyph="&#xE9D9;" />
+                                    <TextBlock Text="Abrir log" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </InfoBar.Content>
+            </InfoBar>
+
+            <!--  Activity  -->
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Atividade" />
+            <Border Style="{StaticResource CardBorderStyle}" Padding="8">
+                <Grid>
+                    <TextBlock
+                        Margin="12"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="Nada por aqui ainda. Os eventos do servidor (início, saves, jogadores, backups) aparecem nesta lista."
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind helpers:Ui.VisibleIfNone(ViewModel.Activity.Count), Mode=OneWay}" />
+                    <ItemsControl ItemsSource="{x:Bind ViewModel.Activity}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ActivityItem">
+                                <Grid Padding="12,6" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource MonoTextStyle}" Text="{x:Bind Time}" />
+                                    <FontIcon Grid.Column="1" VerticalAlignment="Center" FontSize="14" Glyph="{x:Bind Glyph}" />
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{x:Bind Message}" TextWrapping="Wrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="ValheimServerManager.App.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:services="using:ValheimServerManager.App.Services"
+    xmlns:vm="using:ValheimServerManager.App.ViewModels"
+    Title="Valheim Server Manager">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TitleBar
+            x:Name="AppTitleBar"
+            Title="Valheim Server Manager"
+            IsBackButtonVisible="False"
+            IsPaneToggleButtonVisible="True"
+            PaneToggleRequested="OnPaneToggleRequested">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/AppIcon.png" />
+            </TitleBar.IconSource>
+            <TitleBar.Content>
+                <StackPanel Orientation="Horizontal" Spacing="6" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasProfiles), Mode=OneWay}">
+                    <ComboBox
+                        x:Name="ProfileSelector"
+                        MinWidth="280"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Servidor selecionado"
+                        ItemsSource="{x:Bind ViewModel.Profiles}"
+                        SelectedItem="{x:Bind ViewModel.SelectedProfile, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ProfileItemViewModel">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <Ellipse Width="10" Height="10" VerticalAlignment="Center" Fill="{x:Bind helpers:Ui.StateBrush(State), Mode=OneWay}" />
+                                    <TextBlock VerticalAlignment="Center" Text="{x:Bind DisplayName, Mode=OneWay}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource VsmCreativeBrush}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="criativo"
+                                        Visibility="{x:Bind helpers:Ui.Visible(IsCreative), Mode=OneWay}" />
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{StaticResource CaptionTextBlockStyle}"
+                                        Text="{x:Bind Detail, Mode=OneWay}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button VerticalAlignment="Center" AutomationProperties.Name="Gerenciar perfis" ToolTipService.ToolTip="Perfis">
+                        <FontIcon FontSize="14" Glyph="&#xE712;" />
+                        <Button.Flyout>
+                            <MenuFlyout Placement="Bottom">
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.NewProfileCommand}" Text="Novo perfil">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE710;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.ImportBatchCommand}" Text="Importar de um .bat…">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8B5;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.DuplicateProfileCommand}" Text="Duplicar perfil atual">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8C8;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Command="{x:Bind ViewModel.DeleteProfileCommand}" Text="Excluir perfil atual">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE74D;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+            </TitleBar.Content>
+        </TitleBar>
+
+        <NavigationView
+            x:Name="Nav"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsPaneToggleButtonVisible="False"
+            IsSettingsVisible="False"
+            OpenPaneLength="220"
+            PaneDisplayMode="Left"
+            SelectionChanged="OnNavigationSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Painel" Tag="dashboard">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE80F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Servidor" Tag="server">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE977;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Mundo" Tag="world">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE909;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Backups" Tag="backups">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Jogadores" Tag="players">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE716;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Log" Tag="log">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D9;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Proteções e sobre" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE83D;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <InfoBar
+                    Title="Servidor fora do gerenciador"
+                    Margin="16,8,16,0"
+                    IsClosable="False"
+                    IsOpen="{x:Bind ViewModel.HasUnmanaged, Mode=OneWay}"
+                    Message="{x:Bind ViewModel.UnmanagedMessage, Mode=OneWay}"
+                    Severity="Warning">
+                    <InfoBar.ActionButton>
+                        <Button Command="{x:Bind ViewModel.AdoptUnmanagedCommand}" Content="Gerenciar este servidor" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+
+                <Frame x:Name="ContentFrame" Grid.Row="1" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasProfiles), Mode=OneWay}" />
+
+                <!--  First run  -->
+                <ScrollViewer Grid.Row="1" Visibility="{x:Bind helpers:Ui.Collapsed(ViewModel.HasProfiles), Mode=OneWay}">
+                    <StackPanel MaxWidth="620" Margin="32,64" HorizontalAlignment="Center" Spacing="16">
+                        <Image Width="112" Height="112" HorizontalAlignment="Left" Source="ms-appx:///Assets/AppIcon.png" />
+                        <TextBlock Style="{StaticResource TitleLargeTextBlockStyle}" Text="Bem-vindo" />
+                        <TextBlock Style="{StaticResource BodyTextBlockStyle}" TextWrapping="Wrap">
+                            Este app cuida dos seus servidores dedicados de Valheim: liga, desliga salvando o mundo, troca entre modo normal e criativo, faz backups verificados e impede que o servidor e o jogo mexam nos mesmos arquivos.
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Como você quer começar?" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Command="{x:Bind ViewModel.ImportBatchCommand}" Style="{StaticResource AccentButtonStyle}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="16" Glyph="&#xE8B5;" />
+                                    <TextBlock Text="Importar meu .bat atual" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{x:Bind ViewModel.NewProfileCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <FontIcon FontSize="16" Glyph="&#xE710;" />
+                                    <TextBlock Text="Criar do zero" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap">
+                            Se um servidor já estiver rodando, ele aparece num aviso acima e pode ser adotado com um clique.
+                        </TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!--  Toast-style alerts  -->
+                <ItemsControl
+                    Grid.Row="1"
+                    MaxWidth="440"
+                    Margin="16"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    ItemsSource="{x:Bind ViewModel.Alerts.Items}">
+                    <ItemsControl.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <AddDeleteThemeTransition />
+                        </TransitionCollection>
+                    </ItemsControl.ItemContainerTransitions>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="services:AlertItem">
+                            <InfoBar
+                                Title="{x:Bind FullTitle}"
+                                Margin="0,6,0,0"
+                                Background="{ThemeResource SolidBackgroundFillColorTertiaryBrush}"
+                                CloseButtonClick="OnAlertClosed"
+                                IsOpen="True"
+                                Message="{x:Bind Message}"
+                                Severity="{x:Bind Severity}"
+                                Tag="{x:Bind}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>

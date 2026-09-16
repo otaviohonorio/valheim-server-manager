@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ValheimServerManager.App.Views.ServerSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    xmlns:vm="using:ValheimServerManager.App.ViewModels">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer>
+            <StackPanel MaxWidth="{StaticResource PageMaxWidth}" Padding="{StaticResource PagePadding}" Spacing="{StaticResource SettingsCardSpacing}">
+                <TextBlock Style="{StaticResource PageTitleStyle}" Text="Servidor" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}" Text="Identidade, pastas e rotina de saves. As mudanças valem no próximo início do servidor." />
+
+                <ItemsControl ItemsSource="{x:Bind ViewModel.Issues}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:IssueItem">
+                            <InfoBar Margin="0,0,0,4" IsClosable="False" IsOpen="True" Message="{x:Bind Message}" Severity="{x:Bind Severity}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Identificação" />
+                <toolkit:SettingsCard Description="Só aparece aqui no gerenciador." Header="Nome do perfil">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE8EC;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <TextBox MinWidth="280" Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Nome que os jogadores veem na lista de servidores." Header="Nome do servidor">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE968;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <TextBox MinWidth="280" Text="{x:Bind ViewModel.ServerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Obrigatória. Mínimo de 5 caracteres e não pode estar contida no nome do servidor. Fica guardada criptografada no seu usuário do Windows." Header="Senha">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE72E;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <PasswordBox MinWidth="280" Password="{x:Bind ViewModel.Password, Mode=TwoWay}" PasswordRevealMode="Peek" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="O servidor usa esta porta e a seguinte (UDP). Sem crossplay, redirecione as duas no roteador." Header="Porta">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE968;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <NumberBox Minimum="1024" Maximum="65534" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.Port, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Mostrar na lista pública de servidores do jogo." Header="Servidor público">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE774;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsPublic, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Permite Xbox/Game Pass e entrada por código de convite, sem redirecionar portas. Adiciona um relay (um pouco mais de latência)." Header="Crossplay">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE7FC;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.Crossplay, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Pastas" />
+                <toolkit:SettingsExpander Description="Pasta do Valheim Dedicated Server (a ferramenta da Steam)." Header="Instalação do servidor" IsExpanded="True">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE7B8;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox PlaceholderText="Ex.: D:\SteamLibrary\steamapps\common\Valheim dedicated server" Text="{x:Bind ViewModel.ServerDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseServerDirectoryCommand}" Content="Procurar…" />
+                                    <Button Grid.Column="2" Command="{x:Bind ViewModel.DetectInstallationCommand}" Content="Detectar pela Steam" />
+                                </Grid>
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind ViewModel.DetectedInstallations, Mode=OneWay}" TextWrapping="Wrap" Visibility="{x:Bind helpers:Ui.VisibleIfText(ViewModel.DetectedInstallations), Mode=OneWay}" />
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+
+                <toolkit:SettingsExpander Description="Onde ficam os mundos (worlds_local), o log e as listas de jogadores DESTE servidor. Nunca use a pasta do jogo." Header="Pasta de saves do servidor" IsExpanded="True">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE8B7;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox PlaceholderText="Ex.: D:\Valheim\ServerSave" Text="{x:Bind ViewModel.SaveDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseSaveDirectoryCommand}" Content="Procurar…" />
+                                    <Button Grid.Column="2" Command="{x:Bind ViewModel.OpenSaveDirectoryCommand}" Content="Abrir" />
+                                </Grid>
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap">
+                                    <Run Text="Pasta do jogo (proibida aqui):" />
+                                    <Run Text="{x:Bind ViewModel.GameDataDirectory}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+
+                <toolkit:SettingsExpander Description="Onde o gerenciador guarda os backups verificados. Em branco usa uma pasta 'backups' ao lado da pasta de saves." Header="Pasta de backups">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox PlaceholderText="(automática)" Text="{x:Bind ViewModel.BackupDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseBackupDirectoryCommand}" Content="Procurar…" />
+                                </Grid>
+                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap">
+                                    <Run Text="Em uso:" />
+                                    <Run Text="{x:Bind ViewModel.EffectiveBackupDirectory, Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Saves e backups" />
+                <toolkit:SettingsCard Description="Quanto tempo entre os saves automáticos do Valheim. Menos tempo = menos progresso perdido numa queda de energia." Header="Salvar o mundo a cada (minutos)">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE74E;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <NumberBox Minimum="1" Maximum="120" SmallChange="5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.SaveIntervalMinutes, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Copia e verifica o mundo antes de o servidor abrir. Se algo estiver errado, o servidor nem sobe." Header="Backup antes de iniciar">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE768;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.BackupBeforeStart, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Copia e verifica o mundo logo depois que o servidor desliga." Header="Backup depois de parar">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE71A;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ToggleSwitch IsOn="{x:Bind ViewModel.BackupAfterStop, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Quantos backups automáticos manter por mundo. Backups manuais nunca são apagados sozinhos." Header="Guardar backups automáticos">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE81C;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <NumberBox Minimum="1" Maximum="500" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.AutoBackupRetention, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsExpander Description="Os backups que o próprio Valheim faz dentro de worlds_local." Header="Backups internos do Valheim">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE7FC;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard Header="Quantidade">
+                            <NumberBox Minimum="1" Maximum="100" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupCount, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Header="Primeiro backup após (horas)">
+                            <NumberBox Minimum="0.1" Maximum="72" SmallChange="0.5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupShortHours, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                        <toolkit:SettingsCard Header="Depois, a cada (horas)">
+                            <NumberBox Minimum="0.5" Maximum="168" SmallChange="1" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupLongHours, Mode=TwoWay}" />
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+                <toolkit:SettingsCard Description="Quanto esperar o servidor salvar e fechar antes de perguntar o que fazer." Header="Tempo máximo para desligar (segundos)">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE916;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <NumberBox Minimum="15" Maximum="900" SmallChange="15" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.StopTimeoutSeconds, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
+
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Avançado" />
+                <toolkit:SettingsCard Description="Repassados como estão para o valheim_server. Argumentos que o gerenciador controla são recusados." Header="Argumentos extras">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE756;" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <TextBox MinWidth="280" FontFamily="Cascadia Mono, Consolas" PlaceholderText="Ex.: -instanceid 2" Text="{x:Bind ViewModel.ExtraArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </toolkit:SettingsCard>
+                <toolkit:SettingsExpander Description="Exatamente o que será executado (senha oculta)." Header="Linha de comando">
+                    <toolkit:SettingsExpander.HeaderIcon>
+                        <FontIcon Glyph="&#xE943;" />
+                    </toolkit:SettingsExpander.HeaderIcon>
+                    <toolkit:SettingsExpander.Items>
+                        <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <TextBlock Style="{StaticResource MonoTextStyle}" Text="{x:Bind ViewModel.CommandPreview, Mode=OneWay}" />
+                                <Button HorizontalAlignment="Left" Command="{x:Bind ViewModel.CopyCommandLineCommand}" Content="Copiar" />
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+                    </toolkit:SettingsExpander.Items>
+                </toolkit:SettingsExpander>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!--  Save bar  -->
+        <Border
+            Grid.Row="1"
+            Padding="36,12"
+            Background="{ThemeResource LayerFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="0,1,0,0">
+            <Grid MaxWidth="{StaticResource PageMaxWidth}" ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+                    <ProgressRing Width="18" Height="18" IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.SavedMessage, Mode=OneWay}" />
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource VsmAmberBrush}" Text="Alterações não salvas" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsDirty), Mode=OneWay}" />
+                </StackPanel>
+                <Button Grid.Column="1" Command="{x:Bind ViewModel.DiscardCommand}" Content="Descartar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" />
+                <Button Grid.Column="2" MinWidth="120" Command="{x:Bind ViewModel.SaveCommand}" Content="Salvar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

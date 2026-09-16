@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="ValheimServerManager.App.Views.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
+
+    <Page.Resources>
+        <Style x:Key="GuardTitle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock" />
+        <Style x:Key="GuardText" BasedOn="{StaticResource BodyTextBlockStyle}" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer>
+        <StackPanel MaxWidth="{StaticResource PageMaxWidth}" Padding="{StaticResource PagePadding}" Spacing="{StaticResource SettingsCardSpacing}">
+            <Grid Margin="0,0,0,12" ColumnSpacing="20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Image Width="72" Height="72" Source="ms-appx:///Assets/AppIcon.png" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Valheim Server Manager" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        <Run Text="Versão" />
+                        <Run Text="{x:Bind ViewModel.Version}" />
+                        <Run Text="· .NET" />
+                        <Run Text="{x:Bind ViewModel.DotNetVersion}" />
+                        <Run Text="· WinUI 3" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Proteções ativas" />
+            <TextBlock Margin="0,0,0,8" Style="{StaticResource GuardText}">
+                Nasceram do incidente de 16/09/2026, quando servidor e jogo abriram o mesmo mundo, um save ficou pela metade e o Valheim gerou um mundo novo por cima — apagando as construções.
+            </TextBlock>
+
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="16">
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Pasta de saves separada do jogo" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor sempre recebe -savedir. Um perfil que aponte para a pasta do jogo (LocalLow\IronGate\Valheim) é recusado, então servidor e jogo nunca disputam os mesmos arquivos." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Desligar sempre salvando" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor roda sem janela (não há um X para fechar sem querer). Parar envia Ctrl+C e espera o log confirmar o save. Encerrar à força só com confirmação explícita." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Verificação antes de iniciar" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="Se o save mais recente estiver incompleto (por exemplo, sem o .db2) ou faltar algum chunk, o servidor nem sobe. Um mundo inexistente só é criado depois de você confirmar." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Freio de emergência" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="Se mesmo assim o log mostrar que o Valheim não encontrou os dados do mundo e começou a gerar outro, o servidor é encerrado na hora, antes de gravar qualquer coisa por cima." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Backups verificados" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="Antes de iniciar e depois de parar, o save completo é copiado e conferido por SHA-256. Restaurar copia o mundo atual antes, move a pasta antiga para _substituidos e nunca mistura arquivos." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Modo criativo que desliga de verdade" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="O preset sempre vai na linha de comando, então as chaves do mundo são refeitas a cada início. Depois do primeiro save, o app confere no arquivo do mundo se nobuildcost está como deveria." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Log sempre guardado" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor sempre grava -logFile, e o log de cada sessão é arquivado antes do próximo início. Se algo der errado, dá para saber o que aconteceu." />
+                    </StackPanel>
+                    <StackPanel Spacing="2">
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Um servidor por mundo e por porta" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="O app procura valheim_server em execução e recusa iniciar outro no mesmo mundo ou na mesma porta. Servidores abertos fora do app são detectados e podem ser adotados." />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Preferências" />
+            <toolkit:SettingsCard Description="Mostra uma notificação do Windows quando alguém aparece no mundo." Header="Avisar quando um jogador entrar">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE7E7;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.NotifyPlayerJoins, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Dados do aplicativo" />
+            <toolkit:SettingsCard Description="{x:Bind ViewModel.DataDirectory}" Header="Configurações e log do gerenciador">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8B7;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Command="{x:Bind ViewModel.OpenDataDirectoryCommand}" Content="Abrir pasta" />
+                    <Button Command="{x:Bind ViewModel.OpenAppLogsCommand}" Content="Logs do app" />
+                </StackPanel>
+            </toolkit:SettingsCard>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -99,3 +99,12 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
 - Editable `ComboBox.Text` bindings lose their value when items arrive later; use `AutoSuggestBox`.
 - Closed `InfoBar`s still take `StackPanel.Spacing`; bind `Visibility` too.
 - Never edit a `.bat` that is currently running: cmd reads batch files by byte offset.
+- `PasswordBox.Password` two-way x:Bind only pushed on focus loss: typing left Save disabled and
+  leaving the page silently dropped the new password. Push from `PasswordChanged` instead, and keep
+  the unsaved-changes guard (`IEditorPage`, `MainWindow.ConfirmLeaveEditorAsync`) for every editor.
+- `SettingsCard` exposes its header as an automation name too; UI tests must pick the element that
+  supports the needed pattern (Value/RangeValue/Toggle/ExpandCollapse), not the first name match.
+- "Did my settings apply?" is answered by `LaunchVerification`: real command line (WMI) plus the
+  server's `Setting world modifier` log lines, surfaced as `ServerStatus.ConfigDifferences`.
+- Split a process command line with `CommandLine.Split` (the server path contains spaces), never
+  at the first space.

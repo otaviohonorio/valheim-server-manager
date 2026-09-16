@@ -48,6 +48,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
                         <Button
                             MinWidth="130"
+                            AutomationProperties.Name="Iniciar"
                             Command="{x:Bind ViewModel.StartCommand}"
                             Style="{StaticResource AccentButtonStyle}"
                             Visibility="{x:Bind helpers:Ui.Collapsed(ViewModel.Status.IsActive), Mode=OneWay}">
@@ -58,6 +59,7 @@
                         </Button>
                         <Button
                             MinWidth="170"
+                            AutomationProperties.Name="Parar com segurança"
                             Command="{x:Bind ViewModel.StopCommand}"
                             Style="{StaticResource AccentButtonStyle}"
                             ToolTipService.ToolTip="Envia Ctrl+C: o servidor salva o mundo e desliga."
@@ -67,7 +69,7 @@
                                 <TextBlock Text="Parar com segurança" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{x:Bind ViewModel.RestartCommand}" ToolTipService.ToolTip="Salvar, desligar e iniciar de novo" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.IsActive), Mode=OneWay}">
+                        <Button AutomationProperties.Name="Reiniciar" Command="{x:Bind ViewModel.RestartCommand}" ToolTipService.ToolTip="Salvar, desligar e iniciar de novo" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.IsActive), Mode=OneWay}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <FontIcon FontSize="16" Glyph="&#xE72C;" />
                                 <TextBlock Text="Reiniciar" />
@@ -87,6 +89,7 @@
                 Title="Servidor encerrado para proteger o mundo"
                 IsClosable="False"
                 IsOpen="{x:Bind helpers:Ui.HasText(ViewModel.Status.Emergency), Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.VisibleIfText(ViewModel.Status.Emergency), Mode=OneWay}"
                 Message="{x:Bind ViewModel.Status.Emergency, Mode=OneWay}"
                 Severity="Error">
                 <InfoBar.ActionButton>
@@ -97,24 +100,28 @@
                 Title="Última parada"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.LastExitWasBad, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.LastExitWasBad), Mode=OneWay}"
                 Message="{x:Bind ViewModel.ExitText, Mode=OneWay}"
                 Severity="Warning" />
             <InfoBar
                 Title="Servidor iniciado fora do gerenciador"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.Status.IsAttached, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.IsAttached), Mode=OneWay}"
                 Message="O gerenciador está acompanhando este servidor, mas a janela dele ainda pode ser fechada no X (sem salvar). Use Reiniciar: ele desliga com segurança e volta sem janela, com todas as proteções."
                 Severity="Warning" />
             <InfoBar
                 Title="Configuração alterada"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.HasPendingChanges, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasPendingChanges), Mode=OneWay}"
                 Message="O servidor está rodando com a configuração anterior. Reinicie para aplicar."
                 Severity="Informational" />
             <InfoBar
                 Title="Desligamento demorando"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.Status.StopTimedOut, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.Status.StopTimedOut), Mode=OneWay}"
                 Message="O servidor ainda não confirmou o save. Aguarde; forçar o encerramento perde o progresso não salvo."
                 Severity="Warning" />
 
@@ -207,19 +214,19 @@
                     <StackPanel Margin="0,0,0,12" Spacing="10">
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.WorldSummary, Mode=OneWay}" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Command="{x:Bind ViewModel.BackupNowCommand}">
+                            <Button AutomationProperties.Name="Backup agora" Command="{x:Bind ViewModel.BackupNowCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="14" Glyph="&#xE8F1;" />
                                     <TextBlock Text="Backup agora" />
                                 </StackPanel>
                             </Button>
-                            <Button Command="{x:Bind ViewModel.OpenWorldFolderCommand}">
+                            <Button AutomationProperties.Name="Pasta do mundo" Command="{x:Bind ViewModel.OpenWorldFolderCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="14" Glyph="&#xE838;" />
                                     <TextBlock Text="Pasta do mundo" />
                                 </StackPanel>
                             </Button>
-                            <Button Command="{x:Bind ViewModel.OpenLogFileCommand}">
+                            <Button AutomationProperties.Name="Abrir log" Command="{x:Bind ViewModel.OpenLogFileCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="6">
                                     <FontIcon FontSize="14" Glyph="&#xE9D9;" />
                                     <TextBlock Text="Abrir log" />

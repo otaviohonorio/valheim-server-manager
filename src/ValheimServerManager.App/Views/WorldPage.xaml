@@ -39,11 +39,14 @@
                         <FontIcon Glyph="&#xE909;" />
                     </toolkit:SettingsCard.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <ComboBox
+                        <AutoSuggestBox
                             MinWidth="240"
-                            IsEditable="True"
+                            AutomationProperties.Name="Mundo carregado"
+                            GotFocus="OnWorldBoxFocused"
                             ItemsSource="{x:Bind ViewModel.Worlds}"
-                            Text="{x:Bind ViewModel.WorldName, Mode=TwoWay}" />
+                            PlaceholderText="Nome do mundo"
+                            SuggestionChosen="OnWorldChosen"
+                            Text="{x:Bind ViewModel.WorldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <Button AutomationProperties.Name="Abrir pasta dos mundos" Command="{x:Bind ViewModel.OpenWorldFolderCommand}" ToolTipService.ToolTip="Abrir worlds_local">
                             <FontIcon FontSize="14" Glyph="&#xE838;" />
                         </Button>

@@ -46,6 +46,22 @@ public sealed partial class WorldPage : Page
     }
 
     public WorldViewModel ViewModel { get; }
+
+    private void OnWorldBoxFocused(object sender, RoutedEventArgs e)
+    {
+        if (sender is AutoSuggestBox box && ViewModel.Worlds.Count > 0)
+        {
+            box.IsSuggestionListOpen = true;
+        }
+    }
+
+    private void OnWorldChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is string world)
+        {
+            sender.Text = world;
+        }
+    }
 }
 
 public sealed partial class BackupsPage : Page

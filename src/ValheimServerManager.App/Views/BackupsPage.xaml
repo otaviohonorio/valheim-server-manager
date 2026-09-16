@@ -27,13 +27,13 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <Button Command="{x:Bind ViewModel.BackupNowCommand}" Style="{StaticResource AccentButtonStyle}">
+            <Button AutomationProperties.Name="Fazer backup agora" Command="{x:Bind ViewModel.BackupNowCommand}" Style="{StaticResource AccentButtonStyle}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontSize="16" Glyph="&#xE8F1;" />
                     <TextBlock Text="Fazer backup agora" />
                 </StackPanel>
             </Button>
-            <Button Grid.Column="1" Command="{x:Bind ViewModel.OpenRootCommand}">
+            <Button Grid.Column="1" AutomationProperties.Name="Abrir pasta de backups" Command="{x:Bind ViewModel.OpenRootCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontSize="16" Glyph="&#xE838;" />
                     <TextBlock Text="Abrir pasta" />

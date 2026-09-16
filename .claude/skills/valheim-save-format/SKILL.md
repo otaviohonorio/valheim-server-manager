@@ -63,12 +63,21 @@ what makes the index **rebuildable** from surviving chunks (`ChunkIndexRebuilder
 
 ```
 i32 payload_length (file length - 4) | i32 version | string name | string seed_name
-i32 seed | i64 uid | i32 worldgen_version | bool flag
+i32 seed | i64 uid | i32 worldgen_version | bool has_been_saved
 i32 key_count | string keys…            e.g. "nobuildcost", "resourcerate 150", "preset combat_default:…"
 i32 player_count | (platform_id, name, character, player_id)…   e.g. "Steam_7656…", "Viking", "Viking", "71F8…"
 ```
 
 Creative mode = key `nobuildcost` present. `preset …` entries are history strings, not keys.
+
+### Creating a world with a chosen seed
+
+The menu's "new world" writes only `_main.0.fwl2` (50 bytes for a 5-char name): version 41,
+seed = `StableHash(seed_name)`, uid = random int32 sign-extended, worldgen 2,
+`has_been_saved` = 0, no keys, no players. Seed names are up to 10 ASCII letters/digits. A server
+started on that folder logs "missing _main.0.db2" (expected here — `WorldInspector` reports
+`NEW_WORLD_SEEDED`), generates the world from the seed and writes save 1. `WorldCreator.CreateSeeded`
+reproduces the file byte for byte (test fixture in `WorldCreatorTests`).
 
 ## Identifying a player's base
 

@@ -53,7 +53,6 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
     private readonly ProfileContext _context;
     private readonly UiDispatcher _ui;
     private readonly IDialogService _dialogs;
-    private readonly IPickerService _pickers;
     private readonly ILogger<ShellViewModel> _logger;
     private DispatcherQueueTimer? _scanTimer;
     private bool _revertingSelection;
@@ -63,7 +62,6 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         ProfileContext context,
         UiDispatcher ui,
         IDialogService dialogs,
-        IPickerService pickers,
         AlertCenter alerts,
         ILogger<ShellViewModel> logger)
     {
@@ -71,11 +69,19 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         _context = context;
         _ui = ui;
         _dialogs = dialogs;
-        _pickers = pickers;
         _logger = logger;
         Alerts = alerts;
         _manager.ProfilesChanged += (_, _) => _ui.Run(RebuildProfiles);
         _manager.UnmanagedServersChanged += (_, list) => _ui.Run(() => UpdateUnmanaged(list));
+
+        // Profiles created, duplicated or adopted elsewhere are selected through the context; keep the selector in sync.
+        _context.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ProfileContext.SelectedProfileId))
+            {
+                _ui.Run(() => SelectedProfile = Profiles.FirstOrDefault(p => p.Id == _context.SelectedProfileId));
+            }
+        };
         RebuildProfiles();
     }
 
@@ -223,65 +229,20 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         }
     }
 
-    [RelayCommand]
-    private async Task NewProfileAsync()
-    {
-        var name = await _dialogs.PromptAsync("Novo servidor", "Como você quer chamar este perfil?", "Ex.: Mundo principal");
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
+    /// <summary>The window shows the "new server" page.</summary>
+    public event EventHandler? NewServerRequested;
 
-        var profile = new ServerProfile
-        {
-            DisplayName = name,
-            ServerName = name,
-            WorldName = "Mundo",
-            ServerDirectory = ServerManager.DetectServerInstallations().FirstOrDefault() ?? string.Empty,
-        };
+    [ObservableProperty]
+    public partial bool IsCreatingServer { get; set; }
 
-        var documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
-        profile.SaveDirectory = Path.Combine(documents, "Valheim Server Manager", SafeFolder(name), "ServerSave");
-        _manager.AddProfile(profile);
-        _context.SelectedProfileId = profile.Id;
-    }
+    public bool ShowContent => HasProfiles || IsCreatingServer;
+
+    partial void OnIsCreatingServerChanged(bool value) => OnPropertyChanged(nameof(ShowContent));
+
+    partial void OnHasProfilesChanged(bool value) => OnPropertyChanged(nameof(ShowContent));
 
     [RelayCommand]
-    private async Task ImportBatchAsync()
-    {
-        var path = await _pickers.PickFileAsync(".bat", ".cmd");
-        if (path is null)
-        {
-            return;
-        }
-
-        try
-        {
-            var result = BatchFileImporter.ImportFile(path);
-            var profile = result.Profile;
-            if (string.IsNullOrWhiteSpace(profile.ServerDirectory))
-            {
-                profile.ServerDirectory = ServerManager.DetectServerInstallations().FirstOrDefault() ?? string.Empty;
-            }
-
-            if (string.IsNullOrWhiteSpace(profile.SaveDirectory) || ValheimPaths.SameDirectory(profile.SaveDirectory, ValheimPaths.GameDataDirectory))
-            {
-                profile.SaveDirectory = Path.Combine(Path.GetDirectoryName(path) ?? string.Empty, "ServerSave");
-            }
-
-            _manager.AddProfile(profile);
-            _context.SelectedProfileId = profile.Id;
-
-            if (result.Notes.Count > 0)
-            {
-                await _dialogs.AlertAsync("Importado com observações", string.Join("\n\n", result.Notes));
-            }
-        }
-        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException)
-        {
-            await _dialogs.AlertAsync("Não foi possível importar", ex.Message);
-        }
-    }
+    private void NewServer() => NewServerRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
     private async Task DuplicateProfileAsync()
@@ -343,9 +304,6 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
 
         return port;
     }
-
-    private static string SafeFolder(string name) =>
-        string.Concat(name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c)).Trim();
 
     public void Dispose()
     {

@@ -77,6 +77,35 @@ public static class WorldInspector
         }
 
         var latest = saveSets[^1];
+        if (saveSets.Count == 1 && latest is { Number: 0, Fwl2: not null, Db2: null })
+        {
+            WorldMetadata? pending = null;
+            try
+            {
+                pending = WorldMetadata.Read(latest.Fwl2);
+            }
+            catch (Exception ex) when (ex is InvalidDataException or IOException)
+            {
+                issues.Add(new(IssueSeverity.Error, "BAD_METADATA",
+                    $"O arquivo {Path.GetFileName(latest.Fwl2)} está corrompido: {ex.Message}"));
+            }
+
+            if (pending is not null)
+            {
+                issues.Add(new(IssueSeverity.Info, "NEW_WORLD_SEEDED",
+                    $"Mundo novo com a seed \"{pending.SeedName}\". Ele será gerado no primeiro início do servidor."));
+            }
+
+            return new WorldHealthReport
+            {
+                WorldName = worldName,
+                Directory = worldDirectory,
+                Exists = true,
+                Issues = issues,
+                Metadata = pending,
+            };
+        }
+
         if (!latest.IsComplete)
         {
             var olderComplete = saveSets.LastOrDefault(s => s.IsComplete && s.Number < latest.Number);

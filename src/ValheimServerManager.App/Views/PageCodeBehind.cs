@@ -157,6 +157,26 @@ public sealed partial class LogPage : Page
         ViewModel.OpenArchivedCommand.Execute(e.ClickedItem as string);
 }
 
+public sealed partial class NewServerPage : Page
+{
+    public NewServerPage()
+    {
+        ViewModel = App.GetService<NewServerViewModel>();
+        InitializeComponent();
+        ViewModel.NavigateRequested += (_, key) => App.GetService<MainWindow>().Navigate(key);
+    }
+
+    public NewServerViewModel ViewModel { get; }
+
+    private void OnPasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is PasswordBox box)
+        {
+            ViewModel.Password = box.Password;
+        }
+    }
+}
+
 public sealed partial class AboutPage : Page
 {
     public AboutPage()

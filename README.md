@@ -27,7 +27,8 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 | **Log ao vivo** | Eventos importantes filtrados, e o log de cada sessão arquivado. |
 | **Desligar o PC sem perder nada** | Se o Windows for desligado com servidores rodando, o app segura o desligamento por alguns segundos e salva os mundos antes. |
 | **Bandeja do sistema** | Fechar a janela com servidores rodando deixa o app na bandeja; notificações de jogadores e problemas aparecem por ali. |
-| **Vários servidores** | Perfis independentes, cada um com seu mundo e porta. Servidores abertos fora do app são detectados e podem ser adotados. |
+| **Criar servidores** | Assistente "Novo servidor": mundo novo com a seed que você escolher (ou aleatória), ou cópia de um mundo que você já joga — só o último save completo, conferido. |
+| **Vários servidores ao mesmo tempo** | Cada perfil tem seu mundo, pasta e porta, e vários podem rodar juntos. Travas impedem dois servidores no mesmo mundo/pasta ou na mesma porta (o Valheim usa a porta e a seguinte). Servidores abertos fora do app são detectados e podem ser adotados. |
 | **Diagnóstico** | Inspeção do save e contagem de peças construídas por jogadores (bancadas, baús, portais…). |
 
 ## Instalação
@@ -37,7 +38,7 @@ cria atalhos) ou copie a pasta publicada e execute `ValheimServerManager.exe`. N
 Windows App SDK (a publicação é autocontida). Requer Windows 10 2004+ ou Windows 11, x64, e o
 **Valheim Dedicated Server** instalado pela Steam (Biblioteca → Ferramentas).
 
-No primeiro uso, importe o seu `.bat` atual ou crie um perfil do zero.
+No primeiro uso, clique em **Criar meu primeiro servidor**. Se um servidor já estiver rodando por um `.bat`, o app o detecta e oferece adotá-lo.
 
 ## Linha de comando
 
@@ -45,6 +46,7 @@ No primeiro uso, importe o seu `.bat` atual ou crie um perfil do zero.
 
 ```
 vsm profiles                      lista perfis e servidores em execução
+vsm create  --name X --password Y [--seed S | --copy-world <pasta>] [--port N] [--private]
 vsm status  -p "Meu servidor"     estado do servidor e do mundo
 vsm start   -p "Meu servidor"     inicia com todas as verificações
 vsm stop    -p "Meu servidor"     Ctrl+C e espera o save

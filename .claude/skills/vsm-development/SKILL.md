@@ -39,8 +39,10 @@ Run the app against a throwaway settings folder so the user's real profiles are 
 
 ```
 src/ValheimServerManager.Core    domain + services, no UI (net10.0-windows)
-  Worlds/      save format: ChunkIndex, WorldMetadata, WorldInspector, recovery
+  Worlds/      save format: ChunkIndex, WorldMetadata, WorldInspector, recovery,
+               WorldCreator (seeded new world / copy of the latest complete save)
   Profiles/    ServerProfile, ModifierCatalog, LaunchArguments, ProfileValidator, BatchFileImporter
+               (parses command lines of adopted servers; the .bat import UI was removed)
   Processes/   hidden launch, Ctrl+C helper (ConsoleSignal), WMI locator
   Logs/        ServerLogParser, LogTailer, LogArchiver
   Backups/     BackupService (SHA-256 manifests, retention, restore)
@@ -49,7 +51,8 @@ src/ValheimServerManager.Core    domain + services, no UI (net10.0-windows)
 src/ValheimServerManager.App     WinUI 3, MVVM Toolkit, Generic Host DI, Serilog
   Program.cs   custom Main: helper mode (--vsm-send-ctrl-c) + single instance
   Services/    UiDispatcher, DialogService, PickerService, ProfileContext, AlertCenter
-  ViewModels/  ProfilePageViewModel base → Dashboard/ServerSettings/World/Backups/Players/Log
+  ViewModels/  ProfilePageViewModel base → Dashboard/ServerSettings/World/Backups/Players/Log;
+               NewServerViewModel ("Novo servidor" wizard, not profile-bound)
   Views/       pages (XAML) + PageCodeBehind.cs
 src/ValheimServerManager.Cli     `vsm` System.CommandLine tool; also its own Ctrl+C helper
 tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorlds)
@@ -77,8 +80,14 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
   ```bash
   vsm e2e --server-dir "<install>" --world-source "<world folder copy>" --port 2466 --work-dir .test-servers/e2e-run --keep
   ```
-  It covers start → backup while running → Ctrl+C stop with save → creative on/off verified in the
-  world file → refusal of a world missing its .db2 → restore.
+  Paths are made absolute. It covers start → backup while running → Ctrl+C stop with save →
+  creative on/off verified in the world file → all options → edit while running → refusal of a
+  world missing its .db2 → restore → seeded new world (port+20) → two servers at once plus the
+  WORLD_IN_USE and PORT_IN_USE/PORT_BUSY locks (port+40).
+- GUI test instances go on a **secondary monitor** and must not keep focus: `SetWindowPos` the
+  window to a screen with `Screen.Primary == false`, then `SetForegroundWindow` back to the window
+  that was active before the launch. Never synthesize keystrokes; the author keeps working on the
+  primary screen and a stray key once landed in a test field.
 - Screenshots of the running app: `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT)` on the
   process' main window.
 - Drive the UI with UI Automation (`System.Windows.Automation`): navigation items expose

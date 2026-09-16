@@ -28,7 +28,7 @@ internal static class CliApp
         var root = new RootCommand("Valheim Server Manager — linha de comando");
         root.Options.Add(DataDirOption);
         root.Subcommands.Add(ProfilesCommand());
-        root.Subcommands.Add(ImportCommand());
+        root.Subcommands.Add(CreateCommand());
         root.Subcommands.Add(StatusCommand());
         root.Subcommands.Add(StartCommand());
         root.Subcommands.Add(StopCommand());
@@ -101,7 +101,7 @@ internal static class CliApp
             await manager.RefreshRunningServersAsync(ct).ConfigureAwait(false);
             if (manager.Profiles.Count == 0)
             {
-                Console.WriteLine("Nenhum perfil. Use 'vsm import <arquivo.bat>' ou o app.");
+                Console.WriteLine("Nenhum perfil. Use 'vsm create' ou o app.");
                 return 0;
             }
 
@@ -122,38 +122,98 @@ internal static class CliApp
         return command;
     }
 
-    private static Command ImportCommand()
+    private static Command CreateCommand()
     {
-        var file = new Argument<FileInfo>("arquivo") { Description = "Script .bat que inicia o valheim_server." };
-        var saveDir = new Option<string?>("--save-dir") { Description = "Pasta de saves a usar se o .bat não tiver -savedir." };
-        var name = new Option<string?>("--name") { Description = "Nome do perfil." };
-        var command = new Command("import", "Cria um perfil a partir de um .bat.");
-        command.Arguments.Add(file);
-        command.Options.Add(saveDir);
-        command.Options.Add(name);
-        command.SetAction(async (parse, _) =>
+        var name = new Option<string>("--name") { Required = true, Description = "Nome do servidor." };
+        var password = new Option<string>("--password") { Required = true, Description = "Senha (mínimo 5 caracteres)." };
+        var world = new Option<string?>("--world") { Description = "Nome do mundo novo (padrão: derivado do nome)." };
+        var seed = new Option<string?>("--seed") { Description = "Seed do mundo novo (até 10 letras/números; padrão: aleatória)." };
+        var copy = new Option<DirectoryInfo?>("--copy-world") { Description = "Em vez de mundo novo, copia este mundo existente." };
+        var port = new Option<int?>("--port") { Description = "Porta (padrão: 2456)." };
+        var priv = new Option<bool>("--private") { Description = "Não aparecer na lista pública." };
+        var noCross = new Option<bool>("--no-crossplay") { Description = "Desliga o crossplay." };
+        var saveDir = new Option<string?>("--save-dir") { Description = "Pasta de saves do servidor." };
+        var serverDir = new Option<string?>("--server-dir") { Description = "Instalação do Valheim Dedicated Server (padrão: detectada)." };
+        var preset = new Option<string?>("--preset") { Description = "normal, casual, easy, hard, hardcore, immersive ou hammer." };
+        var creative = new Option<bool>("--creative") { Description = "Começa em modo criativo." };
+
+        var command = new Command("create", "Cria um servidor com mundo novo (seed escolhida) ou copiando um mundo existente.");
+        foreach (var option in new Option[] { name, password, world, seed, copy, port, priv, noCross, saveDir, serverDir, preset, creative })
         {
-            var result = BatchFileImporter.ImportFile(parse.GetValue(file)!.FullName);
-            var profile = result.Profile;
-            profile.DisplayName = parse.GetValue(name) ?? profile.DisplayName;
-            if (parse.GetValue(saveDir) is { } dir)
+            command.Options.Add(option);
+        }
+
+        command.SetAction(async (parse, ct) =>
+        {
+            var serverName = parse.GetValue(name)!;
+            var profile = new ServerProfile
             {
-                profile.SaveDirectory = dir;
+                DisplayName = serverName,
+                ServerName = serverName,
+                Password = parse.GetValue(password)!,
+                Port = parse.GetValue(port) ?? ServerProfile.DefaultPort,
+                Public = !parse.GetValue(priv),
+                Crossplay = !parse.GetValue(noCross),
+                CreativeMode = parse.GetValue(creative),
+                ServerDirectory = parse.GetValue(serverDir) is { } svd ? Path.GetFullPath(svd) : ServerManager.DetectServerInstallations().FirstOrDefault() ?? string.Empty,
+                SaveDirectory = parse.GetValue(saveDir) is { } sd ? Path.GetFullPath(sd) : Path.Combine(
+                    System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Valheim Servers",
+                    string.Concat(serverName.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c)), "ServerSave"),
+            };
+
+            if (parse.GetValue(preset) is { } presetName)
+            {
+                if (!ModifierCatalog.TryParse(ModifierCatalog.Presets, presetName, out WorldPreset p))
+                {
+                    Console.Error.WriteLine($"Preset desconhecido: {presetName}");
+                    return 2;
+                }
+
+                profile.Preset = p;
+            }
+
+            var source = parse.GetValue(copy);
+            profile.WorldName = source is not null
+                ? WorldInspector.InspectDirectory(source.FullName).Metadata?.Name ?? string.Empty
+                : parse.GetValue(world) ?? new string(serverName.Where(char.IsAsciiLetterOrDigit).Take(20).ToArray());
+
+            var seedName = parse.GetValue(seed) ?? WorldSeed.Random();
+            var errors = ProfileValidator.Validate(profile).Where(i => i.Severity == ValidationSeverity.Error)
+                .Select(i => i.Message).ToList();
+            if (source is null && WorldSeed.Validate(seedName) is { } seedError)
+            {
+                errors.Add(seedError);
+            }
+
+            if (errors.Count > 0)
+            {
+                errors.ForEach(e => Console.Error.WriteLine($"  [erro] {e}"));
+                return 1;
             }
 
             await using var manager = CreateManager(parse.GetValue(DataDirOption));
+            if (manager.Profiles.Any(o => o.WorldName.Equals(profile.WorldName, StringComparison.OrdinalIgnoreCase) &&
+                                          Core.Platform.ValheimPaths.SameDirectory(o.SaveDirectory, profile.SaveDirectory)))
+            {
+                Console.Error.WriteLine("Outro perfil já usa esse mundo nessa pasta de saves.");
+                return 1;
+            }
+
+            Directory.CreateDirectory(profile.SaveDirectory);
+            if (source is not null)
+            {
+                var copied = WorldCreator.CopyExisting(source.FullName, profile.SaveDirectory);
+                Console.WriteLine($"Mundo {copied.WorldName} copiado (save {copied.LatestSave!.Number}, seed {copied.Metadata!.SeedName}).");
+            }
+            else
+            {
+                WorldCreator.CreateSeeded(profile.SaveDirectory, profile.WorldName, seedName);
+                Console.WriteLine($"Mundo novo {profile.WorldName} com a seed {seedName} (gerado no primeiro início).");
+            }
+
             manager.AddProfile(profile);
-            Console.WriteLine($"Perfil \"{profile.DisplayName}\" criado (id {profile.Id}).");
-            foreach (var note in result.Notes)
-            {
-                Console.WriteLine($"  obs.: {note}");
-            }
-
-            foreach (var issue in ProfileValidator.Validate(profile))
-            {
-                Console.WriteLine($"  [{issue.Severity}] {issue.Message}");
-            }
-
+            Console.WriteLine($"Servidor \"{profile.DisplayName}\" criado (id {profile.Id.ToString()[..8]}, porta {profile.Port}).");
+            await Task.CompletedTask.ConfigureAwait(false);
             return 0;
         });
         return command;

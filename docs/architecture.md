@@ -23,6 +23,7 @@
 │  Backups   BackupService (SHA-256, manifesto, restauração)   │
 │  Worlds    WorldInspector · ChunkIndex · WorldMetadata       │
 │            ChunkIndexRebuilder · PlayerBuildScanner          │
+│            WorldCreator (seed nova / cópia do último save)   │
 └──────────────────────────────────────────────────────────────┘
                │
                ▼

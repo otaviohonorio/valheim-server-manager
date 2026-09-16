@@ -28,7 +28,8 @@ internal static class EndToEndTest
         command.Options.Add(work);
         command.Options.Add(keep);
         command.SetAction(async (parse, ct) => await RunAsync(
-            parse.GetValue(serverDir)!, parse.GetValue(source)!, parse.GetValue(port), parse.GetValue(work), parse.GetValue(keep), ct).ConfigureAwait(false));
+            Path.GetFullPath(parse.GetValue(serverDir)!), Path.GetFullPath(parse.GetValue(source)!), parse.GetValue(port),
+            parse.GetValue(work) is { } w ? Path.GetFullPath(w) : null, parse.GetValue(keep), ct).ConfigureAwait(false));
         return command;
     }
 
@@ -297,9 +298,88 @@ internal static class EndToEndTest
                    await StopClean().ConfigureAwait(false);
         }).ConfigureAwait(false);
 
-        if (controller.Status.IsActive)
+        ServerController? seeded = null;
+        await Step("Mundo novo com a seed escolhida", async () =>
         {
-            await controller.ForceKillAsync().ConfigureAwait(false);
+            var p = new ServerProfile
+            {
+                DisplayName = "E2E Seed",
+                ServerDirectory = serverDir,
+                SaveDirectory = Path.Combine(root, "ServerSaveSeed"),
+                BackupDirectory = Path.Combine(root, "backupsSeed"),
+                ServerName = "VSM-E2E-Seed-" + Environment.ProcessId,
+                WorldName = "SeedTeste",
+                Port = port + 20,
+                Password = "seedSenha42",
+                Public = false,
+            };
+            WorldCreator.CreateSeeded(p.SaveDirectory, p.WorldName, "VSMe2e2026");
+            var before = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);
+            Console.WriteLine($"      antes: {string.Join(" ", before.Issues.Select(i => i.Code))}");
+            manager.AddProfile(p);
+            seeded = manager.GetController(p.Id);
+            var start = await seeded.StartAsync(StartOptions.Default, ct).ConfigureAwait(false);
+            if (!start.Success)
+            {
+                Console.WriteLine($"      {start.Message} {string.Join(" | ", start.Checks.Select(c => c.Message))}");
+                return false;
+            }
+
+            var online = await WaitFor(() => seeded.Status.State == ServerRunState.Running, TimeSpan.FromMinutes(5)).ConfigureAwait(false);
+            var stop = online && (await seeded.StopAsync(ct).ConfigureAwait(false)).Success;
+            var after = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);
+            var meta = after.Metadata;
+            Console.WriteLine($"      depois: save {after.LatestSave?.Number}, seed {meta?.SeedName}, hash confere {meta?.Seed == StableHash.Compute("VSMe2e2026")}, {after.TotalZdos:N0} objetos, emergência: {seeded.Status.Emergency ?? "nenhuma"}");
+            return online && stop && after.IsHealthy && meta?.SeedName == "VSMe2e2026" &&
+                   meta.Seed == StableHash.Compute("VSMe2e2026") && seeded.Status.Emergency is null;
+        }).ConfigureAwait(false);
+
+        await Step("Dois servidores ao mesmo tempo, com as travas", async () =>
+        {
+            if (seeded is null)
+            {
+                return false;
+            }
+
+            var bothOnline = await StartAndWait().ConfigureAwait(false) &&
+                             (await seeded.StartAsync(StartOptions.Default, ct).ConfigureAwait(false)).Success &&
+                             await WaitFor(() => seeded.Status.State == ServerRunState.Running, TimeSpan.FromMinutes(4)).ConfigureAwait(false);
+            Console.WriteLine($"      rodando juntos: {bothOnline} (portas {controller.Profile.Port} e {seeded.Profile.Port})");
+
+            // Same world and save folder as the first server, different port: must be refused.
+            var sameWorld = controller.Profile.Duplicate("E2E mesmo mundo");
+            sameWorld.Port = port + 40;
+            manager.AddProfile(sameWorld);
+            var r1 = await manager.GetController(sameWorld.Id).StartAsync(StartOptions.Confirmed, ct).ConfigureAwait(false);
+            var worldLocked = !r1.Success && r1.Checks.Any(c => c.Code == "WORLD_IN_USE");
+            Console.WriteLine($"      mesmo mundo recusado: {worldLocked} ({r1.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
+
+            // Another world on the port of the second server: must be refused.
+            var samePort = new ServerProfile
+            {
+                DisplayName = "E2E mesma porta",
+                ServerDirectory = serverDir,
+                SaveDirectory = Path.Combine(root, "ServerSavePort"),
+                ServerName = "VSM-E2E-Porta",
+                WorldName = "OutroMundo",
+                Port = seeded.Profile.Port,
+                Password = "portaSenha42",
+                Public = false,
+            };
+            WorldCreator.CreateSeeded(samePort.SaveDirectory, samePort.WorldName, "Porta123");
+            manager.AddProfile(samePort);
+            var r2 = await manager.GetController(samePort.Id).StartAsync(StartOptions.Confirmed, ct).ConfigureAwait(false);
+            var portLocked = !r2.Success && r2.Checks.Any(c => c.Code is "PORT_IN_USE" or "PORT_BUSY");
+            Console.WriteLine($"      mesma porta recusada: {portLocked} ({r2.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
+
+            var stopped = (await controller.StopAsync(ct).ConfigureAwait(false)).Success &
+                          (await seeded.StopAsync(ct).ConfigureAwait(false)).Success;
+            return bothOnline && worldLocked && portLocked && stopped;
+        }).ConfigureAwait(false);
+
+        foreach (var c in manager.Controllers.Where(c => c.Status.IsActive))
+        {
+            await c.ForceKillAsync().ConfigureAwait(false);
         }
 
         Console.WriteLine(failures == 0 ? "TODOS OS PASSOS PASSARAM" : $"{failures} PASSO(S) FALHARAM");

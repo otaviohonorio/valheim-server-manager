@@ -271,6 +271,12 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             WorldHealthMessage = string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message));
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error;
         }
+        else if (report.Issues.Any(i => i.Code == "NEW_WORLD_SEEDED"))
+        {
+            WorldHealthTitle = "Mundo novo pronto para gerar";
+            WorldHealthMessage = report.Issues.First(i => i.Code == "NEW_WORLD_SEEDED").Message;
+            WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
+        }
         else if (report.IsNewWorld)
         {
             WorldHealthTitle = "Mundo ainda não existe";

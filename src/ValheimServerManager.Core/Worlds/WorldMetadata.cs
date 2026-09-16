@@ -25,6 +25,8 @@ public sealed record WorldPlayer(string PlatformId, string Name, string Characte
 public sealed class WorldMetadata
 {
     public const string NoBuildCostKey = "nobuildcost";
+    public const int CurrentVersion = 41;
+    public const int CurrentWorldGenVersion = 2;
 
     public required int Version { get; init; }
     public required string Name { get; init; }
@@ -32,6 +34,9 @@ public sealed class WorldMetadata
     public required int Seed { get; init; }
     public required long Uid { get; init; }
     public required int WorldGenVersion { get; init; }
+
+    /// <summary>0 in a world created by the "new world" dialog and never loaded; 1 after the first save.</summary>
+    public bool HasBeenSaved { get; init; }
     public required IReadOnlyList<string> Keys { get; init; }
     public required IReadOnlyList<WorldPlayer> Players { get; init; }
 
@@ -73,7 +78,7 @@ public sealed class WorldMetadata
             var seed = reader.ReadInt32();
             var uid = reader.ReadInt64();
             var worldGen = reader.ReadInt32();
-            _ = reader.ReadBoolean();
+            var hasBeenSaved = reader.ReadBoolean();
 
             var keyCount = ReadCount(reader, "chaves");
             var keys = new List<string>(keyCount);
@@ -101,6 +106,7 @@ public sealed class WorldMetadata
                 Seed = seed,
                 Uid = uid,
                 WorldGenVersion = worldGen,
+                HasBeenSaved = hasBeenSaved,
                 Keys = keys,
                 Players = players,
             };
@@ -109,6 +115,42 @@ public sealed class WorldMetadata
         {
             throw new InvalidDataException("Arquivo .fwl2 terminou antes do esperado.", ex);
         }
+    }
+
+    /// <summary>Serializes in the game's format (length prefix + payload).</summary>
+    public byte[] ToBytes()
+    {
+        using var body = new MemoryStream();
+        using (var w = new BinaryWriter(body, new UTF8Encoding(false), leaveOpen: true))
+        {
+            w.Write(Version);
+            w.Write(Name);
+            w.Write(SeedName);
+            w.Write(Seed);
+            w.Write(Uid);
+            w.Write(WorldGenVersion);
+            w.Write(HasBeenSaved);
+            w.Write(Keys.Count);
+            foreach (var key in Keys)
+            {
+                w.Write(key);
+            }
+
+            w.Write(Players.Count);
+            foreach (var p in Players)
+            {
+                w.Write(p.PlatformId);
+                w.Write(p.Name);
+                w.Write(p.CharacterName);
+                w.Write(p.PlayerId);
+            }
+        }
+
+        var payload = body.ToArray();
+        var file = new byte[payload.Length + sizeof(int)];
+        BitConverter.TryWriteBytes(file, payload.Length);
+        payload.CopyTo(file, sizeof(int));
+        return file;
     }
 
     private static int ReadCount(BinaryReader reader, string what)

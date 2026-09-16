@@ -60,6 +60,7 @@ public partial class App : Application
         builder.Services.AddTransient<PlayersViewModel>();
         builder.Services.AddTransient<LogViewModel>();
         builder.Services.AddTransient<AboutViewModel>();
+        builder.Services.AddTransient<NewServerViewModel>();
 
         // Views
         builder.Services.AddSingleton<MainWindow>();

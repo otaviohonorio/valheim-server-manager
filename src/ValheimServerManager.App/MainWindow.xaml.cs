@@ -23,6 +23,8 @@ public sealed partial class MainWindow : Window
         ["about"] = typeof(AboutPage),
     };
 
+    private const string NewServerKey = "new";
+
     private readonly ServerManager _manager;
     private readonly IDialogService _dialogs;
     private readonly ILogger<MainWindow> _logger;
@@ -53,21 +55,51 @@ public sealed partial class MainWindow : Window
         AppWindow.Closing += OnClosing;
         InitializeTray();
         ViewModel.ConfirmLeaveAsync = ConfirmLeaveEditorAsync;
+        ViewModel.NewServerRequested += async (_, _) => await OpenNewServerAsync();
+        ContentFrame.Navigated += (_, e) => ViewModel.IsCreatingServer = e.SourcePageType == typeof(NewServerPage);
         Nav.SelectedItem = Nav.MenuItems[0];
         ViewModel.Start();
     }
 
     public ShellViewModel ViewModel { get; }
 
+    public async Task OpenNewServerAsync()
+    {
+        if (ContentFrame.Content is NewServerPage || !await ConfirmLeaveEditorAsync())
+        {
+            return;
+        }
+
+        _revertingNavigation = true;
+        Nav.SelectedItem = null;
+        _currentNavItem = null;
+        _revertingNavigation = false;
+        ContentFrame.Navigate(typeof(NewServerPage));
+    }
+
     public void Navigate(string key)
     {
+        if (key == NewServerKey)
+        {
+            _ = OpenNewServerAsync();
+            return;
+        }
+
         var item = Nav.MenuItems.Concat(Nav.FooterMenuItems)
             .OfType<NavigationViewItem>()
             .FirstOrDefault(i => (string)i.Tag == key);
-        if (item is not null)
+        if (item is null)
         {
-            Nav.SelectedItem = item;
+            return;
         }
+
+        if (ReferenceEquals(Nav.SelectedItem, item) && Pages.TryGetValue(key, out var page) && ContentFrame.CurrentSourcePageType != page)
+        {
+            ContentFrame.Navigate(page);
+            return;
+        }
+
+        Nav.SelectedItem = item;
     }
 
     public void BringToFront()
@@ -169,8 +201,14 @@ public sealed partial class MainWindow : Window
     private async void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (_revertingNavigation || args.SelectedItem is not NavigationViewItem { Tag: string key } item ||
-            !Pages.TryGetValue(key, out var page) || ContentFrame.CurrentSourcePageType == page)
+            !Pages.TryGetValue(key, out var page))
         {
+            return;
+        }
+
+        if (ContentFrame.CurrentSourcePageType == page)
+        {
+            _currentNavItem = item;
             return;
         }
 

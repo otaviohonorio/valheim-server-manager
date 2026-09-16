@@ -1,0 +1,40 @@
+# Build output
+bin/
+obj/
+artifacts/
+dist/
+publish/
+*.binlog
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+
+# Test output
+TestResults/
+coverage*/
+
+# Local runtime data (never commit: contains server passwords and player IDs)
+.vsm-data/
+.test-servers/
+*.log
+
+# Valheim save data must never enter the repo
+worlds_local/
+*.db2
+*.fwl2
+*.chunks
+*.chunk
+*.fch
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Claude Code local-only settings
+.claude/settings.local.json

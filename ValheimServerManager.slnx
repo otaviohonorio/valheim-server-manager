@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ValheimServerManager.Cli/ValheimServerManager.Cli.csproj" />
+    <Project Path="src/ValheimServerManager.Core/ValheimServerManager.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ValheimServerManager.Core.Tests/ValheimServerManager.Core.Tests.csproj" />
+  </Folder>
+</Solution>

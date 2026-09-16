@@ -198,11 +198,12 @@ public sealed partial class ServerSettingsViewModel : ProfileEditorViewModel
     [ObservableProperty] public partial string CommandPreview { get; set; } = string.Empty;
     [ObservableProperty] public partial string EffectiveBackupDirectory { get; set; } = string.Empty;
     [ObservableProperty] public partial string DetectedInstallations { get; set; } = string.Empty;
+    [ObservableProperty] public partial bool ShowPassword { get; set; }
 
     public string GameDataDirectory => ValheimPaths.GameDataDirectory;
 
     protected override bool IsEditableProperty(string propertyName) =>
-        propertyName is not (nameof(CommandPreview) or nameof(EffectiveBackupDirectory) or nameof(DetectedInstallations));
+        propertyName is not (nameof(CommandPreview) or nameof(EffectiveBackupDirectory) or nameof(DetectedInstallations) or nameof(ShowPassword));
 
     protected override IEnumerable<string> RelevantFields =>
     [

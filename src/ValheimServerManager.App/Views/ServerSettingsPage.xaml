@@ -43,7 +43,20 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE72E;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <PasswordBox MinWidth="280" Password="{x:Bind ViewModel.Password, Mode=TwoWay}" PasswordRevealMode="Peek" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <PasswordBox
+                            MinWidth="240"
+                            AutomationProperties.Name="Senha"
+                            Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
+                            PasswordRevealMode="{x:Bind helpers:Ui.RevealMode(ViewModel.ShowPassword), Mode=OneWay}" />
+                        <ToggleButton
+                            VerticalAlignment="Stretch"
+                            AutomationProperties.Name="Mostrar senha"
+                            IsChecked="{x:Bind ViewModel.ShowPassword, Mode=TwoWay}"
+                            ToolTipService.ToolTip="Mostrar/ocultar senha">
+                            <FontIcon FontSize="16" Glyph="{x:Bind helpers:Ui.EyeGlyph(ViewModel.ShowPassword), Mode=OneWay}" />
+                        </ToggleButton>
+                    </StackPanel>
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="O servidor usa esta porta e a seguinte (UDP). Sem crossplay, redirecione as duas no roteador." Header="Porta">
                     <toolkit:SettingsCard.HeaderIcon>

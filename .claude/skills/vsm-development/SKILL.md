@@ -10,7 +10,7 @@ description: How to build, test, run, publish and extend the Valheim Server Mana
 - .NET SDK 10.0.401 (pinned in `global.json`). On the author's machine it is installed per-user
   (no admin), so a fresh shell needs:
   ```bash
-  export DOTNET_ROOT="$LOCALAPPDATA/Microsoft/dotnet" PATH="$LOCALAPPDATA/Microsoft/dotnet:$PATH" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+  export DOTNET_ROOT="$(cygpath -w "$LOCALAPPDATA")/Microsoft/dotnet" PATH="$(cygpath "$LOCALAPPDATA")/Microsoft/dotnet:$PATH" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
   ```
   Elsewhere: `winget install Microsoft.DotNet.SDK.10` or `dotnet-install.ps1 -Channel 10.0`.
 - No Visual Studio needed: WinUI 3 builds with `dotnet build` (Windows App SDK ≥ 2.1.3 reports

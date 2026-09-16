@@ -24,7 +24,7 @@ and Valheim regenerated the world over the player's base (see `docs/incident-202
 ## Quick commands
 
 ```bash
-export DOTNET_ROOT="$LOCALAPPDATA/Microsoft/dotnet" PATH="$LOCALAPPDATA/Microsoft/dotnet:$PATH"   # per-user SDK install
+export DOTNET_ROOT="$(cygpath -w "$LOCALAPPDATA")/Microsoft/dotnet" PATH="$(cygpath "$LOCALAPPDATA")/Microsoft/dotnet:$PATH"   # per-user SDK install
 dotnet build ValheimServerManager.slnx
 dotnet test --project tests/ValheimServerManager.Core.Tests
 powershell -File build/publish.ps1

@@ -25,6 +25,12 @@ public static class Ui
 
     public static bool HasText(string? value) => !string.IsNullOrWhiteSpace(value);
 
+    public static Microsoft.UI.Xaml.Controls.PasswordRevealMode RevealMode(bool show) =>
+        show ? Microsoft.UI.Xaml.Controls.PasswordRevealMode.Visible : Microsoft.UI.Xaml.Controls.PasswordRevealMode.Hidden;
+
+    /// <summary>Open eye when hidden (click to show), crossed eye when visible (click to hide).</summary>
+    public static string EyeGlyph(bool show) => show ? "\uED1A" : "\uE7B3";
+
     public static Brush StateBrush(ServerRunState state) => Resource(state switch
     {
         ServerRunState.Running => "VsmRunningBrush",

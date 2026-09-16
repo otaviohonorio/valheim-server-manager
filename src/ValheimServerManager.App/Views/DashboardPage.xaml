@@ -19,6 +19,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <StackPanel Spacing="6">
@@ -77,7 +78,44 @@
                         </Button>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="6" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}">
+                    <!--  What the server runs with; adjustable before starting  -->
+                    <Border
+                        Grid.Row="1"
+                        Grid.ColumnSpan="2"
+                        Padding="0,14,0,0"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="0,1,0,0">
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Summary}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SummaryItem">
+                                    <Grid Padding="0,3" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="150" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind Label}" />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            FontWeight="{x:Bind helpers:Ui.Weight(IsCustomized)}"
+                                            Text="{x:Bind Value}"
+                                            TextWrapping="Wrap" />
+                                        <HyperlinkButton
+                                            Grid.Column="2"
+                                            Padding="8,2"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="{x:Bind Label}"
+                                            Click="OnAdjustClick"
+                                            Content="Ajustar"
+                                            Tag="{x:Bind Section}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="6" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}">
                         <ProgressBar IsIndeterminate="True" />
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.BusyText, Mode=OneWay}" />
                     </StackPanel>
@@ -111,12 +149,23 @@
                 Message="O gerenciador está acompanhando este servidor, mas a janela dele ainda pode ser fechada no X (sem salvar). Use Reiniciar: ele desliga com segurança e volta sem janela, com todas as proteções."
                 Severity="Warning" />
             <InfoBar
-                Title="Configuração alterada"
+                Title="O servidor não está usando a configuração salva"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.HasPendingChanges, Mode=OneWay}"
                 Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasPendingChanges), Mode=OneWay}"
-                Message="O servidor está rodando com a configuração anterior. Reinicie para aplicar."
-                Severity="Informational" />
+                Message="{x:Bind ViewModel.ConfigText, Mode=OneWay}"
+                Severity="Warning">
+                <InfoBar.ActionButton>
+                    <Button AutomationProperties.Name="Reiniciar agora" Command="{x:Bind ViewModel.RestartCommand}" Content="Reiniciar agora" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+            <InfoBar
+                Title="Configuração conferida"
+                IsClosable="True"
+                IsOpen="{x:Bind ViewModel.ConfigConfirmed, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.ConfigConfirmed), Mode=OneWay}"
+                Message="{x:Bind ViewModel.ConfigText, Mode=OneWay}"
+                Severity="Success" />
             <InfoBar
                 Title="Desligamento demorando"
                 IsClosable="False"

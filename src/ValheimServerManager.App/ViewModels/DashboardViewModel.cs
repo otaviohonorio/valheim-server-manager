@@ -12,6 +12,8 @@ namespace ValheimServerManager.App.ViewModels;
 
 public sealed record ActivityItem(string Time, string Message, string Glyph);
 
+public sealed record SummaryItem(string Label, string Value, string Section, bool IsCustomized);
+
 public sealed partial class DashboardViewModel : ProfilePageViewModel
 {
     private readonly IDialogService _dialogs;
@@ -29,6 +31,11 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     public event EventHandler<string>? NavigateRequested;
 
     public ObservableCollection<ActivityItem> Activity { get; } = [];
+
+    /// <summary>What the server runs with, shown next to the start button.</summary>
+    public ObservableCollection<SummaryItem> Summary { get; } = [];
+
+    public void RequestNavigation(string section) => NavigateRequested?.Invoke(this, section);
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -85,6 +92,12 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     public partial string ExitText { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial bool ConfigConfirmed { get; set; }
+
+    [ObservableProperty]
+    public partial string ConfigText { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool LastExitWasBad { get; set; }
 
     public string JoinCodeText => Status.JoinCode ?? "—";
@@ -118,12 +131,21 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     protected override void OnServerStatusChanged(ServerStatus status)
     {
         var profile = Profile;
+        RefreshSummary(profile);
         Title = profile?.DisplayName ?? string.Empty;
         Subtitle = profile is null ? string.Empty : $"{profile.ServerName} · mundo {profile.WorldName}";
         IsRunning = status.State == ServerRunState.Running;
         CanStart = profile is not null && !status.IsActive && !IsBusy;
         CanStop = status.State is ServerRunState.Running or ServerRunState.Starting && !IsBusy;
-        HasPendingChanges = Controller?.HasPendingChanges ?? false;
+        var diffs = status.IsActive ? status.ConfigDifferences : null;
+        HasPendingChanges = diffs is { Count: > 0 };
+        ConfigConfirmed = diffs is { Count: 0 };
+        ConfigText = diffs switch
+        {
+            null => string.Empty,
+            { Count: 0 } => $"O servidor está usando exatamente a configuração salva ({status.ConfigCheckedCount} opções conferidas na linha de comando e no log).",
+            _ => string.Join("\n", diffs.Select(d => $"• {d.Setting}: em uso {d.Actual}; salvo {d.Expected}")),
+        };
 
         IsCreative = status.IsActive ? status.CreativeActive : profile?.IsCreativeEffective ?? false;
         ModeText = IsCreative ? "Modo criativo" : "Modo normal";
@@ -174,6 +196,22 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     }
 
     protected override void OnBusyChanged(bool value) => OnServerStatusChanged(Status);
+
+    private void RefreshSummary(Core.Profiles.ServerProfile? profile)
+    {
+        var lines = profile is null ? [] : Core.Profiles.ProfileSummary.Describe(profile);
+        var items = lines.Select(l => new SummaryItem(l.Label, l.Value, l.Section, l.IsCustomized)).ToArray();
+        if (items.SequenceEqual(Summary))
+        {
+            return;
+        }
+
+        Summary.Clear();
+        foreach (var item in items)
+        {
+            Summary.Add(item);
+        }
+    }
 
     private void UpdateClock()
     {

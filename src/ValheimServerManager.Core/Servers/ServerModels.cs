@@ -100,5 +100,16 @@ public sealed record ServerStatus
     /// <summary>After a save, whether the world's <c>nobuildcost</c> key matched the launched mode.</summary>
     public bool? ModeVerified { get; init; }
 
+    /// <summary>
+    /// Differences between the profile and what the running server really uses (its command line and
+    /// the modifiers it logged). Null until checked; empty when everything matches.
+    /// </summary>
+    public IReadOnlyList<Profiles.ConfigDifference>? ConfigDifferences { get; init; }
+
+    /// <summary>How many settings were compared in the last check.</summary>
+    public int ConfigCheckedCount { get; init; }
+
+    public DateTimeOffset? ConfigCheckedAt { get; init; }
+
     public bool IsActive => State is ServerRunState.Starting or ServerRunState.Running or ServerRunState.Stopping;
 }

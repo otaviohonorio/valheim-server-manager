@@ -31,13 +31,13 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE8EC;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <TextBox MinWidth="280" Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox AutomationProperties.Name="Nome do perfil" MinWidth="280" Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Nome que os jogadores veem na lista de servidores." Header="Nome do servidor">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE968;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <TextBox MinWidth="280" Text="{x:Bind ViewModel.ServerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox AutomationProperties.Name="Nome do servidor" MinWidth="280" Text="{x:Bind ViewModel.ServerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Obrigatória. Mínimo de 5 caracteres e não pode estar contida no nome do servidor. Fica guardada criptografada no seu usuário do Windows." Header="Senha">
                     <toolkit:SettingsCard.HeaderIcon>
@@ -47,7 +47,8 @@
                         <PasswordBox
                             MinWidth="240"
                             AutomationProperties.Name="Senha"
-                            Password="{x:Bind ViewModel.Password, Mode=TwoWay}"
+                            Password="{x:Bind ViewModel.Password, Mode=OneWay}"
+                            PasswordChanged="OnPasswordChanged"
                             PasswordRevealMode="{x:Bind helpers:Ui.RevealMode(ViewModel.ShowPassword), Mode=OneWay}" />
                         <ToggleButton
                             VerticalAlignment="Stretch"
@@ -62,19 +63,19 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE968;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <NumberBox Minimum="1024" Maximum="65534" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.Port, Mode=TwoWay}" />
+                    <NumberBox AutomationProperties.Name="Porta" Minimum="1024" Maximum="65534" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.Port, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Mostrar na lista pública de servidores do jogo." Header="Servidor público">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE774;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.IsPublic, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Servidor público" IsOn="{x:Bind ViewModel.IsPublic, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Permite Xbox/Game Pass e entrada por código de convite, sem redirecionar portas. Adiciona um relay (um pouco mais de latência)." Header="Crossplay">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE7FC;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.Crossplay, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Crossplay" IsOn="{x:Bind ViewModel.Crossplay, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
 
                 <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Pastas" />
@@ -91,7 +92,7 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox PlaceholderText="Ex.: D:\SteamLibrary\steamapps\common\Valheim dedicated server" Text="{x:Bind ViewModel.ServerDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox AutomationProperties.Name="Instalação do servidor" PlaceholderText="Ex.: D:\SteamLibrary\steamapps\common\Valheim dedicated server" Text="{x:Bind ViewModel.ServerDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseServerDirectoryCommand}" Content="Procurar…" />
                                     <Button Grid.Column="2" Command="{x:Bind ViewModel.DetectInstallationCommand}" Content="Detectar pela Steam" />
                                 </Grid>
@@ -114,7 +115,7 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox PlaceholderText="Ex.: D:\Valheim\ServerSave" Text="{x:Bind ViewModel.SaveDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox AutomationProperties.Name="Pasta de saves do servidor" PlaceholderText="Ex.: D:\Valheim\ServerSave" Text="{x:Bind ViewModel.SaveDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseSaveDirectoryCommand}" Content="Procurar…" />
                                     <Button Grid.Column="2" Command="{x:Bind ViewModel.OpenSaveDirectoryCommand}" Content="Abrir" />
                                 </Grid>
@@ -139,7 +140,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBox PlaceholderText="(automática)" Text="{x:Bind ViewModel.BackupDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBox AutomationProperties.Name="Pasta de backups" PlaceholderText="(automática)" Text="{x:Bind ViewModel.BackupDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button Grid.Column="1" Command="{x:Bind ViewModel.BrowseBackupDirectoryCommand}" Content="Procurar…" />
                                 </Grid>
                                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap">
@@ -156,25 +157,25 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE74E;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <NumberBox Minimum="1" Maximum="120" SmallChange="5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.SaveIntervalMinutes, Mode=TwoWay}" />
+                    <NumberBox AutomationProperties.Name="Salvar o mundo a cada (minutos)" Minimum="1" Maximum="120" SmallChange="5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.SaveIntervalMinutes, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Copia e verifica o mundo antes de o servidor abrir. Se algo estiver errado, o servidor nem sobe." Header="Backup antes de iniciar">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE768;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.BackupBeforeStart, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Backup antes de iniciar" IsOn="{x:Bind ViewModel.BackupBeforeStart, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Copia e verifica o mundo logo depois que o servidor desliga." Header="Backup depois de parar">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE71A;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.BackupAfterStop, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Backup depois de parar" IsOn="{x:Bind ViewModel.BackupAfterStop, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Quantos backups automáticos manter por mundo. Backups manuais nunca são apagados sozinhos." Header="Guardar backups automáticos">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE81C;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <NumberBox Minimum="1" Maximum="500" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.AutoBackupRetention, Mode=TwoWay}" />
+                    <NumberBox AutomationProperties.Name="Guardar backups automáticos" Minimum="1" Maximum="500" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.AutoBackupRetention, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsExpander Description="Os backups que o próprio Valheim faz dentro de worlds_local." Header="Backups internos do Valheim">
                     <toolkit:SettingsExpander.HeaderIcon>
@@ -182,13 +183,13 @@
                     </toolkit:SettingsExpander.HeaderIcon>
                     <toolkit:SettingsExpander.Items>
                         <toolkit:SettingsCard Header="Quantidade">
-                            <NumberBox Minimum="1" Maximum="100" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupCount, Mode=TwoWay}" />
+                            <NumberBox AutomationProperties.Name="Quantidade" Minimum="1" Maximum="100" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupCount, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Header="Primeiro backup após (horas)">
-                            <NumberBox Minimum="0.1" Maximum="72" SmallChange="0.5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupShortHours, Mode=TwoWay}" />
+                            <NumberBox AutomationProperties.Name="Primeiro backup após (horas)" Minimum="0.1" Maximum="72" SmallChange="0.5" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupShortHours, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Header="Depois, a cada (horas)">
-                            <NumberBox Minimum="0.5" Maximum="168" SmallChange="1" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupLongHours, Mode=TwoWay}" />
+                            <NumberBox AutomationProperties.Name="Depois, a cada (horas)" Minimum="0.5" Maximum="168" SmallChange="1" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.GameBackupLongHours, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                     </toolkit:SettingsExpander.Items>
                 </toolkit:SettingsExpander>
@@ -196,7 +197,7 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE916;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <NumberBox Minimum="15" Maximum="900" SmallChange="15" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.StopTimeoutSeconds, Mode=TwoWay}" />
+                    <NumberBox AutomationProperties.Name="Tempo máximo para desligar (segundos)" Minimum="15" Maximum="900" SmallChange="15" SpinButtonPlacementMode="Inline" Value="{x:Bind ViewModel.StopTimeoutSeconds, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
 
                 <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Avançado" />
@@ -204,7 +205,7 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE756;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <TextBox MinWidth="280" FontFamily="Cascadia Mono, Consolas" PlaceholderText="Ex.: -instanceid 2" Text="{x:Bind ViewModel.ExtraArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox AutomationProperties.Name="Argumentos extras" MinWidth="280" FontFamily="Cascadia Mono, Consolas" PlaceholderText="Ex.: -instanceid 2" Text="{x:Bind ViewModel.ExtraArguments, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsExpander Description="Exatamente o que será executado (senha oculta)." Header="Linha de comando">
                     <toolkit:SettingsExpander.HeaderIcon>

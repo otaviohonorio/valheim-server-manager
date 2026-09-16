@@ -10,7 +10,11 @@ namespace ValheimServerManager.App.ViewModels;
 
 public sealed record DetailItem(string Label, string Value);
 
-public sealed record OptionItem(string Label, string Description);
+public sealed record OptionItem(string Label, string Description)
+{
+    /// <summary>Used as the accessible name of the list item.</summary>
+    public override string ToString() => Label;
+}
 
 public sealed partial class WorldViewModel : ProfileEditorViewModel
 {

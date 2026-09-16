@@ -31,6 +31,9 @@ public interface IServerProcessLocator
 {
     IReadOnlyList<RunningServer> FindRunningServers();
 
+    /// <summary>The command line Windows actually started the process with, or null if it is gone.</summary>
+    string? GetCommandLine(int processId);
+
     bool IsGameRunning();
 }
 
@@ -55,6 +58,22 @@ public sealed class WmiServerProcessLocator : IServerProcessLocator
         }
 
         return result;
+    }
+
+    public string? GetCommandLine(int processId)
+    {
+        using var searcher = new ManagementObjectSearcher(
+            $"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {processId.ToString(CultureInfo.InvariantCulture)}");
+        using var collection = searcher.Get();
+        foreach (var item in collection.Cast<ManagementObject>())
+        {
+            using (item)
+            {
+                return item["CommandLine"] as string;
+            }
+        }
+
+        return null;
     }
 
     public bool IsGameRunning()

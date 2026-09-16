@@ -21,6 +21,7 @@ public sealed class ServerControllerTests : IDisposable
     private readonly FakeSignals _signals;
     private readonly ServerController _controller;
     private readonly BackupService _backups = new(TimeProvider.System);
+    private readonly NoServersLocator _locator = new();
 
     public ServerControllerTests()
     {
@@ -28,7 +29,8 @@ public sealed class ServerControllerTests : IDisposable
         _profile.StopTimeoutSeconds = 15;
         _signals = new FakeSignals(_profile);
         _controller = new ServerController(
-            _profile, _backups, _launcher, _signals, new NoServersLocator(), TimeProvider.System, NullLogger.Instance);
+            _profile, _backups, _launcher, _signals, _locator, TimeProvider.System, NullLogger.Instance);
+        _locator.RunningAs = _profile;
     }
 
     private string WorldDir => WorldFolder.WorldDirectory(_profile.SaveDirectory, _profile.WorldName);
@@ -85,6 +87,61 @@ public sealed class ServerControllerTests : IDisposable
         Assert.Equal(8, status.LastSaveNumber);
         Assert.True(status.ModeVerified);
         Assert.Contains(_backups.List(_profile), b => b.Kind == BackupKind.PostStop && b.SaveNumber == 8);
+    }
+
+    [Fact]
+    public async Task Verifies_that_the_running_server_uses_every_saved_option()
+    {
+        _profile.Resources = ResourceRate.More;
+        _profile.PassiveMobs = true;
+        _controller.UpdateProfile(_profile);
+        _locator.RunningAs = _profile;
+        TestWorlds.WriteSave(WorldDir, "MeuMundo", 7, TestWorlds.DefaultChunks);
+        Assert.True((await _controller.StartAsync(StartOptions.Default, TestContext.Current.CancellationToken)).Success);
+
+        WriteLog(
+            "09/16/2026 05:21:49: Setting world modifier preset: normal",
+            "09/16/2026 05:21:49: Setting world modifier: resources->more",
+            "09/16/2026 05:21:57: Game server connected");
+        await WaitUntil(() => _controller.Status.ConfigDifferences is not null);
+
+        Assert.Empty(_controller.Status.ConfigDifferences!);
+        Assert.False(_controller.HasPendingChanges);
+        Assert.True(_controller.Status.ConfigCheckedCount >= 15);
+
+        // The user changes the password while the server runs: the difference shows up at once.
+        var edited = _controller.Profile;
+        edited.Password = "senhaNova99";
+        _controller.UpdateProfile(edited);
+        await WaitUntil(() => _controller.Status.ConfigDifferences is { Count: > 0 });
+
+        var diff = Assert.Single(_controller.Status.ConfigDifferences!);
+        Assert.Equal("Senha", diff.Setting);
+        Assert.DoesNotContain("senhaNova99", diff.Expected + diff.Actual);
+        Assert.True(_controller.HasPendingChanges);
+
+        await _controller.ForceKillAsync();
+        await WaitUntil(() => !_controller.Status.IsActive);
+    }
+
+    [Fact]
+    public async Task Reports_a_modifier_the_server_did_not_apply()
+    {
+        _profile.Resources = ResourceRate.More;
+        _controller.UpdateProfile(_profile);
+        _locator.RunningAs = _profile;
+        TestWorlds.WriteSave(WorldDir, "MeuMundo", 7, TestWorlds.DefaultChunks);
+        Assert.True((await _controller.StartAsync(StartOptions.Default, TestContext.Current.CancellationToken)).Success);
+
+        WriteLog(
+            "09/16/2026 05:21:49: Setting world modifier preset: normal",
+            "09/16/2026 05:21:57: Game server connected");
+        await WaitUntil(() => _controller.Status.ConfigDifferences is not null);
+
+        Assert.Contains(_controller.Status.ConfigDifferences!, d => d.Setting.Contains("resources") && d.Actual == "(não aplicado)");
+
+        await _controller.ForceKillAsync();
+        await WaitUntil(() => !_controller.Status.IsActive);
     }
 
     [Fact]
@@ -241,7 +298,13 @@ public sealed class ServerControllerTests : IDisposable
 
     private sealed class NoServersLocator : IServerProcessLocator
     {
+        /// <summary>Profile whose arguments the fake "running process" reports.</summary>
+        public ServerProfile? RunningAs { get; set; }
+
         public IReadOnlyList<RunningServer> FindRunningServers() => [];
+
+        public string? GetCommandLine(int processId) =>
+            RunningAs is null ? null : "\"D:\\Steam Library\\valheim_server.exe\" " + CommandLine.Join(LaunchArguments.Build(RunningAs));
 
         public bool IsGameRunning() => false;
     }

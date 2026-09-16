@@ -20,9 +20,23 @@ public sealed partial class DashboardPage : Page
     }
 
     public DashboardViewModel ViewModel { get; }
+
+    private void OnAdjustClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.Tag is string section)
+        {
+            ViewModel.RequestNavigation(section);
+        }
+    }
 }
 
-public sealed partial class ServerSettingsPage : Page
+/// <summary>A page that edits the profile and can have unsaved changes.</summary>
+public interface IEditorPage
+{
+    ProfileEditorViewModel Editor { get; }
+}
+
+public sealed partial class ServerSettingsPage : Page, IEditorPage
 {
     public ServerSettingsPage()
     {
@@ -33,9 +47,19 @@ public sealed partial class ServerSettingsPage : Page
     }
 
     public ServerSettingsViewModel ViewModel { get; }
+
+    public ProfileEditorViewModel Editor => ViewModel;
+
+    private void OnPasswordChanged(object sender, RoutedEventArgs e)
+    {
+        if (sender is PasswordBox box && box.Password != ViewModel.Password)
+        {
+            ViewModel.Password = box.Password;
+        }
+    }
 }
 
-public sealed partial class WorldPage : Page
+public sealed partial class WorldPage : Page, IEditorPage
 {
     public WorldPage()
     {
@@ -46,6 +70,8 @@ public sealed partial class WorldPage : Page
     }
 
     public WorldViewModel ViewModel { get; }
+
+    public ProfileEditorViewModel Editor => ViewModel;
 
     private void OnWorldBoxFocused(object sender, RoutedEventArgs e)
     {

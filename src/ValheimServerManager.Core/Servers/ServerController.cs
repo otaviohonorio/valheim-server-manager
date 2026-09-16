@@ -30,6 +30,8 @@ public sealed class ServerController : IAsyncDisposable
     private readonly Lock _gate = new();
     private readonly LinkedList<ServerLogLine> _log = new();
     private readonly LinkedList<ServerActivity> _activity = new();
+    private readonly List<string> _loggedModifiers = [];
+    private string? _knownCommandLine;
 
     private ServerProfile _profile;
     private ServerProfile? _launchedProfile;
@@ -96,15 +98,14 @@ public sealed class ServerController : IAsyncDisposable
         }
     }
 
-    /// <summary>True when the saved configuration differs from what the running server was started with.</summary>
+    /// <summary>True when the running server does not use exactly the saved configuration.</summary>
     public bool HasPendingChanges
     {
         get
         {
             lock (_gate)
             {
-                return _launchedProfile is not null && _status.IsActive &&
-                       !LaunchArguments.Build(_launchedProfile).SequenceEqual(LaunchArguments.Build(_profile));
+                return _status.IsActive && _status.ConfigDifferences is { Count: > 0 };
             }
         }
     }
@@ -145,6 +146,76 @@ public sealed class ServerController : IAsyncDisposable
         }
 
         PublishStatus();
+        if (Status.State == ServerRunState.Running)
+        {
+            _ = VerifyConfigurationAsync();
+        }
+    }
+
+    /// <summary>
+    /// Compares the saved profile with what the running server really received and applied.
+    /// </summary>
+    public async Task VerifyConfigurationAsync()
+    {
+        int? pid;
+        string? commandLine;
+        string[] logged;
+        lock (_gate)
+        {
+            pid = _status.ProcessId;
+            commandLine = _knownCommandLine;
+            logged = [.. _loggedModifiers];
+        }
+
+        if (pid is null)
+        {
+            return;
+        }
+
+        if (commandLine is null)
+        {
+            try
+            {
+                commandLine = await Task.Run(() => _locator.GetCommandLine(pid.Value)).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is System.Management.ManagementException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                _logger.LogWarning(ex, "Não consegui ler a linha de comando do servidor");
+                return;
+            }
+
+            if (commandLine is null)
+            {
+                return;
+            }
+
+            lock (_gate)
+            {
+                _knownCommandLine = commandLine;
+            }
+        }
+
+        var profile = Profile;
+        var differences = LaunchVerification.Compare(profile, commandLine).ToList();
+        var checkedCount = LaunchVerification.CheckedSettingsCount(profile);
+        if (Status.HasLog && logged.Length > 0)
+        {
+            // The server must have applied exactly the modifiers it was given.
+            var launched = BatchFileImporter.FromCommandLine(commandLine, out _);
+            differences.AddRange(LaunchVerification.CompareLoggedModifiers(launched, logged));
+        }
+
+        var previous = Status.ConfigDifferences;
+        SetStatus(s => s with { ConfigDifferences = differences, ConfigCheckedCount = checkedCount, ConfigCheckedAt = _time.GetLocalNow() });
+        if (differences.Count == 0 && previous is not { Count: 0 })
+        {
+            AddActivity(ActivityKind.Lifecycle, $"Configuração conferida: o servidor usa exatamente o perfil ({checkedCount} opções).");
+        }
+        else if (differences.Count > 0 && (previous is null || previous.Count != differences.Count))
+        {
+            AddActivity(ActivityKind.Warning,
+                "O servidor não está usando a configuração salva: " + string.Join("; ", differences.Select(d => $"{d.Setting} ({d.Actual} → {d.Expected})")));
+        }
     }
 
     // ------------------------------------------------------------------ checks
@@ -367,6 +438,11 @@ public sealed class ServerController : IAsyncDisposable
             }
 
             AddActivity(ActivityKind.Lifecycle, $"Servidor já estava rodando (PID {running.ProcessId}); acompanhando.");
+            lock (_gate)
+            {
+                _knownCommandLine = running.CommandLine;
+            }
+
             if (running.LogFile is null)
             {
                 Raise(AlertLevel.Warning, "Servidor sem log",
@@ -380,6 +456,8 @@ public sealed class ServerController : IAsyncDisposable
         {
             _operation.Release();
         }
+
+        await VerifyConfigurationAsync().ConfigureAwait(false);
     }
 
     private async Task BeginTrackingAsync(Process process, string? logFile, bool attached, bool creative)
@@ -390,6 +468,11 @@ public sealed class ServerController : IAsyncDisposable
             _process = process;
             _exitSignal = new TaskCompletionSource<ExitInfo>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingSaveNumber = null;
+            _loggedModifiers.Clear();
+            if (!attached)
+            {
+                _knownCommandLine = null;
+            }
             _sawSaveAfterStop = false;
             _sawShutdown = false;
             _emergencyKill = false;
@@ -407,6 +490,9 @@ public sealed class ServerController : IAsyncDisposable
             StopTimedOut = false,
             StopRequestedAt = null,
             ModeVerified = null,
+            ConfigDifferences = null,
+            ConfigCheckedCount = 0,
+            ConfigCheckedAt = null,
         });
 
         try
@@ -522,10 +608,19 @@ public sealed class ServerController : IAsyncDisposable
 
                 break;
 
+            case ServerLogEventKind.ModifierApplied:
+                lock (_gate)
+                {
+                    _loggedModifiers.Add(evt.Text ?? string.Empty);
+                }
+
+                break;
+
             case ServerLogEventKind.ServerOnline:
                 SetStatus(s => s.State == ServerRunState.Starting ? s with { State = ServerRunState.Running } : s);
                 if (!_replaying)
                 {
+                    _ = VerifyConfigurationAsync();
                     AddActivity(ActivityKind.Lifecycle, "Servidor online.");
                     Raise(AlertLevel.Success, "Servidor online", $"\"{Profile.ServerName}\" está aceitando conexões.");
                 }
@@ -899,12 +994,14 @@ public sealed class ServerController : IAsyncDisposable
             StopTimedOut = false,
             LastExit = info,
             IsAttached = false,
+            ConfigDifferences = null,
         });
 
         lock (_gate)
         {
             _process = null;
             _launchedProfile = null;
+            _knownCommandLine = null;
         }
 
         process.Dispose();

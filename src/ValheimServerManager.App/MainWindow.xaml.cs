@@ -30,6 +30,8 @@ public sealed partial class MainWindow : Window
     private bool _closingConfirmed;
     private bool _exitRequested;
     private bool _trayHintShown;
+    private bool _revertingNavigation;
+    private NavigationViewItem? _currentNavItem;
 
     public MainWindow(
         ShellViewModel viewModel, UiDispatcher ui, ServerManager manager, IDialogService dialogs, TrayIcon tray, ILogger<MainWindow> logger)
@@ -50,6 +52,7 @@ public sealed partial class MainWindow : Window
 
         AppWindow.Closing += OnClosing;
         InitializeTray();
+        ViewModel.ConfirmLeaveAsync = ConfirmLeaveEditorAsync;
         Nav.SelectedItem = Nav.MenuItems[0];
         ViewModel.Start();
     }
@@ -163,12 +166,49 @@ public sealed partial class MainWindow : Window
             height));
     }
 
-    private void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    private async void OnNavigationSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (args.SelectedItem is NavigationViewItem { Tag: string key } && Pages.TryGetValue(key, out var page) &&
-            ContentFrame.CurrentSourcePageType != page)
+        if (_revertingNavigation || args.SelectedItem is not NavigationViewItem { Tag: string key } item ||
+            !Pages.TryGetValue(key, out var page) || ContentFrame.CurrentSourcePageType == page)
         {
-            ContentFrame.Navigate(page, null, args.RecommendedNavigationTransitionInfo);
+            return;
+        }
+
+        if (!await ConfirmLeaveEditorAsync())
+        {
+            _revertingNavigation = true;
+            Nav.SelectedItem = _currentNavItem;
+            _revertingNavigation = false;
+            return;
+        }
+
+        _currentNavItem = item;
+        ContentFrame.Navigate(page, null, args.RecommendedNavigationTransitionInfo);
+    }
+
+    /// <summary>Asks what to do with unsaved edits on the current page. False means "stay here".</summary>
+    private async Task<bool> ConfirmLeaveEditorAsync()
+    {
+        if (ContentFrame.Content is not IEditorPage { Editor: { IsDirty: true } editor })
+        {
+            return true;
+        }
+
+        var choice = await _dialogs.ChooseAsync(
+            "Alterações não salvas",
+            "Você mudou configurações nesta tela e ainda não salvou. O que fazer com elas?",
+            "Salvar",
+            "Descartar");
+        switch (choice)
+        {
+            case 1:
+                await editor.SaveCommand.ExecuteAsync(null);
+                return !editor.IsDirty;
+            case 2:
+                editor.DiscardCommand.Execute(null);
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -190,6 +230,12 @@ public sealed partial class MainWindow : Window
         }
 
         args.Cancel = true;
+        if (!await ConfirmLeaveEditorAsync())
+        {
+            _exitRequested = false;
+            return;
+        }
+
         var active = _manager.Controllers.Where(c => c.Status.IsActive).ToArray();
         if (active.Length > 0 && !_exitRequested && _manager.Settings.MinimizeToTrayOnClose && _tray.IsVisible)
         {

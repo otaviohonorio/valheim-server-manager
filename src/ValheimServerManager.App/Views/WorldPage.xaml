@@ -9,7 +9,7 @@
 
     <Page.Resources>
         <DataTemplate x:Key="OptionTemplate" x:DataType="vm:OptionItem">
-            <StackPanel Padding="0,2" ToolTipService.ToolTip="{x:Bind Description}">
+            <StackPanel Padding="0,2" AutomationProperties.Name="{x:Bind Label}" ToolTipService.ToolTip="{x:Bind Description}">
                 <TextBlock Text="{x:Bind Label}" />
             </StackPanel>
         </DataTemplate>
@@ -86,7 +86,7 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE790;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PresetItems}" SelectedIndex="{x:Bind ViewModel.PresetIndex, Mode=TwoWay}" />
+                    <ComboBox AutomationProperties.Name="Preset" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PresetItems}" SelectedIndex="{x:Bind ViewModel.PresetIndex, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsExpander Description="{x:Bind ViewModel.OverrideHint, Mode=OneWay}" Header="Ajustes finos" IsExpanded="True">
                     <toolkit:SettingsExpander.HeaderIcon>
@@ -94,19 +94,19 @@
                     </toolkit:SettingsExpander.HeaderIcon>
                     <toolkit:SettingsExpander.Items>
                         <toolkit:SettingsCard Description="Dano causado pelos inimigos." Header="Combate">
-                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.CombatItems}" SelectedIndex="{x:Bind ViewModel.CombatIndex, Mode=TwoWay}" />
+                            <ComboBox AutomationProperties.Name="Combate" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.CombatItems}" SelectedIndex="{x:Bind ViewModel.CombatIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Description="O que acontece com itens e habilidades ao morrer. Passe o mouse nas opções para detalhes." Header="Penalidade de morte">
-                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.DeathItems}" SelectedIndex="{x:Bind ViewModel.DeathIndex, Mode=TwoWay}" />
+                            <ComboBox AutomationProperties.Name="Penalidade de morte" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.DeathItems}" SelectedIndex="{x:Bind ViewModel.DeathIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Description="Multiplicador de coleta (arredonda para cima)." Header="Recursos">
-                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.ResourceItems}" SelectedIndex="{x:Bind ViewModel.ResourceIndex, Mode=TwoWay}" />
+                            <ComboBox AutomationProperties.Name="Recursos" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.ResourceItems}" SelectedIndex="{x:Bind ViewModel.ResourceIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Description="Frequência dos ataques à base." Header="Raids">
-                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.RaidItems}" SelectedIndex="{x:Bind ViewModel.RaidIndex, Mode=TwoWay}" />
+                            <ComboBox AutomationProperties.Name="Raids" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.RaidItems}" SelectedIndex="{x:Bind ViewModel.RaidIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                         <toolkit:SettingsCard Description="O que pode passar pelos portais." Header="Portais">
-                            <ComboBox MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PortalItems}" SelectedIndex="{x:Bind ViewModel.PortalIndex, Mode=TwoWay}" />
+                            <ComboBox AutomationProperties.Name="Portais" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PortalItems}" SelectedIndex="{x:Bind ViewModel.PortalIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                     </toolkit:SettingsExpander.Items>
                 </toolkit:SettingsExpander>
@@ -114,19 +114,19 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE77B;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.PlayerEvents, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Eventos por jogador" IsOn="{x:Bind ViewModel.PlayerEvents, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Inimigos só atacam se forem provocados." Header="Inimigos passivos">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE9CE;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.PassiveMobs, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Inimigos passivos" IsOn="{x:Bind ViewModel.PassiveMobs, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Desativa o mapa e o minimapa." Header="Sem mapa">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE826;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.NoMap, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="Sem mapa" IsOn="{x:Bind ViewModel.NoMap, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
 
                 <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Modo criativo" />
@@ -140,7 +140,7 @@
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE70F;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="Normal" OnContent="Criativo" />
+                    <ToggleSwitch AutomationProperties.Name="Construção e craft sem custo" IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="Normal" OnContent="Criativo" />
                 </toolkit:SettingsCard>
 
                 <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Diagnóstico" />

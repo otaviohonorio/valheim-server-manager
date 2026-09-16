@@ -178,9 +178,31 @@ internal static class CliApp
             Console.WriteLine($"Servidor:   {p.ServerName} (porta {p.Port}, {(p.Public ? "público" : "privado")}{(p.Crossplay ? ", crossplay" : string.Empty)})");
             Console.WriteLine($"Estado:     {s.State}{(s.ProcessId is { } pid ? $" (PID {pid})" : string.Empty)}{(s.IsActive ? $", {s.PlayerCount} jogador(es)" : string.Empty)}");
             Console.WriteLine($"Modo:       {((s.IsActive ? s.CreativeActive : p.IsCreativeEffective) ? "criativo" : "normal")}");
+            foreach (var line in ProfileSummary.Describe(p))
+            {
+                Console.WriteLine($"{line.Label + ":",-18}{line.Value}");
+            }
             if (s.JoinCode is not null)
             {
                 Console.WriteLine($"Convite:    {s.JoinCode}");
+            }
+
+            if (s.IsActive)
+            {
+                await controller.VerifyConfigurationAsync().ConfigureAwait(false);
+                var diffs = controller.Status.ConfigDifferences;
+                if (diffs is { Count: 0 })
+                {
+                    Console.WriteLine($"Config:     em uso confere com o perfil ({controller.Status.ConfigCheckedCount} opções)");
+                }
+                else if (diffs is not null)
+                {
+                    Console.WriteLine("Config:     O SERVIDOR NÃO USA A CONFIGURAÇÃO SALVA (reinicie para aplicar):");
+                    foreach (var d in diffs)
+                    {
+                        Console.WriteLine($"            {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+                    }
+                }
             }
 
             var report = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);

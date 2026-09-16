@@ -20,6 +20,14 @@ public static partial class BatchFileImporter
     [GeneratedRegex(@"^\s*(?:""[^""]*valheim_server(?:\.exe)?""|\S*valheim_server(?:\.exe)?)\s+(?<args>.*)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex ServerLineRegex();
 
+    /// <summary>Builds a profile from a process command line (executable first, possibly quoted with spaces).</summary>
+    public static ServerProfile FromCommandLine(string commandLine, out IReadOnlyList<string> notes)
+    {
+        var tokens = CommandLine.Split(commandLine);
+        var args = tokens.Count > 0 && !tokens[0].StartsWith('-') ? tokens.Skip(1) : tokens;
+        return Import(["valheim_server " + CommandLine.Join(args)], out notes);
+    }
+
     public static BatchImportResult ImportFile(string batchPath)
     {
         var profile = Import(File.ReadAllLines(batchPath), out var notes);

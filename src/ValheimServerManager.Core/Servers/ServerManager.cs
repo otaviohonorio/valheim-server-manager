@@ -144,9 +144,11 @@ public sealed class ServerManager : IAsyncDisposable
                 throw new KeyNotFoundException("Perfil não encontrado.");
             }
 
+            var passwordChanged = Settings.Profiles[index].Password != profile.Password;
             Settings.Profiles[index] = profile.Clone();
             _controllers[profile.Id].UpdateProfile(profile);
             Persist();
+            _logger.LogInformation("Perfil {Name} salvo{Password}", profile.DisplayName, passwordChanged ? " (senha alterada)" : string.Empty);
         }
 
         ProfilesChanged?.Invoke(this, EventArgs.Empty);
@@ -237,7 +239,7 @@ public sealed class ServerManager : IAsyncDisposable
     public ServerProfile AdoptRunningServer(RunningServer server, string? password = null)
     {
         ArgumentNullException.ThrowIfNull(server);
-        var profile = BatchFileImporter.Import([$"valheim_server {server.CommandLine[(server.CommandLine.IndexOf(' ', StringComparison.Ordinal) + 1)..]}"], out _);
+        var profile = BatchFileImporter.FromCommandLine(server.CommandLine, out _);
         profile.DisplayName = server.ServerName ?? "Servidor importado";
         profile.ServerDirectory = Path.GetDirectoryName(server.ExecutablePath) ?? string.Empty;
         if (server.SaveDirectoryIsDefault)

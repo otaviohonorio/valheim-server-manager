@@ -56,6 +56,7 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
     private readonly IPickerService _pickers;
     private readonly ILogger<ShellViewModel> _logger;
     private DispatcherQueueTimer? _scanTimer;
+    private bool _revertingSelection;
 
     public ShellViewModel(
         ServerManager manager,
@@ -94,6 +95,9 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool HasUnmanaged { get; set; }
 
+    /// <summary>Set by the window: returns false when the user cancels leaving unsaved edits.</summary>
+    public Func<Task<bool>>? ConfirmLeaveAsync { get; set; }
+
     public bool AnyActive => _manager.AnyActive;
 
     public int ActiveCount => _manager.Controllers.Count(c => c.Status.IsActive);
@@ -105,12 +109,25 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         _ = ScanAsync();
     }
 
-    partial void OnSelectedProfileChanged(ProfileItemViewModel? value)
+    partial void OnSelectedProfileChanged(ProfileItemViewModel? oldValue, ProfileItemViewModel? newValue) =>
+        _ = SwitchProfileAsync(oldValue, newValue);
+
+    private async Task SwitchProfileAsync(ProfileItemViewModel? oldValue, ProfileItemViewModel? newValue)
     {
-        if (value is not null && _context.SelectedProfileId != value.Id)
+        if (_revertingSelection || newValue is null || _context.SelectedProfileId == newValue.Id)
         {
-            _context.SelectedProfileId = value.Id;
+            return;
         }
+
+        if (oldValue is not null && ConfirmLeaveAsync is { } confirm && !await confirm())
+        {
+            _revertingSelection = true;
+            SelectedProfile = oldValue;
+            _revertingSelection = false;
+            return;
+        }
+
+        _context.SelectedProfileId = newValue.Id;
     }
 
     private void RebuildProfiles()

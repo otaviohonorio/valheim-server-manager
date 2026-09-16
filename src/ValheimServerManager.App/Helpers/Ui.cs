@@ -25,6 +25,9 @@ public static class Ui
 
     public static bool HasText(string? value) => !string.IsNullOrWhiteSpace(value);
 
+    public static Windows.UI.Text.FontWeight Weight(bool strong) =>
+        strong ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
+
     public static Microsoft.UI.Xaml.Controls.PasswordRevealMode RevealMode(bool show) =>
         show ? Microsoft.UI.Xaml.Controls.PasswordRevealMode.Visible : Microsoft.UI.Xaml.Controls.PasswordRevealMode.Hidden;
 

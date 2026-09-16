@@ -7,7 +7,15 @@ namespace ValheimServerManager.App;
 
 public static class Program
 {
-    private const string InstanceKey = "ValheimServerManager.Main";
+    private static string InstanceKey
+    {
+        get
+        {
+            var dataDir = new ValheimServerManager.Core.Settings.JsonSettingsStore().DataDirectory.ToUpperInvariant();
+            var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(dataDir)))[..16];
+            return "ValheimServerManager." + hash;
+        }
+    }
 
     [STAThread]
     private static int Main(string[] args)

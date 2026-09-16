@@ -84,6 +84,12 @@ internal static class EndToEndTest
                 ok = false;
             }
 
+            if (!ok && controller.Status.IsActive)
+            {
+                Console.WriteLine("      (parando o servidor que ficou ligado)");
+                await controller.StopAsync(ct).ConfigureAwait(false);
+            }
+
             Console.WriteLine($"  {(ok ? "PASSOU" : "FALHOU")} ({sw.Elapsed.TotalSeconds:N1} s)\n");
             if (!ok)
             {
@@ -167,10 +173,113 @@ internal static class EndToEndTest
             return await StartAndWait().ConfigureAwait(false) && await StopClean().ConfigureAwait(false) && !WorldHasCreativeKey();
         }).ConfigureAwait(false);
 
+        await Step("Todas as opções fora do padrão chegam ao servidor", async () =>
+        {
+            var p = controller.Profile;
+            p.ServerName = "VSM E2E Opcoes " + Environment.ProcessId;
+            p.Port = port + 2;
+            p.Password = "opcoesTeste77";
+            p.Public = false;
+            p.Crossplay = true;
+            p.SaveIntervalSeconds = 600;
+            p.GameBackupCount = 6;
+            p.GameBackupShortSeconds = 3600;
+            p.GameBackupLongSeconds = 21600;
+            p.Preset = WorldPreset.Casual;
+            p.Combat = CombatLevel.Hard;
+            p.DeathPenalty = DeathPenaltyLevel.Easy;
+            p.Resources = ResourceRate.MuchMore;
+            p.Raids = RaidFrequency.None;
+            p.Portals = PortalRule.Hard;
+            p.PlayerEvents = true;
+            p.PassiveMobs = true;
+            p.NoMap = true;
+            p.CreativeMode = true;
+            p.ExtraArguments = "-instanceid 7";
+            manager.SaveProfile(p);
+            Console.WriteLine("      " + LaunchArguments.BuildDisplay(p));
+
+            if (!await StartAndWait().ConfigureAwait(false))
+            {
+                return false;
+            }
+
+            var checkedOk = await WaitFor(() => controller.Status.ConfigDifferences is not null, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            var diffs = controller.Status.ConfigDifferences ?? [];
+            foreach (var d in diffs)
+            {
+                Console.WriteLine($"      DIFERENÇA {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+            }
+
+            string log;
+            using (var stream = new FileStream(profile.LogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            using (var reader = new StreamReader(stream))
+            {
+                log = await reader.ReadToEndAsync(ct).ConfigureAwait(false);
+            }
+
+            foreach (var line in log.Split('\n').Where(l => l.Contains("Setting world modifier", StringComparison.Ordinal)))
+            {
+                Console.WriteLine("      log: " + line.Trim());
+            }
+
+            Console.WriteLine($"      {controller.Status.ConfigCheckedCount} opções conferidas; join code {controller.Status.JoinCode ?? "(ainda sem)"}");
+            var stopped = await StopClean().ConfigureAwait(false);
+            var meta = WorldInspector.Inspect(profile.SaveDirectory, worldName).Metadata;
+            Console.WriteLine($"      chaves no mundo: [{string.Join(", ", meta?.KeyNames ?? [])}]");
+            var keysOk = meta is not null && new[] { "nobuildcost", "playerevents", "passivemobs", "nomap" }.All(meta.HasKey);
+            return checkedOk && diffs.Count == 0 && stopped && keysOk;
+        }).ConfigureAwait(false);
+
+        await Step("Editar com o servidor rodando é detectado e reiniciar aplica", async () =>
+        {
+            if (!await StartAndWait().ConfigureAwait(false) ||
+                !await WaitFor(() => controller.Status.ConfigDifferences is { Count: 0 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
+            {
+                return false;
+            }
+
+            var p = controller.Profile;
+            p.Password = "senhaEditada55";
+            p.Resources = ResourceRate.Less;
+            p.NoMap = false;
+            manager.SaveProfile(p);
+            var detected = await WaitFor(() => controller.Status.ConfigDifferences is { Count: 3 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            foreach (var d in controller.Status.ConfigDifferences ?? [])
+            {
+                Console.WriteLine($"      pendente: {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+            }
+
+            var restart = await controller.RestartAsync(StartOptions.Default, ct).ConfigureAwait(false);
+            var online = restart.Success && await WaitFor(() => controller.Status.State == ServerRunState.Running, TimeSpan.FromMinutes(4)).ConfigureAwait(false);
+            var applied = online && await WaitFor(() => controller.Status.ConfigDifferences is { Count: 0 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Console.WriteLine($"      depois de reiniciar: {controller.Status.ConfigDifferences?.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"} diferença(s)");
+            var stopped = await StopClean().ConfigureAwait(false);
+
+            // Back to the simple profile for the remaining steps.
+            var reset = controller.Profile;
+            reset.ServerName = "VSM-E2E-" + Environment.ProcessId;
+            reset.Port = port;
+            reset.Crossplay = false;
+            reset.Preset = WorldPreset.Normal;
+            reset.Combat = CombatLevel.Default;
+            reset.DeathPenalty = DeathPenaltyLevel.Default;
+            reset.Resources = ResourceRate.Default;
+            reset.Raids = RaidFrequency.Default;
+            reset.Portals = PortalRule.Default;
+            reset.PlayerEvents = false;
+            reset.PassiveMobs = false;
+            reset.CreativeMode = false;
+            reset.ExtraArguments = string.Empty;
+            reset.SaveIntervalSeconds = 1800;
+            manager.SaveProfile(reset);
+            return detected && applied && stopped;
+        }).ConfigureAwait(false);
+
         BackupEntry? good = null;
         await Step("Recusa iniciar mundo com o .db2 faltando (cenário de 16/09)", async () =>
         {
-            good = manager.Backups.List(profile).First(b => b.Kind == BackupKind.PostStop);
+            good = manager.Backups.List(controller.Profile).First(b => b.Kind == BackupKind.PostStop);
             var latest = WorldInspector.Inspect(profile.SaveDirectory, worldName).LatestSave!;
             File.Delete(latest.Db2!);
             var result = await controller.StartAsync(StartOptions.Confirmed, ct).ConfigureAwait(false);

@@ -76,11 +76,18 @@
             </Border>
 
             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Preferências" />
-            <toolkit:SettingsCard Description="Mostra uma notificação do Windows quando alguém aparece no mundo." Header="Avisar quando um jogador entrar">
+            <toolkit:SettingsCard Description="Mostra uma notificação (pela bandeja do sistema) quando alguém aparece no mundo." Header="Avisar quando um jogador entrar">
                 <toolkit:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE7E7;" />
                 </toolkit:SettingsCard.HeaderIcon>
                 <ToggleSwitch IsOn="{x:Bind ViewModel.NotifyPlayerJoins, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+
+            <toolkit:SettingsCard Description="Com servidores rodando, fechar a janela deixa o gerenciador na bandeja do sistema (perto do relógio). Desligado, fechar pergunta se deve parar os servidores." Header="Manter na bandeja ao fechar">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE8A7;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}" />
             </toolkit:SettingsCard>
 
             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Dados do aplicativo" />

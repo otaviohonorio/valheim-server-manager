@@ -124,6 +124,7 @@ public sealed partial class AboutViewModel : ObservableObject
         _manager = manager;
         _shell = shell;
         NotifyPlayerJoins = manager.Settings.NotifyPlayerJoins;
+        MinimizeToTray = manager.Settings.MinimizeToTrayOnClose;
     }
 
     public string Version =>
@@ -135,6 +136,15 @@ public sealed partial class AboutViewModel : ObservableObject
 
     [ObservableProperty]
     public partial bool NotifyPlayerJoins { get; set; }
+
+    [ObservableProperty]
+    public partial bool MinimizeToTray { get; set; }
+
+    partial void OnMinimizeToTrayChanged(bool value)
+    {
+        _manager.Settings.MinimizeToTrayOnClose = value;
+        _manager.SaveSettings();
+    }
 
     partial void OnNotifyPlayerJoinsChanged(bool value)
     {

@@ -26,13 +26,18 @@ public sealed partial class MainWindow : Window
     private readonly ServerManager _manager;
     private readonly IDialogService _dialogs;
     private readonly ILogger<MainWindow> _logger;
+    private readonly TrayIcon _tray;
     private bool _closingConfirmed;
+    private bool _exitRequested;
+    private bool _trayHintShown;
 
-    public MainWindow(ShellViewModel viewModel, UiDispatcher ui, ServerManager manager, IDialogService dialogs, ILogger<MainWindow> logger)
+    public MainWindow(
+        ShellViewModel viewModel, UiDispatcher ui, ServerManager manager, IDialogService dialogs, TrayIcon tray, ILogger<MainWindow> logger)
     {
         ViewModel = viewModel;
         _manager = manager;
         _dialogs = dialogs;
+        _tray = tray;
         _logger = logger;
         InitializeComponent();
         ui.Initialize(DispatcherQueue);
@@ -44,6 +49,7 @@ public sealed partial class MainWindow : Window
         ConfigureSize();
 
         AppWindow.Closing += OnClosing;
+        InitializeTray();
         Nav.SelectedItem = Nav.MenuItems[0];
         ViewModel.Start();
     }
@@ -70,6 +76,32 @@ public sealed partial class MainWindow : Window
 
         AppWindow.Show();
         Activate();
+    }
+
+    private void InitializeTray()
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        _tray.Initialize(hwnd, Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"), "Valheim Server Manager");
+        _logger.LogInformation("Ícone na bandeja do sistema: {Visible}", _tray.IsVisible);
+        _tray.OpenRequested += (_, _) => DispatcherQueue.TryEnqueue(BringToFront);
+        _tray.ExitRequested += (_, _) => DispatcherQueue.TryEnqueue(() =>
+        {
+            _exitRequested = true;
+            BringToFront();
+            Close();
+        });
+        ViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ShellViewModel.ActiveCount))
+            {
+                _tray.SetTooltip(ViewModel.ActiveCount switch
+                {
+                    0 => "Valheim Server Manager",
+                    1 => "Valheim Server Manager — 1 servidor rodando",
+                    var n => $"Valheim Server Manager — {n} servidores rodando",
+                });
+            }
+        };
     }
 
     private void ConfigureSize()
@@ -119,6 +151,20 @@ public sealed partial class MainWindow : Window
 
         args.Cancel = true;
         var active = _manager.Controllers.Where(c => c.Status.IsActive).ToArray();
+        if (active.Length > 0 && !_exitRequested && _manager.Settings.MinimizeToTrayOnClose && _tray.IsVisible)
+        {
+            AppWindow.Hide();
+            if (!_trayHintShown)
+            {
+                _trayHintShown = true;
+                _tray.ShowBalloon("Continua cuidando dos servidores",
+                    "O gerenciador ficou na bandeja do sistema. Clique no ícone para abrir; use Sair no menu dele para fechar de vez.");
+            }
+
+            return;
+        }
+
+        _exitRequested = false;
         if (active.Length > 0)
         {
             var names = string.Join(", ", active.Select(c => c.Profile.DisplayName));

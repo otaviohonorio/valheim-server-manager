@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
-using Microsoft.Windows.AppNotifications;
-using Microsoft.Windows.AppNotifications.Builder;
 using Windows.ApplicationModel.DataTransfer;
 
 namespace ValheimServerManager.App.Services;
@@ -104,64 +102,12 @@ public sealed class ShellService(ILogger<ShellService> logger) : IShellService
 
 public interface INotificationService
 {
-    void Show(string title, string message);
+    void Show(string title, string message, BalloonKind kind = BalloonKind.Info);
 }
 
-/// <summary>Windows toast notifications; silently disabled if the system refuses registration.</summary>
-public sealed class NotificationService : INotificationService, IDisposable
+/// <summary>Notifications through the tray icon (works in self-contained deployments).</summary>
+public sealed class NotificationService(TrayIcon tray) : INotificationService
 {
-    private readonly ILogger<NotificationService> _logger;
-    private readonly bool _enabled;
-
-    public NotificationService(ILogger<NotificationService> logger)
-    {
-        _logger = logger;
-        try
-        {
-            AppNotificationManager.Default.NotificationInvoked += (_, _) => App.Current?.BringToFront();
-            AppNotificationManager.Default.Register();
-            _enabled = true;
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException or UnauthorizedAccessException)
-        {
-            _logger.LogWarning(ex, "Notificações do Windows indisponíveis");
-        }
-    }
-
-    public void Show(string title, string message)
-    {
-        if (!_enabled)
-        {
-            return;
-        }
-
-        try
-        {
-            var notification = new AppNotificationBuilder()
-                .AddText(title)
-                .AddText(message)
-                .BuildNotification();
-            AppNotificationManager.Default.Show(notification);
-        }
-        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
-        {
-            _logger.LogWarning(ex, "Falha ao mostrar notificação");
-        }
-    }
-
-    public void Dispose()
-    {
-        if (!_enabled)
-        {
-            return;
-        }
-
-        try
-        {
-            AppNotificationManager.Default.Unregister();
-        }
-        catch (System.Runtime.InteropServices.COMException)
-        {
-        }
-    }
+    public void Show(string title, string message, BalloonKind kind = BalloonKind.Info) =>
+        tray.ShowBalloon(title, message, kind);
 }

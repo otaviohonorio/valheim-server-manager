@@ -86,7 +86,12 @@ public sealed class AlertCenter
         var isPlayerNews = alert.Level == AlertLevel.Info && alert.Title.Contains("Jogador", StringComparison.Ordinal);
         if (alert.Level is AlertLevel.Warning or AlertLevel.Error or AlertLevel.Critical || (isPlayerNews && notifyPlayers))
         {
-            _notifications.Show(item.FullTitle, alert.Message);
+            _notifications.Show(item.FullTitle, alert.Message, alert.Level switch
+            {
+                AlertLevel.Warning => BalloonKind.Warning,
+                AlertLevel.Error or AlertLevel.Critical => BalloonKind.Error,
+                _ => BalloonKind.Info,
+            });
         }
 
         if (alert.Level is AlertLevel.Success or AlertLevel.Info)

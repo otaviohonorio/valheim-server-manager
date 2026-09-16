@@ -46,6 +46,7 @@ public partial class App : Application
         builder.Services.AddSingleton<IDialogService, DialogService>();
         builder.Services.AddSingleton<IPickerService, PickerService>();
         builder.Services.AddSingleton<IShellService, ShellService>();
+        builder.Services.AddSingleton<TrayIcon>();
         builder.Services.AddSingleton<INotificationService, NotificationService>();
         builder.Services.AddSingleton<ProfileContext>();
         builder.Services.AddSingleton<AlertCenter>();
@@ -96,6 +97,7 @@ public partial class App : Application
     {
         try
         {
+            Services.GetRequiredService<TrayIcon>().Dispose();
             await Services.GetRequiredService<ServerManager>().DisposeAsync();
             await _host.StopAsync(TimeSpan.FromSeconds(3));
         }

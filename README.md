@@ -25,12 +25,15 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 | **Configuração completa** | Nome, senha (criptografada com DPAPI), porta, público, crossplay, pastas, intervalo de save, backups do jogo, presets e todos os modificadores. |
 | **Jogadores** | Admin, banidos e permitidos, com os nomes lidos do próprio mundo. |
 | **Log ao vivo** | Eventos importantes filtrados, e o log de cada sessão arquivado. |
+| **Desligar o PC sem perder nada** | Se o Windows for desligado com servidores rodando, o app segura o desligamento por alguns segundos e salva os mundos antes. |
+| **Bandeja do sistema** | Fechar a janela com servidores rodando deixa o app na bandeja; notificações de jogadores e problemas aparecem por ali. |
 | **Vários servidores** | Perfis independentes, cada um com seu mundo e porta. Servidores abertos fora do app são detectados e podem ser adotados. |
 | **Diagnóstico** | Inspeção do save e contagem de peças construídas por jogadores (bancadas, baús, portais…). |
 
 ## Instalação
 
-Baixe a pasta publicada e execute `ValheimServerManager.exe`. Não é preciso instalar .NET nem
+Rode `build/install.ps1 -Publish` (instala em `%LOCALAPPDATA%\Programs\Valheim Server Manager` e
+cria atalhos) ou copie a pasta publicada e execute `ValheimServerManager.exe`. Não é preciso instalar .NET nem
 Windows App SDK (a publicação é autocontida). Requer Windows 10 2004+ ou Windows 11, x64, e o
 **Valheim Dedicated Server** instalado pela Steam (Biblioteca → Ferramentas).
 

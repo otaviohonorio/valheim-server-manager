@@ -7,9 +7,10 @@ description: How to build, test, run, publish and extend the Valheim Server Mana
 
 ## Toolchain
 
-- .NET SDK 10.0.401 (pinned in `global.json`). On the author's machine it is installed per-user:
+- .NET SDK 10.0.401 (pinned in `global.json`). On the author's machine it is installed per-user
+  (no admin), so a fresh shell needs:
   ```bash
-  export PATH="/c/Users/ofhon/AppData/Local/Microsoft/dotnet:$PATH" DOTNET_ROOT='C:\Users\ofhon\AppData\Local\Microsoft\dotnet' DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+  export DOTNET_ROOT="$LOCALAPPDATA/Microsoft/dotnet" PATH="$LOCALAPPDATA/Microsoft/dotnet:$PATH" DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
   ```
   Elsewhere: `winget install Microsoft.DotNet.SDK.10` or `dotnet-install.ps1 -Channel 10.0`.
 - No Visual Studio needed: WinUI 3 builds with `dotnet build` (Windows App SDK ≥ 2.1.3 reports
@@ -23,8 +24,13 @@ description: How to build, test, run, publish and extend the Valheim Server Mana
 dotnet build ValheimServerManager.slnx
 dotnet test --project tests/ValheimServerManager.Core.Tests          # MTP runner (global.json)
 dotnet run --project src/ValheimServerManager.Cli -- --help
-pwsh build/publish.ps1                                               # self-contained app + CLI in dist/
+powershell -File build/publish.ps1                                  # self-contained app + CLI in dist/ (~350 MB)
+powershell -File build/install.ps1 -Publish                          # %LOCALAPPDATA%\Programs + shortcuts
 ```
+
+PowerShell scripts must be saved as UTF-8 **with BOM** (Windows PowerShell 5.1 reads BOM-less files
+as ANSI; a typographic quote in a string then breaks parsing). Bash heredocs in the agent shell
+collapse `\\` — write Python/PowerShell helpers to files instead of inline heredocs.
 
 Run the app against a throwaway settings folder so the user's real profiles are untouched:
 `VSM_DATA_DIR=<repo>/.test-servers/appdata` (ignored by git).
@@ -75,3 +81,21 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
   world file → refusal of a world missing its .db2 → restore.
 - Screenshots of the running app: `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT)` on the
   process' main window.
+- Drive the UI with UI Automation (`System.Windows.Automation`): navigation items expose
+  `SelectionItemPattern`, buttons `InvokePattern`. Icon+text buttons need
+  `AutomationProperties.Name` — without it they are invisible to automation and screen readers.
+- Simulate Windows shutdown by sending `WM_QUERYENDSESSION` (0x11) then `WM_ENDSESSION` (0x16,
+  wParam=1) to the `WinUIDesktopWin32WindowClass` window; the app must stop servers before
+  `WM_ENDSESSION` returns.
+
+## Platform notes
+
+- App notifications (`AppNotificationManager`) fail in self-contained apps (they need the
+  installed Windows App SDK runtime, WindowsAppSDK#6071). Notifications go through the tray icon
+  (`TrayIcon`, plain `Shell_NotifyIcon`).
+- The main window is subclassed (`SetWindowSubclass`) for tray callbacks, `TaskbarCreated` and
+  session end. At logoff/shutdown Windows kills hidden console processes without letting them
+  save, so `WM_ENDSESSION` stops every server first (with `ShutdownBlockReasonCreate`).
+- Editable `ComboBox.Text` bindings lose their value when items arrive later; use `AutoSuggestBox`.
+- Closed `InfoBar`s still take `StackPanel.Spacing`; bind `Visibility` too.
+- Never edit a `.bat` that is currently running: cmd reads batch files by byte offset.

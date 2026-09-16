@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Builds a self-contained release of the app and the CLI into dist\ and runs the unit tests.
 .DESCRIPTION

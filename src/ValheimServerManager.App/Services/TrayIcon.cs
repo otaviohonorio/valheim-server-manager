@@ -38,6 +38,9 @@ public sealed partial class TrayIcon : IDisposable
     private const uint NiifLargeIcon = 0x20;
     private const uint NiifRespectQuietTime = 0x80;
 
+    private const uint WmQueryEndSession = 0x0011;
+    private const uint WmEndSession = 0x0016;
+
     private const int MenuOpen = 1;
     private const int MenuExit = 2;
 
@@ -57,6 +60,12 @@ public sealed partial class TrayIcon : IDisposable
     public event EventHandler? OpenRequested;
 
     public event EventHandler? ExitRequested;
+
+    /// <summary>
+    /// Windows is logging off or shutting down. Handlers run synchronously on the UI thread and may
+    /// block (the shell shows <see cref="SetShutdownBlockReason"/> while they do).
+    /// </summary>
+    public event EventHandler? SessionEnding;
 
     public bool IsVisible => _added;
 
@@ -140,6 +149,18 @@ public sealed partial class TrayIcon : IDisposable
             return IntPtr.Zero;
         }
 
+        if (msg == WmQueryEndSession)
+        {
+            // Allow the shutdown, but ask Windows to wait while servers save (see WM_ENDSESSION).
+            return (IntPtr)1;
+        }
+
+        if (msg == WmEndSession && wParam != IntPtr.Zero)
+        {
+            SessionEnding?.Invoke(this, EventArgs.Empty);
+            return IntPtr.Zero;
+        }
+
         if (msg == _taskbarCreated && _taskbarCreated != 0)
         {
             // Explorer restarted: the icon is gone and must be added again.
@@ -172,6 +193,24 @@ public sealed partial class TrayIcon : IDisposable
         finally
         {
             DestroyMenu(menu);
+        }
+    }
+
+    /// <summary>Shows a reason on the Windows shutdown screen, or clears it with <c>null</c>.</summary>
+    public void SetShutdownBlockReason(string? reason)
+    {
+        if (_hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (reason is null)
+        {
+            ShutdownBlockReasonDestroy(_hwnd);
+        }
+        else
+        {
+            ShutdownBlockReasonCreate(_hwnd, reason);
         }
     }
 
@@ -265,4 +304,12 @@ public sealed partial class TrayIcon : IDisposable
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool SetForegroundWindow(IntPtr hwnd);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShutdownBlockReasonCreate(IntPtr hwnd, string reason);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShutdownBlockReasonDestroy(IntPtr hwnd);
 }

@@ -90,8 +90,16 @@ public sealed partial class MainWindow : Window
             BringToFront();
             Close();
         });
+        _tray.SessionEnding += (_, _) => SaveServersBeforeWindowsEnds();
         ViewModel.PropertyChanged += (_, e) =>
         {
+            if (e.PropertyName == nameof(ShellViewModel.ActiveCount))
+            {
+                _tray.SetShutdownBlockReason(ViewModel.ActiveCount > 0
+                    ? "Servidores de Valheim rodando — o gerenciador vai salvar os mundos antes de desligar."
+                    : null);
+            }
+
             if (e.PropertyName == nameof(ShellViewModel.ActiveCount))
             {
                 _tray.SetTooltip(ViewModel.ActiveCount switch
@@ -102,6 +110,38 @@ public sealed partial class MainWindow : Window
                 });
             }
         };
+    }
+
+    /// <summary>
+    /// Windows kills hidden console processes at logoff/shutdown without letting them save. Stop every
+    /// server gracefully first; the shutdown screen shows the block reason meanwhile.
+    /// </summary>
+    private void SaveServersBeforeWindowsEnds()
+    {
+        var active = _manager.Controllers.Where(c => c.Status.IsActive).ToArray();
+        if (active.Length == 0)
+        {
+            return;
+        }
+
+        _logger.LogWarning("Windows está encerrando a sessão; desligando {Count} servidor(es) com segurança", active.Length);
+        _tray.SetShutdownBlockReason("Salvando os mundos do Valheim antes de desligar…");
+        try
+        {
+            var stops = active.Select(c => Task.Run(() => c.StopAsync())).ToArray();
+            if (!Task.WaitAll(stops, TimeSpan.FromSeconds(90)))
+            {
+                _logger.LogError("Nem todos os servidores confirmaram o save antes do fim da sessão");
+            }
+        }
+        catch (AggregateException ex)
+        {
+            _logger.LogError(ex, "Falha ao desligar servidores no fim da sessão");
+        }
+        finally
+        {
+            _tray.SetShutdownBlockReason(null);
+        }
     }
 
     private void ConfigureSize()

@@ -61,6 +61,12 @@ Parado ──Iniciar──► pré-checagem ──bloqueio──► Parado (moti
 - **Backups só do save completo.** Arquivos de um save terminado nunca são reescritos pelo
   Valheim, então a cópia é consistente mesmo com o servidor rodando; restauração em pasta nova
   garante que nada se mistura.
+- **Bandeja do sistema.** Com servidores rodando, fechar a janela esconde o app na bandeja; o
+  ícone também entrega as notificações (as notificações nativas do Windows App SDK não funcionam
+  em apps autocontidos).
+- **Desligamento do Windows.** Processos de console ocultos são mortos sem salvar no logoff; o
+  app intercepta `WM_ENDSESSION`, mostra um motivo na tela de desligamento e para cada servidor
+  com Ctrl+C antes de liberar.
 - **Senha com DPAPI** (escopo do usuário), configurações com escrita atômica, versão de schema e
   cópia `.bak`.
 - **`TimeProvider`** injetado em tudo que espera ou marca tempo, para testes determinísticos.

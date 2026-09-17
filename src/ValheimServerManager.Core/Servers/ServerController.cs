@@ -286,9 +286,33 @@ public sealed class ServerController : IAsyncDisposable
                 };
                 checks.Add(new(level, "WORLD_" + issue.Code, issue.Message));
             }
+
+            if (report.IsHealthy)
+            {
+                AddDuplicateCheck(profile, checks);
+            }
         }
 
         return checks;
+    }
+
+    private void AddDuplicateCheck(ServerProfile profile, List<StartCheckItem> checks)
+    {
+        try
+        {
+            var scan = WorldRepair.Scan(profile.SaveDirectory, profile.WorldName);
+            if (scan.NeedsRepair)
+            {
+                checks.Add(new(CheckLevel.Confirm, "WORLD_DUPLICATES",
+                    $"O mundo tem {scan.ExtraCopies:N0} objetos duplicados e {scan.ZonesToMark} zonas que o jogo vai gerar de novo " +
+                    $"por cima ({scan.Summary}). Isso causa itens que \"voltam\", minério que quebra duas vezes e inimigos em dobro. " +
+                    "Use \"Reparar mundo\" no Painel antes de iniciar."));
+            }
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(ex, "Não consegui procurar objetos duplicados");
+        }
     }
 
     private static bool IsUdpPortBusy(int port)
@@ -1162,6 +1186,56 @@ public sealed class ServerController : IAsyncDisposable
         {
             _logger.LogError(ex, "Backup depois de parar falhou");
             Raise(AlertLevel.Error, "Backup depois de parar falhou", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Removes duplicated world objects and marks populated zones as generated (see <see cref="WorldRepair"/>).
+    /// Only with the server stopped and the world not used by another process; a backup is taken first.
+    /// </summary>
+    public async Task<OperationResult> RepairWorldAsync(CancellationToken ct = default)
+    {
+        await _operation.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            var profile = Profile;
+            if (Status.IsActive)
+            {
+                return OperationResult.Fail("Pare o servidor antes de reparar o mundo.");
+            }
+
+            var inUse = Preflight(profile).Where(c => c.Code is "WORLD_IN_USE" or "ALREADY_RUNNING").ToArray();
+            if (inUse.Length > 0)
+            {
+                return OperationResult.Fail("O mundo está em uso por outro servidor.", inUse);
+            }
+
+            var scan = await Task.Run(() => WorldRepair.Scan(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
+            if (!scan.NeedsRepair)
+            {
+                return OperationResult.Ok("O mundo não tem objetos duplicados nem zonas por marcar.");
+            }
+
+            AddActivity(ActivityKind.Backup, "Fazendo backup antes de reparar o mundo…");
+            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, "antes de reparar duplicados", ct).ConfigureAwait(false);
+            RecordBackup(backup);
+
+            var result = await Task.Run(() => WorldRepair.Repair(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
+            var message = $"Mundo reparado: {result.RemovedObjects:N0} cópias removidas e {result.ZonesMarked} regiões protegidas " +
+                          $"contra nova geração (save {result.OldSaveNumber} → {result.NewSaveNumber}). Backup: {backup.Name}.";
+            _logger.LogInformation("{Message}", message);
+            AddActivity(ActivityKind.Save, message);
+            Raise(AlertLevel.Success, "Mundo reparado", message);
+            return OperationResult.Ok(message);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            _logger.LogError(ex, "Reparo do mundo falhou");
+            return OperationResult.Fail("O reparo não foi feito; o mundo continua como estava. " + ex.Message);
+        }
+        finally
+        {
+            _operation.Release();
         }
     }
 

@@ -37,6 +37,7 @@ internal static class CliApp
         root.Subcommands.Add(RestoreCommand());
         root.Subcommands.Add(InspectCommand());
         root.Subcommands.Add(RebuildIndexCommand());
+        root.Subcommands.Add(RepairWorldCommand());
         root.Subcommands.Add(EndToEndTest.Command());
         return await root.Parse(args).InvokeAsync().ConfigureAwait(false);
     }
@@ -440,9 +441,11 @@ internal static class CliApp
     {
         var dir = new Argument<DirectoryInfo>("pasta-do-mundo") { Description = "Pasta do mundo (a que contém _main.N.*)." };
         var pieces = new Option<bool>("--pieces") { Description = "Procura peças construídas por jogadores." };
+        var duplicates = new Option<bool>("--duplicates") { Description = "Procura objetos duplicados e zonas que o jogo vai gerar de novo." };
         var command = new Command("inspect", "Confere a integridade de uma pasta de mundo.");
         command.Arguments.Add(dir);
         command.Options.Add(pieces);
+        command.Options.Add(duplicates);
         command.SetAction(parse =>
         {
             var report = WorldInspector.InspectDirectory(parse.GetValue(dir)!.FullName);
@@ -470,7 +473,50 @@ internal static class CliApp
                 }
             }
 
+            if (parse.GetValue(duplicates) && report.IsHealthy)
+            {
+                PrintDuplicates(WorldRepair.ScanDirectory(report.Directory, report.WorldName));
+            }
+
             return report.HasErrors ? 1 : 0;
+        });
+        return command;
+    }
+
+    private static void PrintDuplicates(WorldDuplicateReport scan)
+    {
+        Console.WriteLine($"  duplicados: {scan.ExtraCopies:N0} cópias extras em {scan.Objects:N0} objetos; " +
+                          $"{scan.ZonesWithDoubleSpawn} zonas com spawn em dobro; {scan.ZonesToMark} zonas que o jogo vai gerar de novo");
+        foreach (var (category, count) in scan.ByCategory)
+        {
+            Console.WriteLine($"    {count,8:N0}  {category}");
+        }
+    }
+
+    private static Command RepairWorldCommand()
+    {
+        var command = new Command("repair-world",
+            "Remove objetos duplicados e impede que o jogo gere de novo zonas que já existem (servidor parado; faz backup antes).");
+        command.Options.Add(ProfileOption);
+        command.SetAction(async (parse, ct) =>
+        {
+            await using var manager = CreateManager(parse.GetValue(DataDirOption));
+            if (Resolve(manager, parse.GetValue(ProfileOption)) is not { } controller)
+            {
+                return 2;
+            }
+
+            await manager.RefreshRunningServersAsync(ct).ConfigureAwait(false);
+            var profile = controller.Profile;
+            PrintDuplicates(WorldRepair.Scan(profile.SaveDirectory, profile.WorldName));
+            var result = await controller.RepairWorldAsync(ct).ConfigureAwait(false);
+            Console.WriteLine(result.Message);
+            foreach (var check in result.Checks)
+            {
+                Console.WriteLine($"  [{check.Level}] {check.Message}");
+            }
+
+            return result.Success ? 0 : 1;
         });
         return command;
     }

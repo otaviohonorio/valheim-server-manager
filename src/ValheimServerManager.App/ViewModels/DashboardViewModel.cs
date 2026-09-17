@@ -37,6 +37,16 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
     public void RequestNavigation(string section) => NavigateRequested?.Invoke(this, section);
 
+    private int _duplicateScan;
+    private WorldDuplicateReport? _duplicates;
+
+    /// <summary>The world has copies placed by a second generation, or zones that would be generated again.</summary>
+    [ObservableProperty]
+    public partial bool HasDuplicates { get; set; }
+
+    [ObservableProperty]
+    public partial string DuplicatesText { get; set; } = string.Empty;
+
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
 
@@ -194,6 +204,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         StartCommand.NotifyCanExecuteChanged();
         StopCommand.NotifyCanExecuteChanged();
         RestartCommand.NotifyCanExecuteChanged();
+        RepairWorldCommand.NotifyCanExecuteChanged();
         if (status.State == ServerRunState.Stopped && !IsBusy)
         {
             RefreshWorld();
@@ -310,6 +321,15 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             WorldHealthSeverity = report.HasWarnings
                 ? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning
                 : Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success;
+        }
+
+        if (report.IsHealthy)
+        {
+            _ = ScanDuplicatesAsync(profile.SaveDirectory, profile.WorldName);
+        }
+        else
+        {
+            ShowDuplicates(null);
         }
 
         WorldSummary = report.Metadata is { } meta
@@ -526,6 +546,95 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         OnServerStatusChanged(Status);
+    }
+
+    private async Task ScanDuplicatesAsync(string saveDirectory, string worldName)
+    {
+        var version = ++_duplicateScan;
+        WorldDuplicateReport? scan = null;
+        try
+        {
+            scan = await Task.Run(() => WorldRepair.Scan(saveDirectory, worldName));
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            // The health check above already reports unreadable worlds.
+        }
+
+        if (version == _duplicateScan)
+        {
+            ShowDuplicates(scan);
+        }
+    }
+
+    private void ShowDuplicates(WorldDuplicateReport? scan)
+    {
+        _duplicates = scan is { NeedsRepair: true } ? scan : null;
+        HasDuplicates = _duplicates is not null;
+        if (_duplicates is { } d)
+        {
+            var parts = new List<string>();
+            if (d.ExtraCopies > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(d.ExtraCopies)} objetos existem em dobro ({d.Summary})");
+            }
+
+            if (d.ZonesWithDoubleSpawn > 0)
+            {
+                parts.Add($"{d.ZonesWithDoubleSpawn} regiões geram inimigos em dobro");
+            }
+
+            if (d.ZonesToMark > 0)
+            {
+                parts.Add($"{d.ZonesToMark} regiões ainda vão ser geradas de novo quando alguém passar por lá");
+            }
+
+            DuplicatesText = string.Join("; ", parts) +
+                ". É por isso que itens coletados \"voltam\", minério quebra duas vezes e aparecem inimigos demais. " +
+                (Status.IsActive ? "Pare o servidor para reparar." : "O reparo faz um backup antes e grava um save novo.");
+        }
+        else
+        {
+            DuplicatesText = string.Empty;
+        }
+
+        RepairWorldCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanRepairWorld() => HasDuplicates && Status.State is ServerRunState.Stopped or ServerRunState.Crashed && !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanRepairWorld))]
+    private async Task RepairWorldAsync()
+    {
+        if (Controller is not { } controller || _duplicates is not { } scan)
+        {
+            return;
+        }
+
+        var message =
+            $"Remove {Helpers.Ui.Number(scan.ExtraCopies)} cópias criadas quando o jogo gerou regiões de novo por cima do mundo " +
+            $"e marca {scan.ZonesToMark} regiões como já geradas, para isso não voltar a acontecer.\n\n" +
+            "Construções, baús dos jogadores, terreno e inventários não são alterados. Antes do reparo é feito um backup; " +
+            "se algo parecer errado, é só restaurá-lo na tela Backups.";
+        if (!await _dialogs.ConfirmAsync("Reparar mundo?", message, "Reparar"))
+        {
+            return;
+        }
+
+        await RunBusyAsync("Reparando o mundo…", async () =>
+        {
+            var result = await controller.RepairWorldAsync();
+            if (result.Success)
+            {
+                await _dialogs.AlertAsync("Mundo reparado", result.Message);
+            }
+            else
+            {
+                await _dialogs.ShowChecksAsync("O mundo não foi reparado", result.Message, result.Checks, false, string.Empty);
+            }
+        });
+
+        RefreshWorld();
     }
 
     [RelayCommand]

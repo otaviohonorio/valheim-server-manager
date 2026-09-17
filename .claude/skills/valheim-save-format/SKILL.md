@@ -51,6 +51,49 @@ entry  11 bytes : i8 x | i8 z | u8 flag | u32 revision | u32 zdo_count
 - File for an entry: `{(byte)z:x2}_{(byte)x:x2}__{flag}_{revision}.chunk` (lowercase hex).
   Example: x=0x1e z=0x20 flag=1 rev=11 → `20_1e__1_11.chunk`.
 
+## `.chunk` contents (`ZDOMan.SaveChunk` / `ZDO.Save`)
+
+`i16 version (41) | i32 count | ZDO[count]` — no ZDO ids (the game assigns new ones on load).
+Reader/writer: `ChunkObjects` (`Worlds/WorldObjects.cs`), confirmed on every chunk of a real
+world (file fully consumed). Each ZDO:
+
+```
+u16 flags        0x01 connection  0x02 floats  0x04 vec3  0x08 quats  0x10 ints  0x20 longs
+                 0x40 strings  0x80 byte arrays  0x100 persistent  0x200 distant
+                 0xC00 type (<<10)  0x1000 rotation  0x2000 small position
+position         i16 x, i16 z (y = 0) with 0x2000, else f32 x, y, z (world coordinates)
+i32 prefab       StableHash of the prefab name
+rotation         with 0x1000: u16; if its high bit is set y = (v & 0x7FFF) / 2,
+                 else a second u16 follows: x = v & 0x3FF, y = v >> 10 & 0x3FF, z = v >> 20, all / 2
+connection       u8 type, i32 hash
+maps             in the order above: count (1 byte, or 2 when the first has 0x80: ((b0&0x7F)<<8)|b1),
+                 then (i32 key, value); string = 7-bit length + UTF-8; byte array = i32 length + bytes
+```
+
+Player-built pieces carry a `creator` long (StableHash "creator"); generated objects never do —
+this is how to tell a base wall from a ruin wall of the same prefab.
+
+## `_main.N.db2`
+
+`i32 version | f64 net_time | i32 size | gzip(zone data) | RandEventSystem | PersistentEventSystem`.
+Zone data: `i32 n | (i16 x, i16 z)[n]` **generated zones**, `i32 location_version`,
+`i32 k | string global_keys[k]`, `bool locations_generated`,
+`i32 m | (i32 location_hash, f32 x, y, z, bool placed)[m]`. `WorldDatabase` rewrites only the zone list.
+
+### The second regeneration trap: zones not marked as generated
+
+`ZoneSystem.SpawnZone` places vegetation, ore, pickables, locations and a `_ZoneCtrl` (the
+enemy spawner of the zone, 64×64 m, `zone = floor((pos + 32) / 64)`) in every zone that is **not**
+in the db2 list, whenever a player comes near — on top of whatever the chunks already hold.
+Pairing chunks with the db2 of another save (as the 2026-09-16 recovery did) therefore duplicates
+the world bit by bit as people explore: pickables that "come back", ore that breaks twice,
+double enemy spawns (two `_ZoneCtrl` in a zone), and locations placed again **with another
+rotation** (their contents are the original contents rotated by the angle difference).
+`WorldRepair` removes the copies (first occurrence is the original; creator-owned objects are never
+touched) and adds every zone that has a `_ZoneCtrl` to the list — CLI `vsm inspect --duplicates`,
+`vsm repair-world`, app "Reparar mundo". Validated: the dedicated server loads the repaired save
+(its gzip is accepted) and saves it again clean.
+
 ## `.chunk` header
 
 First 6 bytes: `u16 version | u32 zdo_count`. The count equals the index entry's count, which is
@@ -97,5 +140,8 @@ finds nothing. Wood walls/floors also exist in generated ruins, so only count pl
    with a `.fwl2`/`.db2` of the same world (a regenerated one works; world keys and boss
    progress may be lost), give it a fresh N, validate with `vsm inspect --pieces`, load it in a
    **separate** save dir.
+   **Then run `vsm repair-world`** (or copy the zone list): a db2 from another save does not list
+   the zones present in the chunks, and the game will generate them again on top.
+   `vsm inspect --duplicates` must report 0 zones to mark.
 5. Undelete tools only help if the MFT records were not reused; small files (`.chunks`, `.ok`,
    `.fwl2`) are MFT-resident and come back intact when they do.

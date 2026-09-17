@@ -135,6 +135,18 @@
                 </InfoBar.ActionButton>
             </InfoBar>
             <InfoBar
+                Title="Mundo com objetos duplicados"
+                AutomationProperties.Name="Mundo com objetos duplicados"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasDuplicates, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasDuplicates), Mode=OneWay}"
+                Message="{x:Bind ViewModel.DuplicatesText, Mode=OneWay}"
+                Severity="Warning">
+                <InfoBar.ActionButton>
+                    <Button AutomationProperties.Name="Reparar mundo" Command="{x:Bind ViewModel.RepairWorldCommand}" Content="Reparar mundo" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+            <InfoBar
                 Title="Última parada"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.LastExitWasBad, Mode=OneWay}"

@@ -142,6 +142,15 @@ internal static class EndToEndTest
             return report.Metadata?.IsCreative ?? false;
         }
 
+        await Step("Reparar objetos duplicados (o servidor carrega o resultado nos passos seguintes)", async () =>
+        {
+            var before = WorldRepair.Scan(profile.SaveDirectory, worldName);
+            var result = await controller.RepairWorldAsync(ct).ConfigureAwait(false);
+            var after = WorldRepair.Scan(profile.SaveDirectory, worldName);
+            Console.WriteLine($"      antes: {before.ExtraCopies:N0} cópias, {before.ZonesToMark} zonas; {result.Message}");
+            return result.Success && !after.NeedsRepair && after.Objects == before.Objects - before.ExtraCopies;
+        }).ConfigureAwait(false);
+
         await Step("Iniciar em modo normal (com backup antes)", async () =>
             await StartAndWait().ConfigureAwait(false) &&
             manager.Backups.List(profile).Any(b => b.Kind == BackupKind.PreStart)).ConfigureAwait(false);

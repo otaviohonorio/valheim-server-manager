@@ -40,6 +40,8 @@ public sealed class ServerController : IAsyncDisposable
     private LogTailer? _tailer;
     private TaskCompletionSource<ExitInfo>? _exitSignal;
     private int? _pendingSaveNumber;
+    private readonly List<string> _pendingPlatformIds = [];
+    private readonly Dictionary<long, OnlinePlayer> _players = [];
     private bool _sawSaveAfterStop;
     private bool _sawShutdown;
     private bool _emergencyKill;
@@ -469,6 +471,8 @@ public sealed class ServerController : IAsyncDisposable
             _exitSignal = new TaskCompletionSource<ExitInfo>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingSaveNumber = null;
             _loggedModifiers.Clear();
+            _pendingPlatformIds.Clear();
+            _players.Clear();
             if (!attached)
             {
                 _knownCommandLine = null;
@@ -634,18 +638,54 @@ public sealed class ServerController : IAsyncDisposable
             case ServerLogEventKind.PlayerCount:
                 var previous = Status.PlayerCount;
                 SetStatus(s => s with { PlayerCount = evt.Number ?? 0, PublicAddress = evt.Text ?? s.PublicAddress });
-                if (!_replaying && evt.Number is { } count && count != previous)
+                if (evt.Number == 0)
                 {
-                    AddActivity(ActivityKind.Player, count > previous
-                        ? $"Jogador entrou — {count} online."
-                        : $"Jogador saiu — {count} online.");
+                    lock (_gate)
+                    {
+                        _players.Clear();
+                        _pendingPlatformIds.Clear();
+                    }
+
+                    PublishPlayers();
+                }
+
+                if (!_replaying && evt.Number is { } count && count > previous)
+                {
+                    AddActivity(ActivityKind.Player, $"Alguém está conectando — {count} online.");
                 }
 
                 break;
 
-            case ServerLogEventKind.PlayerSpawned when !_replaying:
-                AddActivity(ActivityKind.Player, $"{evt.Text} apareceu no mundo.");
-                Raise(AlertLevel.Info, "Jogador no mundo", $"{evt.Text} entrou no servidor.");
+            case ServerLogEventKind.PlayerConnected:
+                lock (_gate)
+                {
+                    if (evt.Text is { } pid && !_pendingPlatformIds.Contains(pid))
+                    {
+                        _pendingPlatformIds.Add(pid);
+                    }
+                }
+
+                break;
+
+            case ServerLogEventKind.PlayerSpawned:
+                OnPlayerSpawned(evt);
+                break;
+
+            case ServerLogEventKind.PlayerDied when !_replaying:
+                AddActivity(ActivityKind.Player, $"{evt.Text} morreu.");
+                break;
+
+            case ServerLogEventKind.PlayerLeft:
+                OnPlayerLeft(p => p.OwnerId == evt.Count);
+                break;
+
+            case ServerLogEventKind.PlayerDisconnected:
+                lock (_gate)
+                {
+                    _pendingPlatformIds.Remove(evt.Text ?? string.Empty);
+                }
+
+                OnPlayerLeft(p => p.PlatformId == evt.Text);
                 break;
 
             case ServerLogEventKind.SaveStarted:
@@ -673,6 +713,82 @@ public sealed class ServerController : IAsyncDisposable
                 break;
         }
     }
+
+    private void OnPlayerSpawned(ServerLogEvent evt)
+    {
+        var owner = evt.Count ?? 0;
+        var name = evt.Text ?? "?";
+        bool isNew;
+        lock (_gate)
+        {
+            isNew = !_players.TryGetValue(owner, out var existing);
+            if (isNew)
+            {
+                // Clients connect first and spawn a few seconds later, in the same order.
+                string? platformId = null;
+                if (_pendingPlatformIds.Count > 0)
+                {
+                    platformId = _pendingPlatformIds[0];
+                    _pendingPlatformIds.RemoveAt(0);
+                }
+
+                _players[owner] = new OnlinePlayer(name, owner, platformId, When(evt));
+            }
+            else if (existing!.Name != name)
+            {
+                _players[owner] = existing with { Name = name };
+            }
+        }
+
+        PublishPlayers();
+        if (isNew && !_replaying)
+        {
+            AddActivity(ActivityKind.Player, $"{name} entrou no mundo.");
+            Raise(AlertLevel.Info, "Jogador entrou", $"{name} entrou em \"{Profile.ServerName}\".");
+        }
+    }
+
+    private void OnPlayerLeft(Func<OnlinePlayer, bool> match)
+    {
+        List<OnlinePlayer> gone;
+        lock (_gate)
+        {
+            gone = _players.Values.Where(match).ToList();
+            foreach (var player in gone)
+            {
+                _players.Remove(player.OwnerId);
+            }
+        }
+
+        if (gone.Count == 0)
+        {
+            return;
+        }
+
+        PublishPlayers();
+        if (!_replaying)
+        {
+            foreach (var player in gone)
+            {
+                AddActivity(ActivityKind.Player, $"{player.Name} saiu.");
+                Raise(AlertLevel.Info, "Jogador saiu", $"{player.Name} saiu de \"{Profile.ServerName}\".");
+            }
+        }
+    }
+
+    private void PublishPlayers()
+    {
+        OnlinePlayer[] list;
+        lock (_gate)
+        {
+            list = _players.Values.OrderBy(p => p.Since).ToArray();
+        }
+
+        SetStatus(s => s with { OnlinePlayers = list });
+    }
+
+    private DateTimeOffset When(ServerLogEvent evt) =>
+        evt.Timestamp is { } ts ? new DateTimeOffset(ts) : _time.GetLocalNow();
 
     private void OnSaveCompleted(ServerLogEvent evt)
     {
@@ -990,6 +1106,7 @@ public sealed class ServerController : IAsyncDisposable
             State = state,
             ProcessId = null,
             PlayerCount = 0,
+            OnlinePlayers = [],
             JoinCode = null,
             StopTimedOut = false,
             LastExit = info,

@@ -28,6 +28,9 @@ public sealed partial class PlayerRowViewModel : ObservableObject
 
     public string Id { get; }
 
+    [ObservableProperty]
+    public partial bool IsOnline { get; set; }
+
     public string Name { get; }
 
     public string Detail { get; }
@@ -68,6 +71,12 @@ public sealed partial class PlayerRowViewModel : ObservableObject
     }
 }
 
+/// <summary>A character in the world right now.</summary>
+public sealed record OnlinePlayerRow(string Name, string Detail)
+{
+    public string Initials => string.Concat(Name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(w => char.ToUpperInvariant(w[0])));
+}
+
 public sealed partial class PlayersViewModel : ProfilePageViewModel
 {
     private readonly IDialogService _dialogs;
@@ -81,6 +90,11 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
     }
 
     public ObservableCollection<PlayerRowViewModel> Players { get; } = [];
+
+    public ObservableCollection<OnlinePlayerRow> Online { get; } = [];
+
+    [ObservableProperty]
+    public partial bool HasOnline { get; set; }
 
     [ObservableProperty]
     public partial string NewId { get; set; } = string.Empty;
@@ -96,8 +110,49 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
 
     protected override void OnControllerChanged() => Refresh();
 
-    protected override void OnServerStatusChanged(ServerStatus status) =>
+    protected override void OnServerStatusChanged(ServerStatus status)
+    {
         OnlineText = status.IsActive ? $"{status.PlayerCount} jogador(es) online agora." : "Servidor parado.";
+        UpdateOnline(status);
+    }
+
+    private void UpdateOnline(ServerStatus status)
+    {
+        var admins = Profile is { } profile && !string.IsNullOrWhiteSpace(profile.SaveDirectory)
+            ? PlayerListFile.Read(profile.SaveDirectory, PlayerListKind.Admins).ToHashSet(StringComparer.Ordinal)
+            : [];
+        var players = status.IsActive ? status.OnlinePlayers : [];
+
+        Online.Clear();
+        foreach (var player in players)
+        {
+            var parts = new List<string>();
+            if (player.SteamId is { } steam)
+            {
+                parts.Add($"Steam · {steam}");
+            }
+            else if (player.PlatformId is { } platform)
+            {
+                parts.Add(platform);
+            }
+
+            parts.Add($"no mundo desde {player.Since.ToLocalTime():HH:mm}");
+            if (player.SteamId is { } id && admins.Contains(id))
+            {
+                parts.Add("admin");
+            }
+
+            Online.Add(new OnlinePlayerRow(player.Name, string.Join(" · ", parts)));
+        }
+
+        HasOnline = Online.Count > 0;
+        var onlineIds = players.Select(p => p.SteamId ?? p.PlatformId).OfType<string>().ToHashSet(StringComparer.Ordinal);
+        var onlineNames = players.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+        foreach (var row in Players)
+        {
+            row.IsOnline = onlineIds.Contains(row.Id) || (onlineIds.Count == 0 && onlineNames.Contains(row.Name));
+        }
+    }
 
     [RelayCommand]
     private void Refresh()
@@ -139,6 +194,8 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
             Players.Add(new PlayerRowViewModel(id, info.Name, info.Detail,
                 admins.Contains(id), banned.Contains(id), permitted.Contains(id), OnPlayerChanged));
         }
+
+        UpdateOnline(Status);
     }
 
     private void OnPlayerChanged(PlayerRowViewModel row, PlayerListKind kind, bool value)

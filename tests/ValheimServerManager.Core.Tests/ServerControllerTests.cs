@@ -90,6 +90,46 @@ public sealed class ServerControllerTests : IDisposable
     }
 
     [Fact]
+    public async Task Tracks_who_is_online_through_joins_deaths_and_leaves()
+    {
+        TestWorlds.WriteSave(WorldDir, "MeuMundo", 7, TestWorlds.DefaultChunks);
+        Assert.True((await _controller.StartAsync(StartOptions.Default, TestContext.Current.CancellationToken)).Success);
+
+        WriteLog(
+            "09/16/2026 20:41:00: Game server connected",
+            "09/16/2026 20:42:00: PlayFab socket with remote ID playfab/0123456789ABCDEF received local Platform ID Steam_76561190000000001",
+            "09/16/2026 20:42:00: Player joined server \"Servidor de Teste\" that has join code 123456, now 1 player(s)",
+            "09/16/2026 20:42:24: Got character ZDOID from Bjorn : -123456789:1",
+            "09/16/2026 20:43:00: Got connection SteamID 76561190000000002",
+            "09/16/2026 20:43:00: Player joined server \"Servidor de Teste\" that has join code 123456, now 2 player(s)",
+            "09/16/2026 20:43:20: Got character ZDOID from Astrid : 1122334455:1",
+            "09/16/2026 20:50:00: Got character ZDOID from Bjorn : 0:0",
+            "09/16/2026 20:50:30: Got character ZDOID from Bjorn : -123456789:9");
+        await WaitUntil(() => _controller.Status.OnlinePlayers.Count == 2);
+
+        var players = _controller.Status.OnlinePlayers;
+        Assert.Equal(["Bjorn", "Astrid"], players.Select(p => p.Name));
+        Assert.Equal("76561190000000001", players[0].SteamId);
+        Assert.Equal("76561190000000002", players[1].SteamId);
+        Assert.Equal(new DateTimeOffset(new DateTime(2026, 9, 16, 20, 42, 24)), players[0].Since);
+        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn entrou no mundo.");
+        Assert.Contains(_controller.RecentActivity, a => a.Message == "Bjorn morreu.");
+
+        WriteLog(
+            "09/16/2026 21:49:40: Player connection lost server \"Servidor de Teste\" that has join code 123456, now 1 player(s)",
+            "09/16/2026 21:49:40: Destroying abandoned non persistent zdo -123456789:6956 owner -123456789",
+            "09/16/2026 21:49:40: Destroying abandoned non persistent zdo -123456789:1 owner -123456789");
+        await WaitUntil(() => _controller.Status.OnlinePlayers.Count == 1);
+        Assert.Equal("Astrid", _controller.Status.OnlinePlayers[0].Name);
+        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn saiu.");
+
+        WriteLog(
+            "09/16/2026 21:55:00: Closing socket 76561190000000002",
+            "09/16/2026 21:55:00: Player connection lost server \"Servidor de Teste\" that has join code 123456, now 0 player(s)");
+        await WaitUntil(() => _controller.Status.OnlinePlayers.Count == 0 && _controller.Status.PlayerCount == 0);
+    }
+
+    [Fact]
     public async Task Verifies_that_the_running_server_uses_every_saved_option()
     {
         _profile.Resources = ResourceRate.More;

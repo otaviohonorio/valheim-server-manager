@@ -69,6 +69,17 @@ public enum ActivityKind
     Error,
 }
 
+/// <summary>A character currently in the world.</summary>
+/// <param name="Name">Character name.</param>
+/// <param name="OwnerId">The peer id the server logs for the character (links join and leave lines).</param>
+/// <param name="PlatformId">Steam_… or another platform id, when the log showed it.</param>
+/// <param name="Since">When the character entered the world.</param>
+public sealed record OnlinePlayer(string Name, long OwnerId, string? PlatformId, DateTimeOffset Since)
+{
+    public string? SteamId =>
+        PlatformId?.StartsWith("Steam_", StringComparison.Ordinal) == true ? PlatformId["Steam_".Length..] : null;
+}
+
 public sealed record ServerActivity(DateTimeOffset At, ActivityKind Kind, string Message);
 
 public sealed record ServerLogLine(DateTimeOffset ReceivedAt, string Text, bool Important);
@@ -85,6 +96,9 @@ public sealed record ServerStatus
     public string? JoinCode { get; init; }
     public string? PublicAddress { get; init; }
     public int PlayerCount { get; init; }
+
+    /// <summary>Who is in the world, from the log. May lag <see cref="PlayerCount"/> while someone is loading.</summary>
+    public IReadOnlyList<OnlinePlayer> OnlinePlayers { get; init; } = [];
     public int? LoadedSaveNumber { get; init; }
     public long? LoadedZdos { get; init; }
     public int? LastSaveNumber { get; init; }

@@ -20,6 +20,35 @@ public class ServerLogParserTests
     }
 
     [Fact]
+    public void Parses_player_lines_from_a_real_crossplay_session()
+    {
+        var connected = ServerLogParser.Parse("09/16/2026 20:42:00: PlayFab socket with remote ID playfab/0123456789ABCDEF received local Platform ID Steam_76561190000000001");
+        Assert.Equal(ServerLogEventKind.PlayerConnected, connected!.Kind);
+        Assert.Equal("Steam_76561190000000001", connected.Text);
+
+        var spawned = ServerLogParser.Parse("09/16/2026 20:42:24: Got character ZDOID from Bjorn : -123456789:1");
+        Assert.Equal(ServerLogEventKind.PlayerSpawned, spawned!.Kind);
+        Assert.Equal("Bjorn", spawned.Text);
+        Assert.Equal(-123456789, spawned.Count);
+
+        var died = ServerLogParser.Parse("09/16/2026 20:50:00: Got character ZDOID from Bjorn : 0:0");
+        Assert.Equal(ServerLogEventKind.PlayerDied, died!.Kind);
+
+        var left = ServerLogParser.Parse("09/16/2026 21:49:40: Destroying abandoned non persistent zdo -123456789:6956 owner -123456789");
+        Assert.Equal(ServerLogEventKind.PlayerLeft, left!.Kind);
+        Assert.Equal(-123456789, left.Count);
+    }
+
+    [Fact]
+    public void Parses_steam_connection_lines()
+    {
+        Assert.Equal("Steam_76561190000000002", ServerLogParser.Parse("09/16/2026 20:42:00: Got connection SteamID 76561190000000002")!.Text);
+        var closed = ServerLogParser.Parse("09/16/2026 20:42:00: Closing socket 76561190000000002");
+        Assert.Equal(ServerLogEventKind.PlayerDisconnected, closed!.Kind);
+        Assert.Equal("Steam_76561190000000002", closed.Text);
+    }
+
+    [Fact]
     public void Parses_timestamp()
     {
         var evt = ServerLogParser.Parse("09/16/2026 05:21:57: Game server connected");
@@ -54,7 +83,7 @@ public class ServerLogParserTests
 
     [Theory]
     [InlineData("09/16/2026 06:11:41: Net scene destroyed", ServerLogEventKind.ShutdownComplete)]
-    [InlineData("09/16/2026 05:25:27: Got character ZDOID from Torvi : -1495850011:2", ServerLogEventKind.PlayerSpawned)]
+    [InlineData("09/16/2026 05:25:27: Got character ZDOID from Bjorn : -1495850011:2", ServerLogEventKind.PlayerSpawned)]
     [InlineData("09/16/2026 05:21:49: Setting world modifier: deathpenalty->casual", ServerLogEventKind.ModifierApplied)]
     [InlineData("09/16/2026 04:13:05: Removing orphan CHUNK file: C:/x/20_1e__1_18.chunk", ServerLogEventKind.OrphanRemoved)]
     public void Parses_simple_events(string line, ServerLogEventKind kind)

@@ -106,6 +106,24 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
     public string PlayersText => Status.IsActive ? Status.PlayerCount.ToString(System.Globalization.CultureInfo.InvariantCulture) : "—";
 
+    /// <summary>"Bjorn, Astrid" plus anyone still loading.</summary>
+    public string OnlineNamesText
+    {
+        get
+        {
+            if (!Status.IsActive)
+            {
+                return string.Empty;
+            }
+
+            var names = string.Join(", ", Status.OnlinePlayers.Select(p => p.Name));
+            var loading = Status.PlayerCount - Status.OnlinePlayers.Count;
+            return loading <= 0 ? names
+                : names.Length == 0 ? $"{loading} entrando…"
+                : $"{names} + {loading} entrando…";
+        }
+    }
+
     public void StartClock()
     {
         _clock ??= Ui.CreateTimer(TimeSpan.FromSeconds(1), UpdateClock);
@@ -170,6 +188,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         OnPropertyChanged(nameof(JoinCodeText));
         OnPropertyChanged(nameof(AddressText));
         OnPropertyChanged(nameof(PlayersText));
+        OnPropertyChanged(nameof(OnlineNamesText));
         UpdateClock();
 
         StartCommand.NotifyCanExecuteChanged();

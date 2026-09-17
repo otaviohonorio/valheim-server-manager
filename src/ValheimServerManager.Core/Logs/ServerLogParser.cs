@@ -15,6 +15,18 @@ public enum ServerLogEventKind
     PublicAddress,
     PlayerCount,
     PlayerSpawned,
+
+    /// <summary>A client finished connecting; <see cref="ServerLogEvent.Text"/> is its platform id (<c>Steam_…</c>).</summary>
+    PlayerConnected,
+
+    /// <summary>The character died (<c>ZDOID 0:0</c>); <see cref="ServerLogEvent.Text"/> is its name.</summary>
+    PlayerDied,
+
+    /// <summary>The server dropped objects of a gone peer; <see cref="ServerLogEvent.Count"/> is the peer's owner id.</summary>
+    PlayerLeft,
+
+    /// <summary>A Steam socket closed (no crossplay); <see cref="ServerLogEvent.Text"/> is the platform id.</summary>
+    PlayerDisconnected,
     SaveStarted,
     SaveCompleted,
     OrphanRemoved,
@@ -59,8 +71,20 @@ public static partial class ServerLogParser
     [GeneratedRegex(@"(?:now|is active with) (?<n>\d+) player\(s\)", RegexOptions.CultureInvariant)]
     private static partial Regex PlayerCountRegex();
 
-    [GeneratedRegex(@"Got character ZDOID from (?<name>.+?) :", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"Got character ZDOID from (?<name>.+?) : (?<owner>-?\d+):(?<id>\d+)", RegexOptions.CultureInvariant)]
     private static partial Regex PlayerSpawnedRegex();
+
+    [GeneratedRegex(@"received local Platform ID (?<pid>\S+)", RegexOptions.CultureInvariant)]
+    private static partial Regex PlatformIdRegex();
+
+    [GeneratedRegex(@"^Got connection SteamID (?<id>\d+)", RegexOptions.CultureInvariant)]
+    private static partial Regex SteamConnectionRegex();
+
+    [GeneratedRegex(@"^Closing socket (?<id>\d{17})\s*$", RegexOptions.CultureInvariant)]
+    private static partial Regex SteamClosedRegex();
+
+    [GeneratedRegex(@"^Destroying abandoned non persistent zdo -?\d+:\d+ owner (?<owner>-?\d+)", RegexOptions.CultureInvariant)]
+    private static partial Regex AbandonedRegex();
 
     [GeneratedRegex(@"World save \(1/5\).*=> Save number (?<n>\d+)", RegexOptions.CultureInvariant)]
     private static partial Regex SaveStartedRegex();
@@ -153,7 +177,33 @@ public static partial class ServerLogParser
 
         if ((m = PlayerSpawnedRegex().Match(message)).Success)
         {
-            return new(ServerLogEventKind.PlayerSpawned, ts, line) { Text = m.Groups["name"].Value };
+            var owner = long.Parse(m.Groups["owner"].Value, CultureInfo.InvariantCulture);
+            return owner == 0
+                ? new(ServerLogEventKind.PlayerDied, ts, line) { Text = m.Groups["name"].Value }
+                : new(ServerLogEventKind.PlayerSpawned, ts, line) { Text = m.Groups["name"].Value, Count = owner };
+        }
+
+        if ((m = PlatformIdRegex().Match(message)).Success)
+        {
+            return new(ServerLogEventKind.PlayerConnected, ts, line) { Text = m.Groups["pid"].Value };
+        }
+
+        if ((m = SteamConnectionRegex().Match(message)).Success)
+        {
+            return new(ServerLogEventKind.PlayerConnected, ts, line) { Text = "Steam_" + m.Groups["id"].Value };
+        }
+
+        if ((m = SteamClosedRegex().Match(message)).Success)
+        {
+            return new(ServerLogEventKind.PlayerDisconnected, ts, line) { Text = "Steam_" + m.Groups["id"].Value };
+        }
+
+        if ((m = AbandonedRegex().Match(message)).Success)
+        {
+            return new(ServerLogEventKind.PlayerLeft, ts, line)
+            {
+                Count = long.Parse(m.Groups["owner"].Value, CultureInfo.InvariantCulture),
+            };
         }
 
         if ((m = OrphanRegex().Match(message)).Success)

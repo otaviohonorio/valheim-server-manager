@@ -190,6 +190,13 @@
                     <StackPanel Spacing="4">
                         <TextBlock Style="{StaticResource StatLabelStyle}" Text="Jogadores online" />
                         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.PlayersText, Mode=OneWay}" />
+                        <TextBlock
+                            AutomationProperties.Name="Quem está online"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            MaxLines="3"
+                            Text="{x:Bind ViewModel.OnlineNamesText, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis"
+                            TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
                 <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}">

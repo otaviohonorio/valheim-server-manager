@@ -23,7 +23,7 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 | **Backups verificados** | Antes de iniciar e depois de parar (e quando você quiser). Cada backup guarda um save completo, conferido por SHA-256, com manifesto e retenção. |
 | **Restauração segura** | Copia o mundo atual antes (ou guarda em quarentena), move a pasta antiga para `_substituidos`, nunca mistura arquivos. |
 | **Configuração completa** | Nome, senha (criptografada com DPAPI), porta, público, crossplay, pastas, intervalo de save, backups do jogo, presets e todos os modificadores. |
-| **Jogadores** | Admin, banidos e permitidos, com os nomes lidos do próprio mundo. |
+| **Jogadores** | Quem está online agora (nome, Steam ID e desde quando), avisos de entrada e saída, e admin, banidos e permitidos com os nomes lidos do próprio mundo. |
 | **Log ao vivo** | Eventos importantes filtrados, e o log de cada sessão arquivado. |
 | **Desligar o PC sem perder nada** | Se o Windows for desligado com servidores rodando, o app segura o desligamento por alguns segundos e salva os mundos antes. |
 | **Bandeja do sistema** | Fechar a janela com servidores rodando deixa o app na bandeja; notificações de jogadores e problemas aparecem por ali. |

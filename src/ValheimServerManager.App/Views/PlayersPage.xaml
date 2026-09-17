@@ -25,6 +25,31 @@
                 Message="Só quem estiver marcado como Permitido consegue entrar."
                 Severity="Warning" />
 
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Online agora" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasOnline), Mode=OneWay}" />
+            <Border Style="{StaticResource CardBorderStyle}" Padding="0" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasOnline), Mode=OneWay}">
+                <ItemsControl AutomationProperties.Name="Jogadores online agora" ItemsSource="{x:Bind ViewModel.Online}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:OnlinePlayerRow">
+                            <Grid Padding="20,10" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <PersonPicture Width="36" Height="36" Initials="{x:Bind Initials}" />
+                                    <Ellipse Width="12" Height="12" HorizontalAlignment="Right" VerticalAlignment="Bottom" Fill="{ThemeResource SystemFillColorSuccessBrush}" Stroke="{ThemeResource CardBackgroundFillColorDefaultBrush}" StrokeThickness="2" />
+                                </Grid>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
+                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Detail}" />
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Todos que já entraram neste mundo" />
             <Border Style="{StaticResource CardBorderStyle}" Padding="0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -63,7 +88,15 @@
                                     </Grid.ColumnDefinitions>
                                     <PersonPicture Width="36" Height="36" Initials="{x:Bind Initials}" />
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind Name}" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource SystemFillColorSuccessBrush}"
+                                                Style="{StaticResource CaptionTextBlockStyle}"
+                                                Text="● online"
+                                                Visibility="{x:Bind helpers:Ui.Visible(IsOnline), Mode=OneWay}" />
+                                        </StackPanel>
                                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" IsTextSelectionEnabled="True" Style="{StaticResource CaptionTextBlockStyle}" Text="{x:Bind Detail}" />
                                     </StackPanel>
                                     <CheckBox Grid.Column="2" MinWidth="0" AutomationProperties.Name="Admin" IsChecked="{x:Bind IsAdmin, Mode=TwoWay}" />

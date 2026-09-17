@@ -20,6 +20,14 @@ valheim_server -nographics -batchmode -name "<name>" -port <p> -world "<World>" 
   app id is 896660 (`steamapps\appmanifest_896660.acf`).
 - `-port p` uses UDP p and p+1 (not three ports in 1.0).
 - Password: ≥ 5 chars, must not be contained in the server name.
+- Who is online, from `server.log` (1.0.12):
+  - connect: `PlayFab socket with remote ID playfab/… received local Platform ID Steam_<id>` (crossplay)
+    or `Got connection SteamID <id>`; the character spawns a few seconds later, in the same order;
+  - spawn: `Got character ZDOID from <name> : <owner>:<n>` — `0:0` means the character **died**
+    (not a new join); a respawn repeats the same owner;
+  - leave: `Destroying abandoned non persistent zdo … owner <owner>` (crossplay) or
+    `Closing socket <steamid>`; `now 0 player(s)` clears everyone.
+  `ServerController` keeps `ServerStatus.OnlinePlayers` from these lines.
 - `-crossplay` adds the PlayFab relay and a join code (log: `registered with join code N`);
   no port forwarding, but no LAN IP join.
 

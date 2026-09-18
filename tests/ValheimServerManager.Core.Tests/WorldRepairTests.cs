@@ -299,7 +299,7 @@ public class WorldRepairTests
         var scan = WorldRepair.Scan(temp.Path, "Mundo");
 
         Assert.Equal(7, scan.Objects);
-        Assert.Equal(2, scan.ExtraCopies);
+        Assert.Equal(3, scan.ExtraCopies);   // the mushroom, the zone control and one of the stacked trees
         Assert.Equal(1, scan.ZonesWithDoubleSpawn);
         Assert.Equal(1, scan.ZonesToMark);
         Assert.Contains(("cogumelos", 1), scan.ByCategory);

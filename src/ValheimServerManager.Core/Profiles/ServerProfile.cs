@@ -53,6 +53,9 @@ public sealed class ServerProfile
     public bool BackupBeforeStart { get; set; } = true;
     public bool BackupAfterStop { get; set; } = true;
     public int AutoBackupRetention { get; set; } = 20;
+
+    /// <summary>After every stop, repair duplicated objects and clear cheat marks (see <see cref="Worlds.WorldRepair"/>).</summary>
+    public bool FixWorldAfterStop { get; set; } = true;
     public int StopTimeoutSeconds { get; set; } = 120;
 
     /// <summary>Advanced: appended verbatim. Must not repeat arguments the manager controls.</summary>

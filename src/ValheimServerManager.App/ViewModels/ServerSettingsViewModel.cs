@@ -192,6 +192,8 @@ public sealed partial class ServerSettingsViewModel : ProfileEditorViewModel
     [ObservableProperty] public partial double GameBackupLongHours { get; set; } = 12;
     [ObservableProperty] public partial bool BackupBeforeStart { get; set; }
     [ObservableProperty] public partial bool BackupAfterStop { get; set; }
+
+    [ObservableProperty] public partial bool FixWorldAfterStop { get; set; }
     [ObservableProperty] public partial double AutoBackupRetention { get; set; } = 20;
     [ObservableProperty] public partial double StopTimeoutSeconds { get; set; } = 120;
     [ObservableProperty] public partial string ExtraArguments { get; set; } = string.Empty;
@@ -230,6 +232,7 @@ public sealed partial class ServerSettingsViewModel : ProfileEditorViewModel
         GameBackupLongHours = p.GameBackupLongSeconds / 3600.0;
         BackupBeforeStart = p.BackupBeforeStart;
         BackupAfterStop = p.BackupAfterStop;
+        FixWorldAfterStop = p.FixWorldAfterStop;
         AutoBackupRetention = p.AutoBackupRetention;
         StopTimeoutSeconds = p.StopTimeoutSeconds;
         ExtraArguments = p.ExtraArguments;
@@ -253,6 +256,7 @@ public sealed partial class ServerSettingsViewModel : ProfileEditorViewModel
         p.GameBackupLongSeconds = SafeInt(GameBackupLongHours * 3600, p.GameBackupLongSeconds);
         p.BackupBeforeStart = BackupBeforeStart;
         p.BackupAfterStop = BackupAfterStop;
+        p.FixWorldAfterStop = FixWorldAfterStop;
         p.AutoBackupRetention = SafeInt(AutoBackupRetention, p.AutoBackupRetention);
         p.StopTimeoutSeconds = SafeInt(StopTimeoutSeconds, p.StopTimeoutSeconds);
         p.ExtraArguments = ExtraArguments.Trim();

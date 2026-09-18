@@ -64,6 +64,9 @@ public static class ProfileSummary
             new("Opções do mundo", options.Count == 0 ? "nenhuma" : string.Join(" · ", options), WorldSection, options.Count > 0),
             new("Acesso", string.Join(" · ", access), ServerSection, false),
             new("Saves", $"a cada {Interval(profile.SaveIntervalSeconds)} · {backups}", ServerSection, !profile.BackupBeforeStart || !profile.BackupAfterStop),
+            new("Manutenção", profile.FixWorldAfterStop
+                ? "corrige duplicados e marcas ao parar"
+                : "desligada (o mundo não é corrigido ao parar)", ServerSection, !profile.FixWorldAfterStop),
         };
 
         if (!string.IsNullOrWhiteSpace(profile.ExtraArguments))

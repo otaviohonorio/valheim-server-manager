@@ -175,11 +175,34 @@ public static class WorldRepair
 
         // 2. Locations placed again with another rotation, and what they spawned around them.
         var kept = all.Where(r => !removed.Contains((r.Chunk, r.Index))).ToList();
+
         foreach (var r in RotatedLocationCopies(chunks, kept))
         {
             if (removed.Add((r.Chunk, r.Index)))
             {
                 Count(extras, r.Obj.Prefab == LocationProxyPrefab ? "entradas e estruturas" : "conteúdo de ruínas e locais repetidos");
+            }
+        }
+
+        // 3. Objects on the very same spot with the same data but another rotation: one of them is
+        //    invisible under the other and has to be chopped or mined a second time.
+        var stacked = new Dictionary<(int, float, float, float, string), int>();
+        foreach (var r in all)
+        {
+            if (removed.Contains((r.Chunk, r.Index)) || IsPlayerMade(r.Obj))
+            {
+                continue;
+            }
+
+            var key = (r.Obj.Prefab, r.Obj.X, r.Obj.Y, r.Obj.Z, Convert.ToHexString(chunks[r.Chunk].File.ExtraData(r.Obj)));
+            if (stacked.TryGetValue(key, out var first) && first != r.Index)
+            {
+                removed.Add((r.Chunk, r.Index));
+                Count(extras, "objetos empilhados no mesmo ponto");
+            }
+            else
+            {
+                stacked[key] = r.Index;
             }
         }
 

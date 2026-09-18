@@ -1186,6 +1186,50 @@ public sealed class ServerController : IAsyncDisposable
         {
             _logger.LogError(ex, "Backup depois de parar falhou");
             Raise(AlertLevel.Error, "Backup depois de parar falhou", ex.Message);
+            return;
+        }
+
+        await FixWorldAsync(profile).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Keeps the world from drifting back into the two problems it had: objects the game generated
+    /// twice and items marked as made with cheats. Runs on the world the post-stop backup just saved.
+    /// </summary>
+    private async Task FixWorldAsync(ServerProfile profile)
+    {
+        if (!profile.FixWorldAfterStop)
+        {
+            return;
+        }
+
+        try
+        {
+            var repaired = await Task.Run(() => WorldRepair.Scan(profile.SaveDirectory, profile.WorldName) is { NeedsRepair: true }
+                ? WorldRepair.Repair(profile.SaveDirectory, profile.WorldName)
+                : null).ConfigureAwait(false);
+            if (repaired is { } r)
+            {
+                var message = $"Manutenção: {r.RemovedObjects:N0} objetos duplicados removidos e {r.ZonesMarked} regiões protegidas.";
+                AddActivity(ActivityKind.Save, message);
+                Raise(AlertLevel.Info, "Mundo corrigido depois de parar", message);
+            }
+
+            var cleaned = await Task.Run(() => WorldCheatMarks.Scan(profile.SaveDirectory, profile.WorldName) is { NeedsCleaning: true }
+                ? WorldCheatMarks.Clean(profile.SaveDirectory, profile.WorldName)
+                : null).ConfigureAwait(false);
+            if (cleaned is { } c)
+            {
+                var message = $"Manutenção: marca de trapaça removida de {c.ClearedObjects:N0} objetos e {c.ClearedItems:N0} itens.";
+                AddActivity(ActivityKind.Save, message);
+                Raise(AlertLevel.Info, "Marcas removidas depois de parar", message);
+            }
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            _logger.LogError(ex, "Manutenção do mundo depois de parar falhou");
+            Raise(AlertLevel.Warning, "Manutenção do mundo não foi feita",
+                "O mundo continua como estava; use \"Reparar mundo\" no Painel. " + ex.Message);
         }
     }
 

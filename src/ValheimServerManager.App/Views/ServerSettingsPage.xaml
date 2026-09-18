@@ -171,6 +171,9 @@
                     </toolkit:SettingsCard.HeaderIcon>
                     <ToggleSwitch AutomationProperties.Name="Backup depois de parar" IsOn="{x:Bind ViewModel.BackupAfterStop, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
+                <toolkit:SettingsCard Description="Depois de parar, remove objetos que o jogo gerou duas vezes e a marca de &quot;feito com trapaça&quot; dos itens. O backup feito antes disso fica na tela Backups." Header="Corrigir o mundo ao parar">
+                    <ToggleSwitch AutomationProperties.Name="Corrigir o mundo ao parar" IsOn="{x:Bind ViewModel.FixWorldAfterStop, Mode=TwoWay}" />
+                </toolkit:SettingsCard>
                 <toolkit:SettingsCard Description="Quantos backups automáticos manter por mundo. Backups manuais nunca são apagados sozinhos." Header="Guardar backups automáticos">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE81C;" />

@@ -47,7 +47,12 @@ valheim_server -nographics -batchmode -name "<name>" -port <p> -world "<World>" 
   and cooking still cost. Achievements are blocked while it is active (temporary).
 - Console cheats (`devcommands`, `god`, `fly`, `debugmode`) do not work on a dedicated server
   without the BepInEx mod *Server Devcommands*. There is no per-player free-build in vanilla.
-- Cheat flag: using most devcommands flags the character **and** the world permanently.
+- Cheat flag: using most devcommands flags the character **and** the world permanently. Marked
+  items never stack with unmarked copies — see the save-format skill.
+- On a **dedicated server** the console cannot run cheat commands at all: `Terminal.IsCheatsEnabled`
+  returns `m_cheat && ZNet.instance.IsServer()`, so a connected player is never "the server", and
+  being admin does not change it (admin only unlocks the admin commands: kick, ban, save, …).
+  Non-cheat commands still run, e.g. `yesiuseddevcommandsbutiwantmyachievementsanyway`.
   Since 1.0.12, `yesiuseddevcommandsbutiwantmyachievementsanyway 1` (after `devcommands`, in
   single player) clears the character flag.
 - Admin/ban/allow lists (`adminlist.txt`, `bannedlist.txt`, `permittedlist.txt`) live in the

@@ -147,6 +147,18 @@
                 </InfoBar.ActionButton>
             </InfoBar>
             <InfoBar
+                Title="Itens marcados como feitos com trapaça"
+                AutomationProperties.Name="Itens marcados como feitos com trapaça"
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.HasCheatMarks, Mode=OneWay}"
+                Visibility="{x:Bind helpers:Ui.Visible(ViewModel.HasCheatMarks), Mode=OneWay}"
+                Message="{x:Bind ViewModel.CheatMarksText, Mode=OneWay}"
+                Severity="Warning">
+                <InfoBar.ActionButton>
+                    <Button AutomationProperties.Name="Limpar marcas" Command="{x:Bind ViewModel.CleanCheatMarksCommand}" Content="Limpar marcas" />
+                </InfoBar.ActionButton>
+            </InfoBar>
+            <InfoBar
                 Title="Última parada"
                 IsClosable="False"
                 IsOpen="{x:Bind ViewModel.LastExitWasBad, Mode=OneWay}"

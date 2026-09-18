@@ -38,6 +38,7 @@ internal static class CliApp
         root.Subcommands.Add(InspectCommand());
         root.Subcommands.Add(RebuildIndexCommand());
         root.Subcommands.Add(RepairWorldCommand());
+        root.Subcommands.Add(CleanCheatMarksCommand());
         root.Subcommands.Add(EndToEndTest.Command());
         return await root.Parse(args).InvokeAsync().ConfigureAwait(false);
     }
@@ -442,10 +443,12 @@ internal static class CliApp
         var dir = new Argument<DirectoryInfo>("pasta-do-mundo") { Description = "Pasta do mundo (a que contém _main.N.*)." };
         var pieces = new Option<bool>("--pieces") { Description = "Procura peças construídas por jogadores." };
         var duplicates = new Option<bool>("--duplicates") { Description = "Procura objetos duplicados e zonas que o jogo vai gerar de novo." };
+        var cheats = new Option<bool>("--cheats") { Description = "Conta objetos e itens com a marca de \"feito com trapaça\"." };
         var command = new Command("inspect", "Confere a integridade de uma pasta de mundo.");
         command.Arguments.Add(dir);
         command.Options.Add(pieces);
         command.Options.Add(duplicates);
+        command.Options.Add(cheats);
         command.SetAction(parse =>
         {
             var report = WorldInspector.InspectDirectory(parse.GetValue(dir)!.FullName);
@@ -476,6 +479,13 @@ internal static class CliApp
             if (parse.GetValue(duplicates) && report.IsHealthy)
             {
                 PrintDuplicates(WorldRepair.ScanDirectory(report.Directory, report.WorldName));
+            }
+
+            if (parse.GetValue(cheats) && report.IsHealthy)
+            {
+                var marks = WorldCheatMarks.ScanDirectory(report.Directory, report.WorldName);
+                Console.WriteLine($"  marcas de trapaça: {marks.MarkedPieces:N0} peças construídas, {marks.MarkedOthers:N0} outros objetos, " +
+                                  $"{marks.MarkedItems:N0} itens guardados");
             }
 
             return report.HasErrors ? 1 : 0;
@@ -510,6 +520,32 @@ internal static class CliApp
             var profile = controller.Profile;
             PrintDuplicates(WorldRepair.Scan(profile.SaveDirectory, profile.WorldName));
             var result = await controller.RepairWorldAsync(ct).ConfigureAwait(false);
+            Console.WriteLine(result.Message);
+            foreach (var check in result.Checks)
+            {
+                Console.WriteLine($"  [{check.Level}] {check.Message}");
+            }
+
+            return result.Success ? 0 : 1;
+        });
+        return command;
+    }
+
+    private static Command CleanCheatMarksCommand()
+    {
+        var command = new Command("clean-cheat-marks",
+            "Remove a marca de \"feito com trapaça\" do mundo, para os itens voltarem a empilhar (servidor parado; faz backup antes).");
+        command.Options.Add(ProfileOption);
+        command.SetAction(async (parse, ct) =>
+        {
+            await using var manager = CreateManager(parse.GetValue(DataDirOption));
+            if (Resolve(manager, parse.GetValue(ProfileOption)) is not { } controller)
+            {
+                return 2;
+            }
+
+            await manager.RefreshRunningServersAsync(ct).ConfigureAwait(false);
+            var result = await controller.CleanCheatMarksAsync(ct).ConfigureAwait(false);
             Console.WriteLine(result.Message);
             foreach (var check in result.Checks)
             {

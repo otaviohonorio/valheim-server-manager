@@ -38,7 +38,9 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     public void RequestNavigation(string section) => NavigateRequested?.Invoke(this, section);
 
     private int _duplicateScan;
+    private int _cheatScan;
     private WorldDuplicateReport? _duplicates;
+    private CheatMarkReport? _cheatMarks;
 
     /// <summary>The world has copies placed by a second generation, or zones that would be generated again.</summary>
     [ObservableProperty]
@@ -46,6 +48,13 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
     [ObservableProperty]
     public partial string DuplicatesText { get; set; } = string.Empty;
+
+    /// <summary>The world has objects or items marked by the game as made with cheats.</summary>
+    [ObservableProperty]
+    public partial bool HasCheatMarks { get; set; }
+
+    [ObservableProperty]
+    public partial string CheatMarksText { get; set; } = string.Empty;
 
     [ObservableProperty]
     public partial string Title { get; set; } = string.Empty;
@@ -205,6 +214,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         StopCommand.NotifyCanExecuteChanged();
         RestartCommand.NotifyCanExecuteChanged();
         RepairWorldCommand.NotifyCanExecuteChanged();
+        CleanCheatMarksCommand.NotifyCanExecuteChanged();
         if (status.State == ServerRunState.Stopped && !IsBusy)
         {
             RefreshWorld();
@@ -326,10 +336,12 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         if (report.IsHealthy)
         {
             _ = ScanDuplicatesAsync(profile.SaveDirectory, profile.WorldName);
+            _ = ScanCheatMarksAsync(profile.SaveDirectory, profile.WorldName);
         }
         else
         {
             ShowDuplicates(null);
+            ShowCheatMarks(null);
         }
 
         WorldSummary = report.Metadata is { } meta
@@ -631,6 +643,97 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             else
             {
                 await _dialogs.ShowChecksAsync("O mundo não foi reparado", result.Message, result.Checks, false, string.Empty);
+            }
+        });
+
+        RefreshWorld();
+    }
+
+    private async Task ScanCheatMarksAsync(string saveDirectory, string worldName)
+    {
+        var version = ++_cheatScan;
+        CheatMarkReport? scan = null;
+        try
+        {
+            scan = await Task.Run(() => WorldCheatMarks.Scan(saveDirectory, worldName));
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            // The health check above already reports unreadable worlds.
+        }
+
+        if (version == _cheatScan)
+        {
+            ShowCheatMarks(scan);
+        }
+    }
+
+    private void ShowCheatMarks(CheatMarkReport? scan)
+    {
+        _cheatMarks = scan is { NeedsCleaning: true } ? scan : null;
+        HasCheatMarks = _cheatMarks is not null;
+        if (_cheatMarks is { } marks)
+        {
+            var parts = new List<string>();
+            if (marks.MarkedPieces > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(marks.MarkedPieces)} peças construídas");
+            }
+
+            if (marks.MarkedItems > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(marks.MarkedItems)} itens em baús e no chão");
+            }
+
+            if (marks.MarkedOthers > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(marks.MarkedOthers)} outros objetos");
+            }
+
+            CheatMarksText = string.Join(", ", parts) +
+                " estão marcados pelo jogo como \"feitos com trapaça\". Item marcado nunca se junta a um igual sem marca, " +
+                "e desmontar uma peça marcada devolve material marcado. " +
+                (Status.IsActive ? "Pare o servidor para limpar." : "A limpeza faz backup antes e não altera o que existe, só tira a marca.");
+        }
+        else
+        {
+            CheatMarksText = string.Empty;
+        }
+
+        CleanCheatMarksCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanCleanCheatMarks() => HasCheatMarks && Status.State is ServerRunState.Stopped or ServerRunState.Crashed && !IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanCleanCheatMarks))]
+    private async Task CleanCheatMarksAsync()
+    {
+        if (Controller is not { } controller || _cheatMarks is not { } marks)
+        {
+            return;
+        }
+
+        var message =
+            $"Tira a marca de \"feito com trapaça\" de {Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers)} objetos e " +
+            $"{Helpers.Ui.Number(marks.MarkedItems)} itens do mundo.\n\n" +
+            "Nada mais muda: os itens continuam com a mesma quantidade, qualidade e dono. Depois disso eles voltam a empilhar " +
+            "e as conquistas deixam de ser bloqueadas por causa deles. O que estiver na mochila dos jogadores não é alterado; " +
+            "guarde num baú para limpar também. Antes da limpeza é feito um backup.";
+        if (!await _dialogs.ConfirmAsync("Limpar marcas de trapaça?", message, "Limpar"))
+        {
+            return;
+        }
+
+        await RunBusyAsync("Limpando as marcas…", async () =>
+        {
+            var result = await controller.CleanCheatMarksAsync();
+            if (result.Success)
+            {
+                await _dialogs.AlertAsync("Marcas removidas", result.Message);
+            }
+            else
+            {
+                await _dialogs.ShowChecksAsync("As marcas não foram removidas", result.Message, result.Checks, false, string.Empty);
             }
         });
 

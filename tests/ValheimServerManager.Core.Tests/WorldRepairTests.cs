@@ -14,16 +14,51 @@ internal static class Zdo
     public static readonly int Proxy = StableHash.Compute("LocationProxy");
     public static readonly int ZoneCtrl = StableHash.Compute("_ZoneCtrl");
 
+    /// <summary>Items as a container stores them (<c>Inventory.Save</c>, version 109).</summary>
+    public static byte[] Inventory(params (int Prefab, int Stack, bool Cheated, string? Crafter)[] items)
+    {
+        using var ms = new MemoryStream();
+        using var w = new BinaryWriter(ms, Encoding.UTF8);
+        w.Write(109);
+        w.Write((ushort)items.Length);
+        foreach (var (prefab, stack, cheated, crafter) in items)
+        {
+            var flags = 0x40 | (stack != 1 ? 8 : 0) | (crafter is not null ? 0x20 : 0);
+            w.Write(10000);              // durability
+            w.Write((byte)0);            // grid x
+            w.Write((byte)0);            // grid y
+            w.Write((byte)0);            // world level
+            w.Write((byte)flags);
+            if (stack != 1)
+            {
+                w.Write((ushort)stack);
+            }
+
+            if (crafter is not null)
+            {
+                w.Write(12345L);
+                w.Write(crafter);
+            }
+
+            w.Write(prefab);
+            w.Write((byte)(cheated ? 1 : 0));
+        }
+
+        w.Flush();
+        return ms.ToArray();
+    }
+
     public static byte[] Make(int prefab, float x, float y, float z, float? yaw = null, int[]? ints = null,
         string? text = null, byte[]? blob = null, bool connection = false, bool smallPosition = false, bool tilted = false,
-        long? creator = null)
+        long? creator = null, bool cheated = false, byte[]? items = null, byte[]? itemData = null)
     {
         using var ms = new MemoryStream();
         using var w = new BinaryWriter(ms, Encoding.UTF8);
         ushort flags = 0x100;
         if (connection) flags |= 0x01;
-        if (ints is not null) flags |= 0x10;
+        if (ints is not null || cheated) flags |= 0x10;
         if (creator is not null) flags |= 0x20;
+        if (items is not null || itemData is not null) flags |= 0x80;
         if (text is not null) flags |= 0x40;
         if (blob is not null) flags |= 0x80;
         if (yaw is not null || tilted) flags |= 0x1000;
@@ -59,13 +94,19 @@ internal static class Zdo
             w.Write(12345);
         }
 
-        if (ints is not null)
+        if (ints is not null || cheated)
         {
-            w.Write((byte)ints.Length);
-            for (var i = 0; i < ints.Length; i++)
+            w.Write((byte)((ints?.Length ?? 0) + (cheated ? 1 : 0)));
+            for (var i = 0; i < (ints?.Length ?? 0); i++)
             {
                 w.Write(1000 + i);
-                w.Write(ints[i]);
+                w.Write(ints![i]);
+            }
+
+            if (cheated)
+            {
+                w.Write(StableHash.Compute("cheated"));
+                w.Write(1);
             }
         }
 
@@ -85,12 +126,29 @@ internal static class Zdo
             w.Write(text);
         }
 
-        if (blob is not null)
+        if (blob is not null || items is not null || itemData is not null)
         {
-            w.Write((byte)1);
-            w.Write(88);
-            w.Write(blob.Length);
-            w.Write(blob);
+            w.Write((byte)((blob is null ? 0 : 1) + (items is null ? 0 : 1) + (itemData is null ? 0 : 1)));
+            if (blob is not null)
+            {
+                w.Write(88);
+                w.Write(blob.Length);
+                w.Write(blob);
+            }
+
+            if (items is not null)
+            {
+                w.Write(StableHash.Compute("items"));
+                w.Write(items.Length);
+                w.Write(items);
+            }
+
+            if (itemData is not null)
+            {
+                w.Write(StableHash.Compute("itemData"));
+                w.Write(itemData.Length);
+                w.Write(itemData);
+            }
         }
 
         w.Flush();
@@ -382,5 +440,92 @@ public class WorldRepairTests
         }
 
         return count;
+    }
+}
+
+public class WorldCheatMarkTests
+{
+    private static readonly int Wall = StableHash.Compute("woodwall");
+    private static readonly int Creature = StableHash.Compute("Greydwarf");
+
+    /// <summary>A dropped item is stored as "u8 version | item", an inventory as "i32 version | u16 count | items".</summary>
+    private static byte[] DroppedItem(int prefab, bool cheated) =>
+        [109, .. Zdo.Inventory((prefab, 3, cheated, "Bjorn"))[6..]];
+
+    private static byte[] Chest() => Zdo.Inventory(
+        (Zdo.Mushroom, 11, true, null), (Zdo.Mushroom, 1, false, null), (Zdo.Stone, 20, true, "Bjorn"));
+
+    [Fact]
+    public void Scan_counts_marked_pieces_creatures_and_items()
+    {
+        using var temp = new TempDir();
+        Zdo.WriteWorld(temp.Path, 4,
+        [
+            Zdo.Make(Zdo.ZoneCtrl, 0, 0, 0),
+            Zdo.Make(Wall, 1, 1, 1, creator: 7, cheated: true),
+            Zdo.Make(Wall, 2, 1, 1, creator: 7),
+            Zdo.Make(Creature, 3, 1, 1, cheated: true),
+            Zdo.Make(Zdo.Chest, 4, 1, 1, creator: 7, items: Chest()),
+            Zdo.Make(Zdo.Tree, 5, 1, 1, itemData: DroppedItem(Zdo.Stone, cheated: true)),
+        ], [(0, 0)]);
+
+        var scan = WorldCheatMarks.Scan(temp.Path, "Mundo");
+
+        Assert.Equal((1, 1, 3), (scan.MarkedPieces, scan.MarkedOthers, scan.MarkedItems));
+        Assert.True(scan.NeedsCleaning);
+    }
+
+    [Fact]
+    public void Clean_clears_every_mark_and_changes_nothing_else()
+    {
+        using var temp = new TempDir();
+        var dir = Zdo.WriteWorld(temp.Path, 4,
+        [
+            Zdo.Make(Zdo.ZoneCtrl, 0, 0, 0),
+            Zdo.Make(Wall, 1, 1, 1, creator: 7, cheated: true),
+            Zdo.Make(Zdo.Chest, 4, 1, 1, creator: 7, items: Chest()),
+            Zdo.Make(Zdo.Tree, 5, 1, 1, itemData: DroppedItem(Zdo.Stone, cheated: true)),
+        ], [(0, 0)]);
+        var chunk = Path.Combine(dir, WorldInspector.Inspect(temp.Path, "Mundo").Index!.Entries[0].FileName);
+        var before = File.ReadAllBytes(chunk);
+
+        var result = WorldCheatMarks.Clean(temp.Path, "Mundo");
+
+        Assert.Equal((4, 5, 1, 3), (result.OldSaveNumber, result.NewSaveNumber, result.ClearedObjects, result.ClearedItems));
+        var report = WorldInspector.Inspect(temp.Path, "Mundo");
+        var after = File.ReadAllBytes(Path.Combine(dir, report.Index!.Entries[0].FileName));
+        Assert.Equal(before.Length, after.Length);
+        // One byte of the piece's int plus one flag byte per item, and every change only clears bit 0.
+        Assert.Equal(4, before.Zip(after).Count(p => p.First != p.Second));
+        Assert.Equal(4, CountClearedBits(before, after));
+        Assert.Equal(before, File.ReadAllBytes(chunk));                       // save 4 untouched
+        Assert.False(WorldCheatMarks.Scan(temp.Path, "Mundo").NeedsCleaning);
+        Assert.Equal(5, WorldCheatMarks.Clean(temp.Path, "Mundo").NewSaveNumber);
+    }
+
+    [Fact]
+    public void Leaves_a_clean_world_and_its_files_alone()
+    {
+        using var temp = new TempDir();
+        var dir = Zdo.WriteWorld(temp.Path, 2, [Zdo.Make(Zdo.ZoneCtrl, 0, 0, 0), Zdo.Make(Zdo.Tree, 1, 1, 1)], [(0, 0)]);
+
+        var result = WorldCheatMarks.Clean(temp.Path, "Mundo");
+
+        Assert.Equal((2, 2, 0, 0), (result.OldSaveNumber, result.NewSaveNumber, result.ClearedObjects, result.ClearedItems));
+        Assert.Equal(4, Directory.GetFiles(dir, "_main.*").Length);
+    }
+
+    private static int CountClearedBits(byte[] before, byte[] after)
+    {
+        var bits = 0;
+        for (var i = 0; i < before.Length; i++)
+        {
+            if ((before[i] ^ after[i]) == 1 && (before[i] & 1) == 1)
+            {
+                bits++;
+            }
+        }
+
+        return bits;
     }
 }

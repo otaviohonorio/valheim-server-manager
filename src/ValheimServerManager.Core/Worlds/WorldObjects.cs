@@ -16,6 +16,12 @@ public readonly record struct WorldObject(int Prefab, float X, float Y, float Z,
     /// <summary>Built by a player: the game stores the builder in the <c>creator</c> long.</summary>
     public bool HasCreator { get; init; }
 
+    /// <summary>Offsets of the <c>cheated</c>/<c>cheatedQueued</c> int values; empty when the object has none.</summary>
+    public IReadOnlyList<int> CheatFlagOffsets { get; init; } = [];
+
+    /// <summary>A stored inventory (<c>items</c>) or a single dropped item (<c>itemData</c>), when present.</summary>
+    public StoredItems? Inventory { get; init; }
+
     /// <summary>Rotation around the vertical axis in degrees, or null when the object is also tilted.</summary>
     public float? Yaw
     {
@@ -42,6 +48,12 @@ public readonly record struct WorldObject(int Prefab, float X, float Y, float Z,
     public (short X, short Z) Zone =>
         ((short)Math.Floor((X + 32.0) / 64.0), (short)Math.Floor((Z + 32.0) / 64.0));
 }
+
+/// <summary>Items stored in an object: a container's inventory or one dropped item.</summary>
+/// <param name="Offset">Where the package starts inside the chunk file.</param>
+/// <param name="Length">Package size in bytes.</param>
+/// <param name="SingleItem">True for a dropped item (<c>itemData</c>), false for an inventory (<c>items</c>).</param>
+public readonly record struct StoredItems(int Offset, int Length, bool SingleItem);
 
 /// <summary>
 /// A <c>.chunk</c> file: <c>i16 version | i32 count | ZDO[count]</c>, as written by
@@ -115,6 +127,12 @@ public sealed class ChunkObjects
         }
     }
 
+    /// <summary>A copy of the whole file, for editing objects in place.</summary>
+    public byte[] CopyBytes() => (byte[])Data.Clone();
+
+    /// <summary>Raw bytes of the file, for reading a value at a known offset.</summary>
+    public ReadOnlySpan<byte> Bytes(int offset, int length) => Data.AsSpan(offset, length);
+
     /// <summary>The object's key/value data (everything after position, prefab and rotation).</summary>
     public ReadOnlySpan<byte> ExtraData(WorldObject obj) =>
         Data.AsSpan(obj.Offset + obj.HeaderLength, obj.Length - obj.HeaderLength);
@@ -171,6 +189,8 @@ public sealed class ChunkObjects
 
         var headerLength = o - start;
         var hasCreator = false;
+        int[] cheats = [];
+        StoredItems? inventory = null;
         if ((flags & 0xFF) != 0)
         {
             if ((flags & Connections) != 0)
@@ -181,10 +201,20 @@ public sealed class ChunkObjects
             SkipMap(d, ref o, flags, Floats, 4);
             SkipMap(d, ref o, flags, Vec3s, 12);
             SkipMap(d, ref o, flags, Quaternions, 16);
+            if ((flags & Ints) != 0)
+            {
+                cheats = FindIntValues(d, o, CheatedKey, CheatedQueuedKey);
+            }
+
             SkipMap(d, ref o, flags, Ints, 4);
             hasCreator = (flags & Longs) != 0 && MapHasKey(d, o, flags, CreatorKey);
             SkipMap(d, ref o, flags, Longs, 8);
             SkipMap(d, ref o, flags, Strings, StringValue);
+            if ((flags & ByteArrays) != 0)
+            {
+                inventory = FindByteArray(d, o, ItemsKey, ItemDataKey);
+            }
+
             SkipMap(d, ref o, flags, ByteArrays, ByteArrayValue);
         }
 
@@ -193,10 +223,65 @@ public sealed class ChunkObjects
             throw new InvalidDataException("O chunk terminou no meio de um objeto.");
         }
 
-        return new WorldObject(prefab, x, y, z, rotation, start, o - start, headerLength) { HasCreator = hasCreator };
+        return new WorldObject(prefab, x, y, z, rotation, start, o - start, headerLength)
+        {
+            HasCreator = hasCreator,
+            CheatFlagOffsets = cheats,
+            Inventory = inventory,
+        };
     }
 
     private static readonly int CreatorKey = StableHash.Compute("creator");
+    private static readonly int CheatedKey = StableHash.Compute("cheated");
+    private static readonly int CheatedQueuedKey = StableHash.Compute("cheatedQueued");
+    private static readonly int ItemsKey = StableHash.Compute("items");
+    private static readonly int ItemDataKey = StableHash.Compute("itemData");
+
+    /// <summary>Offsets of the values of the given int keys, so they can be edited in place.</summary>
+    private static int[] FindIntValues(ReadOnlySpan<byte> d, int o, int keyA, int keyB)
+    {
+        var count = ReadCount(d, ref o);
+        List<int>? found = null;
+        for (var i = 0; i < count; i++, o += 8)
+        {
+            var key = BinaryPrimitives.ReadInt32LittleEndian(d[o..]);
+            if (key == keyA || key == keyB)
+            {
+                (found ??= []).Add(o + 4);
+            }
+        }
+
+        return found?.ToArray() ?? [];
+    }
+
+    private static StoredItems? FindByteArray(ReadOnlySpan<byte> d, int o, int inventoryKey, int singleItemKey)
+    {
+        var count = ReadCount(d, ref o);
+        for (var i = 0; i < count; i++)
+        {
+            var key = BinaryPrimitives.ReadInt32LittleEndian(d[o..]);
+            var length = BinaryPrimitives.ReadInt32LittleEndian(d[(o + 4)..]);
+            if (key == inventoryKey || key == singleItemKey)
+            {
+                return new StoredItems(o + 8, length, key == singleItemKey);
+            }
+
+            o += 8 + length;
+        }
+
+        return null;
+    }
+
+    private static int ReadCount(ReadOnlySpan<byte> d, ref int o)
+    {
+        int count = d[o++];
+        if ((count & 0x80) != 0)
+        {
+            count = ((count & 0x7F) << 8) | d[o++];
+        }
+
+        return count;
+    }
 
     /// <summary>Whether the long map starting at <paramref name="o"/> has <paramref name="key"/>.</summary>
     private static bool MapHasKey(ReadOnlySpan<byte> d, int o, ushort flags, int key)

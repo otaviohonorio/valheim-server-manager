@@ -25,6 +25,7 @@
 │            ChunkIndexRebuilder · PlayerBuildScanner          │
 │            WorldCreator (seed nova / cópia do último save)   │
 │            ChunkObjects · WorldDatabase · WorldRepair        │
+│            WorldCheatMarks · WorldSaveWriter                 │
 └──────────────────────────────────────────────────────────────┘
                │
                ▼

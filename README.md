@@ -30,6 +30,7 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 | **Criar servidores** | Assistente "Novo servidor": mundo novo com a seed que você escolher (ou aleatória), ou cópia de um mundo que você já joga — só o último save completo, conferido. |
 | **Vários servidores ao mesmo tempo** | Cada perfil tem seu mundo, pasta e porta, e vários podem rodar juntos. Travas impedem dois servidores no mesmo mundo/pasta ou na mesma porta (o Valheim usa a porta e a seguinte). Servidores abertos fora do app são detectados e podem ser adotados. |
 | **Reparo de mundo duplicado** | Detecta objetos que o jogo gerou duas vezes (itens que "voltam", minério que quebra duas vezes, inimigos em dobro) e zonas que ele ainda vai gerar de novo; o Painel avisa e repara com backup antes. |
+| **Marcas de trapaça** | Encontra o que o jogo marcou como "feito com trapaça" (itens marcados não empilham com os iguais) e tira a marca do mundo inteiro, sem alterar quantidades nem donos. |
 | **Diagnóstico** | Inspeção do save e contagem de peças construídas por jogadores (bancadas, baús, portais…). |
 
 ## Instalação
@@ -53,7 +54,8 @@ vsm start   -p "Meu servidor"     inicia com todas as verificações
 vsm stop    -p "Meu servidor"     Ctrl+C e espera o save
 vsm backup  -p "Meu servidor"     backup verificado (pode ser com o servidor rodando)
 vsm backups / vsm restore --backup <nome>
-vsm inspect <pasta-do-mundo> --pieces --duplicates
+vsm inspect <pasta-do-mundo> --pieces --duplicates --cheats
+vsm clean-cheat-marks -p "Meu servidor"   tira a marca de trapaça do mundo
 vsm repair-world -p "Meu servidor"   remove objetos duplicados (servidor parado; backup antes)
 vsm rebuild-index <pasta-do-mundo> --save-number N    recuperação de mundo
 vsm e2e ...                       teste de ponta a ponta com o servidor real

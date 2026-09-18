@@ -1239,6 +1239,56 @@ public sealed class ServerController : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Clears the "made with cheats" mark from the world so items stack again (see <see cref="WorldCheatMarks"/>).
+    /// Only with the server stopped; a backup is taken first.
+    /// </summary>
+    public async Task<OperationResult> CleanCheatMarksAsync(CancellationToken ct = default)
+    {
+        await _operation.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            var profile = Profile;
+            if (Status.IsActive)
+            {
+                return OperationResult.Fail("Pare o servidor antes de limpar as marcas.");
+            }
+
+            var inUse = Preflight(profile).Where(c => c.Code is "WORLD_IN_USE" or "ALREADY_RUNNING").ToArray();
+            if (inUse.Length > 0)
+            {
+                return OperationResult.Fail("O mundo está em uso por outro servidor.", inUse);
+            }
+
+            var scan = await Task.Run(() => WorldCheatMarks.Scan(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
+            if (!scan.NeedsCleaning)
+            {
+                return OperationResult.Ok("O mundo não tem itens nem objetos marcados.");
+            }
+
+            AddActivity(ActivityKind.Backup, "Fazendo backup antes de limpar as marcas…");
+            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, "antes de limpar marcas de trapaça", ct).ConfigureAwait(false);
+            RecordBackup(backup);
+
+            var result = await Task.Run(() => WorldCheatMarks.Clean(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
+            var message = $"Marcas removidas de {result.ClearedObjects:N0} objetos e {result.ClearedItems:N0} itens " +
+                          $"(save {result.OldSaveNumber} → {result.NewSaveNumber}). Backup: {backup.Name}.";
+            _logger.LogInformation("{Message}", message);
+            AddActivity(ActivityKind.Save, message);
+            Raise(AlertLevel.Success, "Marcas removidas", message);
+            return OperationResult.Ok(message);
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            _logger.LogError(ex, "Limpeza das marcas falhou");
+            return OperationResult.Fail("A limpeza não foi feita; o mundo continua como estava. " + ex.Message);
+        }
+        finally
+        {
+            _operation.Release();
+        }
+    }
+
     public void RecordBackup(BackupEntry backup)
     {
         ArgumentNullException.ThrowIfNull(backup);

@@ -73,6 +73,42 @@ maps             in the order above: count (1 byte, or 2 when the first has 0x80
 Player-built pieces carry a `creator` long (StableHash "creator"); generated objects never do —
 this is how to tell a base wall from a ruin wall of the same prefab.
 
+## Stored items (`Inventory.Save` / `ItemDrop.ItemData.Save`, item version 109)
+
+A container keeps its inventory in the byte array `items`, a dropped item keeps itself in
+`itemData`. Same item layout, different header: `i32 version | u16 count | items…` for a container,
+`u8 version | item` for a drop (a drop with 0 durability starts with the same four bytes as a
+container, so tell them apart by the ZDO key, never by the content).
+
+```
+i32 durability*100 | u8 grid x | u8 grid y | u8 world level | u8 flags
+flags: 1 picked up  2 equipped  4 quality (u16)  8 stack (u16)  0x10 variant (i32)
+       0x20 crafter (i64 id + string name)  0x40 prefab hash (i32)  0x80 custom data
+custom data: 1–2 byte pair count, then (string key, string value)…
+u8 last: bit 0 = cheated
+```
+
+## The "cheated" mark (why identical items stop stacking)
+
+`Inventory.FindFreeStackItem` only merges stacks with the same name, quality, **world level** and
+**cheated flag**, so a marked item never joins an unmarked one — the symptom players report.
+The game sets the mark on:
+
+- a piece placed with the console's `nocost` (`Player.PlacePiece` → ZDO `cheated`), and on anything
+  crafted at a station whose ZDO is marked;
+- items spawned with `spawn`, or crafted from marked materials;
+- **materials returned when a marked piece is dismantled or destroyed** (`Piece` drop code) — this
+  is how a base built with `nocost` keeps producing marked materials long afterwards;
+- creatures hit by a player with a marked damaging item, in god/ghost/fly mode, and their drops;
+- anything destroyed or mined with a marked tool equipped (`Destructible`, `MineRock`).
+
+The world modifier `nobuildcost` (the app's creative mode) does **not** mark anything: only the
+console cheat does. `yesiuseddevcommandsbutiwantmyachievementsanyway 1` sets the player key
+`bypasscheatchecks`, which stops new marks **for that player only** and does not clean what exists.
+`WorldCheatMarks` clears the mark for everyone: the ZDO int and one bit per stored item, patched in
+place so every other byte is preserved (`vsm inspect --cheats`, `vsm clean-cheat-marks`, app
+"Limpar marcas").
+
 ## `_main.N.db2`
 
 `i32 version | f64 net_time | i32 size | gzip(zone data) | RandEventSystem | PersistentEventSystem`.

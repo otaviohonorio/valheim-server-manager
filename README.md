@@ -30,7 +30,7 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 | **Criar servidores** | Assistente "Novo servidor": mundo novo com a seed que você escolher (ou aleatória), ou cópia de um mundo que você já joga — só o último save completo, conferido. |
 | **Vários servidores ao mesmo tempo** | Cada perfil tem seu mundo, pasta e porta, e vários podem rodar juntos. Travas impedem dois servidores no mesmo mundo/pasta ou na mesma porta (o Valheim usa a porta e a seguinte). Servidores abertos fora do app são detectados e podem ser adotados. |
 | **Reparo de mundo duplicado** | Detecta objetos que o jogo gerou duas vezes (itens que "voltam", minério que quebra duas vezes, inimigos em dobro) e zonas que ele ainda vai gerar de novo; o Painel avisa e repara com backup antes. |
-| **Manutenção automática** | A cada parada, o gerenciador confere o mundo e corrige sozinho: duplicados, regiões por marcar e marcas de trapaça. Também dá para rodar quando quiser, em Mundo → "Conferir e corrigir agora". |
+| **Manutenção automática** | A cada parada (inclusive no Reiniciar, antes de subir de novo), o gerenciador confere o mundo e corrige sozinho: duplicados, regiões por marcar e marcas de trapaça. Também dá para rodar quando quiser, em Mundo → "Conferir e corrigir agora". |
 | **Marcas de trapaça** | Encontra o que o jogo marcou como "feito com trapaça" (itens marcados não empilham com os iguais) e tira a marca do mundo inteiro, sem alterar quantidades nem donos. |
 | **Diagnóstico** | Inspeção do save e contagem de peças construídas por jogadores (bancadas, baús, portais…). |
 
@@ -53,6 +53,7 @@ vsm create  --name X --password Y [--seed S | --copy-world <pasta>] [--port N] [
 vsm status  -p "Meu servidor"     estado do servidor e do mundo
 vsm start   -p "Meu servidor"     inicia com todas as verificações
 vsm stop    -p "Meu servidor"     Ctrl+C e espera o save
+vsm restart -p "Meu servidor"     para, corrige o mundo e inicia de novo
 vsm backup  -p "Meu servidor"     backup verificado (pode ser com o servidor rodando)
 vsm backups / vsm restore --backup <nome>
 vsm inspect <pasta-do-mundo> --pieces --duplicates --cheats

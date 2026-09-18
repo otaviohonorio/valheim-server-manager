@@ -33,6 +33,7 @@ internal static class CliApp
         root.Subcommands.Add(StatusCommand());
         root.Subcommands.Add(StartCommand());
         root.Subcommands.Add(StopCommand());
+        root.Subcommands.Add(RestartCommand());
         root.Subcommands.Add(BackupCommand());
         root.Subcommands.Add(BackupsCommand());
         root.Subcommands.Add(RestoreCommand());
@@ -352,6 +353,41 @@ internal static class CliApp
             var result = await controller.StopAsync(ct).ConfigureAwait(false);
             Console.WriteLine(result.Message);
             return result.Success ? 0 : 1;
+        });
+        return command;
+    }
+
+    private static Command RestartCommand()
+    {
+        var yes = new Option<bool>("--yes", "-y") { Description = "Aceita avisos ao iniciar de novo." };
+        var command = new Command("restart", "Para com segurança, corrige o mundo e inicia de novo.");
+        command.Options.Add(ProfileOption);
+        command.Options.Add(yes);
+        command.SetAction(async (parse, ct) =>
+        {
+            await using var manager = CreateManager(parse.GetValue(DataDirOption));
+            if (Resolve(manager, parse.GetValue(ProfileOption)) is not { } controller)
+            {
+                return 2;
+            }
+
+            await manager.RefreshRunningServersAsync(ct).ConfigureAwait(false);
+            Follow(controller);
+            var result = await controller.RestartAsync(
+                parse.GetValue(yes) ? StartOptions.Confirmed : StartOptions.Default, ct).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                PrintChecks(result);
+                return result.NeedsConfirmation ? 3 : 1;
+            }
+
+            while (controller.Status.State == ServerRunState.Starting)
+            {
+                await Task.Delay(500, ct).ConfigureAwait(false);
+            }
+
+            Console.WriteLine($"Estado: {controller.Status.State}");
+            return controller.Status.State == ServerRunState.Running ? 0 : 1;
         });
         return command;
     }

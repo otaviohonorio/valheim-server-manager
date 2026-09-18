@@ -1,5 +1,7 @@
 using System.IO.Compression;
 using System.Text;
+using System.Security.Cryptography;
+using ValheimServerManager.Core.Players;
 using ValheimServerManager.Core.Worlds;
 
 namespace ValheimServerManager.Core.Tests;
@@ -527,5 +529,95 @@ public class WorldCheatMarkTests
         }
 
         return bits;
+    }
+}
+
+public class CharacterFileTests
+{
+    /// <summary>A .fch file: "i32 length | package | i32 hash length | SHA-512", player data last.</summary>
+    private static string WriteCharacter(string folder, params (int Prefab, int Stack, bool Cheated, string? Crafter)[] items)
+    {
+        using var player = new MemoryStream();
+        using (var w = new BinaryWriter(player, Encoding.UTF8, leaveOpen: true))
+        {
+            w.Write(33);        // version
+            w.Write(100f);      // max health
+            w.Write(75f);       // health
+            w.Write(80f);       // max stamina
+            w.Write(1200f);     // time since death
+            w.Write("GP_Eikthyr");
+            w.Write(0f);        // guardian power cooldown
+            w.Write(Zdo.Inventory(items));
+            w.Write(0);         // known recipes, and whatever else the game writes after it
+        }
+
+        using var package = new MemoryStream();
+        using (var w = new BinaryWriter(package, Encoding.UTF8, leaveOpen: true))
+        {
+            w.Write(41);
+            w.Write("Bjorn");
+            w.Write(true);      // has player data
+            w.Write((int)player.Length);
+            w.Write(player.ToArray());
+        }
+
+        var bytes = package.ToArray();
+        var path = Path.Combine(folder, "bjorn.fch");
+        using var file = new BinaryWriter(File.Create(path));
+        file.Write(bytes.Length);
+        file.Write(bytes);
+        var hash = SHA512.HashData(bytes);
+        file.Write(hash.Length);
+        file.Write(hash);
+        return path;
+    }
+
+    [Fact]
+    public void Reads_the_backpack_and_clears_only_the_marks()
+    {
+        using var temp = new TempDir();
+        var path = WriteCharacter(temp.Path,
+            (Zdo.Mushroom, 11, true, null), (Zdo.Mushroom, 1, false, null), (Zdo.Stone, 20, true, "Bjorn"));
+        var before = File.ReadAllBytes(path);
+
+        var scan = CharacterFile.Scan(path);
+        Assert.Equal((3, 2), (scan.Items, scan.MarkedItems));
+        Assert.True(scan.NeedsCleaning);
+
+        var result = CharacterFile.Clean(path);
+
+        Assert.Equal(2, result.MarkedItems);
+        var after = File.ReadAllBytes(path);
+        Assert.Equal(before.Length, after.Length);
+        // Two flag bits plus the hash at the end; the package itself changes in two bytes only.
+        var packageLength = before.Length - 64 - 4;
+        Assert.Equal(2, before[..packageLength].Zip(after[..packageLength]).Count(p => p.First != p.Second));
+        Assert.False(CharacterFile.Scan(path).NeedsCleaning);
+    }
+
+    [Fact]
+    public void Keeps_the_file_valid_for_the_game()
+    {
+        using var temp = new TempDir();
+        var path = WriteCharacter(temp.Path, (Zdo.Stone, 5, true, null));
+
+        CharacterFile.Clean(path);
+
+        var bytes = File.ReadAllBytes(path);
+        var length = BitConverter.ToInt32(bytes);
+        var package = bytes[4..(4 + length)];
+        var hashLength = BitConverter.ToInt32(bytes, 4 + length);
+        Assert.Equal(64, hashLength);
+        Assert.Equal(SHA512.HashData(package), bytes[(8 + length)..]);
+    }
+
+    [Fact]
+    public void Refuses_a_file_that_is_not_a_character()
+    {
+        using var temp = new TempDir();
+        var path = Path.Combine(temp.Path, "x.fch");
+        File.WriteAllBytes(path, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        Assert.Throws<InvalidDataException>(() => CharacterFile.Scan(path));
     }
 }

@@ -121,6 +121,17 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
         {
             RefreshHealth(p);
         }
+
+        FixWorldNowCommand.NotifyCanExecuteChanged();
+        if (status.IsActive)
+        {
+            MaintenanceSummary = "Pare o servidor para conferir e corrigir o mundo.";
+            CanFixWorld = false;
+        }
+        else
+        {
+            _ = CheckMaintenanceAsync();
+        }
     }
 
     private void UpdateHints()
@@ -206,6 +217,85 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
             Details.Add(new("Chaves gravadas", meta.KeyNames.Any() ? string.Join(", ", meta.KeyNames) : "nenhuma"));
             Details.Add(new("Jogadores registrados", meta.Players.Count > 0 ? string.Join(", ", meta.Players.Select(x => x.Name)) : "nenhum"));
         }
+    }
+
+    /// <summary>What the maintenance would do right now.</summary>
+    [ObservableProperty]
+    public partial string MaintenanceSummary { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool CanFixWorld { get; set; }
+
+    [RelayCommand]
+    private async Task CheckMaintenanceAsync()
+    {
+        if (Draft() is not { } draft || string.IsNullOrWhiteSpace(draft.SaveDirectory) || string.IsNullOrWhiteSpace(draft.WorldName))
+        {
+            MaintenanceSummary = "Configure a pasta de saves e o mundo.";
+            CanFixWorld = false;
+            return;
+        }
+
+        try
+        {
+            var (duplicates, marks) = await Task.Run(() => (
+                WorldRepair.Scan(draft.SaveDirectory, draft.WorldName),
+                WorldCheatMarks.Scan(draft.SaveDirectory, draft.WorldName)));
+
+            var parts = new List<string>();
+            if (duplicates.ExtraCopies > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(duplicates.ExtraCopies)} objetos duplicados");
+            }
+
+            if (duplicates.ZonesToMark > 0)
+            {
+                parts.Add($"{duplicates.ZonesToMark} regiões que o jogo geraria de novo");
+            }
+
+            if (marks.Total > 0)
+            {
+                parts.Add($"{Helpers.Ui.Number(marks.MarkedItems)} itens e {Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers)} objetos com marca de trapaça");
+            }
+
+            CanFixWorld = parts.Count > 0 && !Status.IsActive;
+            MaintenanceSummary = parts.Count == 0
+                ? "Nada a corrigir: sem duplicados e sem itens marcados."
+                : "A corrigir: " + string.Join(", ", parts) + ".";
+        }
+        catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
+        {
+            MaintenanceSummary = "Não consegui conferir o mundo: " + ex.Message;
+            CanFixWorld = false;
+        }
+
+        FixWorldNowCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool CanRunFix() => CanFixWorld && !Status.IsActive && !IsBusy;
+
+    /// <summary>Same maintenance the manager runs after every stop, on demand.</summary>
+    [RelayCommand(CanExecute = nameof(CanRunFix))]
+    private async Task FixWorldNowAsync()
+    {
+        if (Controller is not { } controller)
+        {
+            return;
+        }
+
+        await RunBusyAsync("Corrigindo o mundo…", async () =>
+        {
+            var messages = new List<string>();
+            var repair = await controller.RepairWorldAsync();
+            messages.Add(repair.Message);
+            var clean = await controller.CleanCheatMarksAsync();
+            messages.Add(clean.Message);
+            await Dialogs.AlertAsync(repair.Success && clean.Success ? "Mundo conferido" : "Correção incompleta",
+                string.Join("\n\n", messages));
+        });
+
+        await CheckMaintenanceAsync();
+        RefreshWorldInfo();
     }
 
     [RelayCommand]

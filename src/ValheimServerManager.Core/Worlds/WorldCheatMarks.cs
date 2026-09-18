@@ -127,93 +127,16 @@ public static class WorldCheatMarks
         return false;
     }
 
-    /// <summary>
-    /// Offsets of the per-item flag bytes that have the cheated bit set, inside a container's
-    /// <c>items</c> package or a dropped item's <c>itemData</c> (<c>Inventory.Save</c> /
-    /// <c>ItemDrop.ItemData.Save</c>, item version 109).
-    /// </summary>
-    private static List<int> MarkedItemFlags(ChunkObjects file, WorldObject obj)
+    /// <summary>Offsets (inside the object) of item flag bytes that have the cheated bit set.</summary>
+    private static IReadOnlyList<int> MarkedItemFlags(ChunkObjects file, WorldObject obj)
     {
-        var found = new List<int>();
         if (obj.Inventory is not { } inventory || inventory.Length < 5)
         {
-            return found;
+            return [];
         }
 
-        // A container writes "i32 version | u16 count | items"; a dropped item writes "u8 version | item".
-        var data = file.Bytes(inventory.Offset, inventory.Length);
-        var o = inventory.SingleItem ? 1 : 6;
-        var count = inventory.SingleItem ? 1 : BinaryPrimitives.ReadUInt16LittleEndian(data[4..]);
-        if ((inventory.SingleItem ? data[0] : BinaryPrimitives.ReadInt32LittleEndian(data)) < 106)
-        {
-            return found;   // older item format, left alone
-        }
-
-        for (var i = 0; i < count && o < data.Length; i++)
-        {
-            o += 4 + 3;                       // durability, grid x/y, world level
-            var flags = data[o++];
-            o += (flags & 0x04) != 0 ? 2 : 0; // quality
-            o += (flags & 0x08) != 0 ? 2 : 0; // stack
-            o += (flags & 0x10) != 0 ? 4 : 0; // variant
-            if ((flags & 0x20) != 0)
-            {
-                o += 8;                       // crafter id
-                SkipString(data, ref o);
-            }
-
-            o += (flags & 0x40) != 0 ? 4 : 0; // prefab
-            if ((flags & 0x80) != 0)
-            {
-                var pairs = ReadCount(data, ref o);
-                for (var p = 0; p < pairs * 2; p++)
-                {
-                    SkipString(data, ref o);
-                }
-            }
-
-            if (o >= data.Length)
-            {
-                break;
-            }
-
-            if ((data[o] & 1) != 0)
-            {
-                found.Add(inventory.Offset + o);
-            }
-
-            o++;
-        }
-
-        return found;
-    }
-
-    /// <summary>Skips a length-prefixed UTF-8 string, prefix included.</summary>
-    private static void SkipString(ReadOnlySpan<byte> d, ref int o)
-    {
-        var length = 0;
-        var shift = 0;
-        byte b;
-        do
-        {
-            b = d[o++];
-            length |= (b & 0x7F) << shift;
-            shift += 7;
-        }
-        while ((b & 0x80) != 0);
-
-        o += length;
-    }
-
-    private static int ReadCount(ReadOnlySpan<byte> d, ref int o)
-    {
-        int count = d[o++];
-        if ((count & 0x80) != 0)
-        {
-            count = ((count & 0x7F) << 8) | d[o++];
-        }
-
-        return count;
+        var flags = StoredItemReader.MarkedFlagOffsets(file.Bytes(inventory.Offset, inventory.Length), inventory.SingleItem);
+        return flags.Count == 0 ? [] : flags.Select(at => inventory.Offset + at).ToArray();
     }
 
     private static (SaveSet Save, ChunkIndex Index, List<(ChunkIndexEntry Entry, ChunkObjects File, int Index)> Chunks)

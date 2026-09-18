@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Globalization;
 using Microsoft.Extensions.Logging.Abstractions;
 using ValheimServerManager.Core.Backups;
+using ValheimServerManager.Core.Players;
 using ValheimServerManager.Core.Processes;
 using ValheimServerManager.Core.Profiles;
 using ValheimServerManager.Core.Servers;
@@ -39,6 +40,7 @@ internal static class CliApp
         root.Subcommands.Add(RebuildIndexCommand());
         root.Subcommands.Add(RepairWorldCommand());
         root.Subcommands.Add(CleanCheatMarksCommand());
+        root.Subcommands.Add(CleanCharacterCommand());
         root.Subcommands.Add(EndToEndTest.Command());
         return await root.Parse(args).InvokeAsync().ConfigureAwait(false);
     }
@@ -553,6 +555,32 @@ internal static class CliApp
             }
 
             return result.Success ? 0 : 1;
+        });
+        return command;
+    }
+
+    private static Command CleanCharacterCommand()
+    {
+        var file = new Argument<FileInfo>("arquivo-do-personagem") { Description = "Arquivo .fch do personagem (o jogo precisa estar fechado)." };
+        var apply = new Option<bool>("--apply") { Description = "Grava a limpeza (sem isso, só mostra o que seria feito)." };
+        var command = new Command("clean-character", "Tira a marca de \"feito com trapaça\" dos itens na mochila de um personagem.");
+        command.Arguments.Add(file);
+        command.Options.Add(apply);
+        command.SetAction(parse =>
+        {
+            var path = parse.GetValue(file)!.FullName;
+            var scan = CharacterFile.Scan(path);
+            Console.WriteLine($"{scan.Name}: {scan.Items} itens na mochila, {scan.MarkedItems} marcados.");
+            if (!parse.GetValue(apply) || !scan.NeedsCleaning)
+            {
+                return 0;
+            }
+
+            var backup = path + $".antes-da-limpeza-{DateTime.Now:yyyyMMdd-HHmmss}";
+            File.Copy(path, backup);
+            var result = CharacterFile.Clean(path);
+            Console.WriteLine($"Marca removida de {result.MarkedItems} itens. Cópia do arquivo original: {Path.GetFileName(backup)}");
+            return 0;
         });
         return command;
     }

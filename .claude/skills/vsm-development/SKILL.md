@@ -44,6 +44,7 @@ src/ValheimServerManager.Core    domain + services, no UI (net10.0-windows)
   Profiles/    ServerProfile, ModifierCatalog, LaunchArguments, ProfileValidator, BatchFileImporter
                (parses command lines of adopted servers; the .bat import UI was removed)
   Processes/   hidden launch, Ctrl+C helper (ConsoleSignal), WMI locator
+  Players/     CharacterFile (clears cheat marks in a .fch backpack)
   Logs/        ServerLogParser, LogTailer, LogArchiver
   Backups/     BackupService (SHA-256 manifests, retention, restore)
   Servers/     ServerController (state machine, safety rules), ServerManager (profiles, attach)

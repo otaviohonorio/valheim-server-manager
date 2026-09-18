@@ -143,6 +143,26 @@
                     <ToggleSwitch AutomationProperties.Name="Construção e craft sem custo" IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="Normal" OnContent="Criativo" />
                 </toolkit:SettingsCard>
 
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Manutenção do mundo" />
+                <toolkit:SettingsCard
+                    ContentAlignment="Vertical"
+                    Description="Remove objetos que o jogo gerou duas vezes (os que precisam ser quebrados duas vezes) e a marca de &quot;feito com trapaça&quot; dos itens, que impede o empilhamento. Faz backup antes. O gerenciador também faz isso sozinho a cada parada; use aqui depois que alguém guardar itens nos baús."
+                    Header="Conferir e corrigir agora"
+                    HorizontalContentAlignment="Stretch">
+                    <StackPanel Spacing="8">
+                        <ProgressBar IsIndeterminate="True" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}" />
+                        <TextBlock Text="{x:Bind ViewModel.MaintenanceSummary, Mode=OneWay}" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button
+                                AutomationProperties.Name="Corrigir o mundo agora"
+                                Command="{x:Bind ViewModel.FixWorldNowCommand}"
+                                Content="Corrigir agora"
+                                Style="{StaticResource AccentButtonStyle}" />
+                            <Button AutomationProperties.Name="Conferir de novo" Command="{x:Bind ViewModel.CheckMaintenanceCommand}" Content="Conferir de novo" />
+                        </StackPanel>
+                    </StackPanel>
+                </toolkit:SettingsCard>
+
                 <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Diagnóstico" />
                 <toolkit:SettingsExpander Description="Procura nos chunks peças que só jogadores constroem (bancadas, baús, portais, fornalhas…). Útil para confirmar que um mundo restaurado é o seu." Header="Construções encontradas">
                     <toolkit:SettingsExpander.HeaderIcon>

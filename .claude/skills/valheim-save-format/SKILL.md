@@ -105,6 +105,8 @@ The game sets the mark on:
 The world modifier `nobuildcost` (the app's creative mode) does **not** mark anything: only the
 console cheat does. `yesiuseddevcommandsbutiwantmyachievementsanyway 1` sets the player key
 `bypasscheatchecks`, which stops new marks **for that player only** and does not clean what exists.
+A character's backpack lives in its own `.fch` (`i32 length | package | i32 hash length | SHA-512`,
+player data last: `i32 33 | 4 floats | string guardian power | f32 cooldown | inventory`) — `CharacterFile`.
 `WorldCheatMarks` clears the mark for everyone: the ZDO int and one bit per stored item, patched in
 place so every other byte is preserved (`vsm inspect --cheats`, `vsm clean-cheat-marks`, app
 "Limpar marcas").

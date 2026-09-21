@@ -31,6 +31,7 @@ internal static class CliApp
         root.Subcommands.Add(ProfilesCommand());
         root.Subcommands.Add(CreateCommand());
         root.Subcommands.Add(StatusCommand());
+        root.Subcommands.Add(SetCommand());
         root.Subcommands.Add(StartCommand());
         root.Subcommands.Add(StopCommand());
         root.Subcommands.Add(RestartCommand());
@@ -283,6 +284,86 @@ internal static class CliApp
             }
 
             return report.HasErrors ? 1 : 0;
+        });
+        return command;
+    }
+
+    private static Command SetCommand()
+    {
+        var crossplay = new Option<bool?>("--crossplay") { Description = "Liga ou desliga o crossplay (true/false)." };
+        var isPublic = new Option<bool?>("--public") { Description = "Aparecer na lista pública (true/false)." };
+        var port = new Option<int?>("--port") { Description = "Porta do servidor." };
+        var password = new Option<string?>("--password") { Description = "Nova senha." };
+        var fixWorld = new Option<bool?>("--fix-world-after-stop") { Description = "Corrigir o mundo ao parar (true/false)." };
+        var command = new Command("set", "Altera opções do perfil (o app precisa estar fechado para não sobrescrever).");
+        command.Options.Add(ProfileOption);
+        foreach (var option in new Option[] { crossplay, isPublic, port, password, fixWorld })
+        {
+            command.Options.Add(option);
+        }
+
+        command.SetAction(async (parse, ct) =>
+        {
+            await using var manager = CreateManager(parse.GetValue(DataDirOption));
+            if (Resolve(manager, parse.GetValue(ProfileOption)) is not { } controller)
+            {
+                return 2;
+            }
+
+            await Task.CompletedTask.ConfigureAwait(false);
+            var profile = controller.Profile;
+            var changes = new List<string>();
+            if (parse.GetValue(crossplay) is { } cross && cross != profile.Crossplay)
+            {
+                profile.Crossplay = cross;
+                changes.Add($"crossplay: {(cross ? "ligado" : "desligado")}");
+            }
+
+            if (parse.GetValue(isPublic) is { } pub && pub != profile.Public)
+            {
+                profile.Public = pub;
+                changes.Add($"público: {(pub ? "sim" : "não")}");
+            }
+
+            if (parse.GetValue(port) is { } p && p != profile.Port)
+            {
+                profile.Port = p;
+                changes.Add($"porta: {p}");
+            }
+
+            if (parse.GetValue(password) is { } pw && pw != profile.Password)
+            {
+                profile.Password = pw;
+                changes.Add("senha alterada");
+            }
+
+            if (parse.GetValue(fixWorld) is { } fix && fix != profile.FixWorldAfterStop)
+            {
+                profile.FixWorldAfterStop = fix;
+                changes.Add($"corrigir o mundo ao parar: {(fix ? "sim" : "não")}");
+            }
+
+            if (changes.Count == 0)
+            {
+                Console.WriteLine("Nada a alterar.");
+                return 0;
+            }
+
+            var errors = ProfileValidator.Validate(profile).Where(i => i.Severity == ValidationSeverity.Error).ToList();
+            if (errors.Count > 0)
+            {
+                errors.ForEach(e => Console.Error.WriteLine($"  [erro] {e.Message}"));
+                return 1;
+            }
+
+            manager.SaveProfile(profile);
+            Console.WriteLine($"Perfil \"{profile.DisplayName}\" atualizado: {string.Join(", ", changes)}.");
+            if (controller.Status.IsActive)
+            {
+                Console.WriteLine("O servidor está rodando com a configuração antiga; reinicie para aplicar.");
+            }
+
+            return 0;
         });
         return command;
     }

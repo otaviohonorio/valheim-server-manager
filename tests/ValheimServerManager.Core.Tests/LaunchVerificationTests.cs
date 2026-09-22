@@ -62,12 +62,12 @@ public class LaunchVerificationTests
 
         Assert.Equal(
             [
-                "Nome do servidor", "Porta", "Mundo", "Senha", "Servidor público", "Crossplay", "Pasta de saves",
-                "Arquivo de log", "Intervalo de save", "Backups do Valheim", "Primeiro backup do Valheim",
-                "Intervalo dos backups do Valheim", "Preset",
-                "Modificador deathpenalty", "Modificador resources", "Modificador portals", "Modificador combat", "Modificador raids",
-                "Chave nobuildcost", "Chave playerevents", "Chave passivemobs", "Chave nomap",
-                "Argumentos extras",
+                "Server name", "Port", "World", "Password", "Public server", "Crossplay", "Save folder",
+                "Log file", "Save interval", "Valheim backups", "First Valheim backup",
+                "Interval between Valheim backups", "Preset",
+                "Modifier deathpenalty", "Modifier resources", "Modifier portals", "Modifier combat", "Modifier raids",
+                "Key nobuildcost", "Key playerevents", "Key passivemobs", "Key nomap",
+                "Extra arguments",
             ],
             settings);
     }
@@ -81,7 +81,7 @@ public class LaunchVerificationTests
 
         var diff = Assert.Single(LaunchVerification.Compare(saved, Running(running)));
 
-        Assert.Equal("Senha", diff.Setting);
+        Assert.Equal("Password", diff.Setting);
         Assert.DoesNotContain("senha123", diff.Expected + diff.Actual);
         Assert.DoesNotContain("segredoAntigo", diff.Expected + diff.Actual);
     }
@@ -97,7 +97,7 @@ public class LaunchVerificationTests
         var diff = Assert.Single(LaunchVerification.Compare(p, line));
 
         Assert.Equal("Preset", diff.Setting);
-        Assert.Equal("(ausente)", diff.Actual);
+        Assert.Equal("(absent)", diff.Actual);
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class LaunchVerificationTests
         var saved = Profile();
         var running = saved.Clone();
         running.SaveDirectory = @"d:\games\valheim\serversave\";
-        Assert.DoesNotContain(LaunchVerification.Compare(saved, Running(running)), d => d.Setting == "Pasta de saves");
+        Assert.DoesNotContain(LaunchVerification.Compare(saved, Running(running)), d => d.Setting == "Save folder");
     }
 
     [Fact]
@@ -116,8 +116,8 @@ public class LaunchVerificationTests
         Assert.Empty(LaunchVerification.CompareLoggedModifiers(p, ["normal", "deathpenalty->casual", "resources->more", "portals->casual"]));
 
         var diffs = LaunchVerification.CompareLoggedModifiers(p, ["casual", "deathpenalty->casual", "raids->none"]);
-        Assert.Contains(diffs, d => d.Setting == "Preset aplicado pelo servidor" && d.Actual == "casual");
-        Assert.Contains(diffs, d => d.Setting.Contains("resources") && d.Actual == "(não aplicado)");
+        Assert.Contains(diffs, d => d.Setting == "Preset applied by the server" && d.Actual == "casual");
+        Assert.Contains(diffs, d => d.Setting.Contains("resources") && d.Actual == "(not applied)");
         Assert.Contains(diffs, d => d.Setting.Contains("raids") && d.Actual == "none");
     }
 

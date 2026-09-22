@@ -1,3 +1,6 @@
+using System.Globalization;
+using ValheimServerManager.Core.Localization;
+
 namespace ValheimServerManager.Core.Profiles;
 
 /// <summary>One line of the configuration summary shown before starting a server.</summary>
@@ -16,28 +19,28 @@ public static class ProfileSummary
         var presetIsNormal = profile.Preset == WorldPreset.Normal;
 
         var modifiers = new List<string>();
-        AddModifier(modifiers, "Combate", ModifierCatalog.Combat, profile.Combat, CombatLevel.Default);
-        AddModifier(modifiers, "Penalidade de morte", ModifierCatalog.DeathPenalty, profile.DeathPenalty, DeathPenaltyLevel.Default);
-        AddModifier(modifiers, "Recursos", ModifierCatalog.Resources, profile.Resources, ResourceRate.Default);
-        AddModifier(modifiers, "Raids", ModifierCatalog.Raids, profile.Raids, RaidFrequency.Default);
-        AddModifier(modifiers, "Portais", ModifierCatalog.Portals, profile.Portals, PortalRule.Default);
+        AddModifier(modifiers, Strings.Summary_Combat, ModifierCatalog.Combat, profile.Combat, CombatLevel.Default);
+        AddModifier(modifiers, Strings.Summary_DeathPenalty, ModifierCatalog.DeathPenalty, profile.DeathPenalty, DeathPenaltyLevel.Default);
+        AddModifier(modifiers, Strings.Summary_Resources, ModifierCatalog.Resources, profile.Resources, ResourceRate.Default);
+        AddModifier(modifiers, Strings.Summary_Raids, ModifierCatalog.Raids, profile.Raids, RaidFrequency.Default);
+        AddModifier(modifiers, Strings.Summary_Portals, ModifierCatalog.Portals, profile.Portals, PortalRule.Default);
 
         var options = new List<string>();
         if (profile.IsCreativeEffective)
         {
             options.Add(profile.Preset == WorldPreset.Hammer && !profile.CreativeMode
-                ? "Modo criativo (pelo preset Martelo)"
-                : "Modo criativo — construção e craft sem custo");
+                ? Strings.Summary_CreativeByHammer
+                : Strings.Summary_CreativeMode);
         }
 
-        if (profile.PlayerEvents) options.Add("Eventos por jogador");
-        if (profile.PassiveMobs) options.Add("Inimigos passivos");
-        if (profile.NoMap) options.Add("Sem mapa");
+        if (profile.PlayerEvents) options.Add(Strings.Summary_PlayerEvents);
+        if (profile.PassiveMobs) options.Add(Strings.Summary_PassiveMobs);
+        if (profile.NoMap) options.Add(Strings.Summary_NoMap);
 
         var access = new List<string>
         {
-            profile.Public ? "Público" : "Privado",
-            $"porta {profile.Port}",
+            profile.Public ? Strings.Summary_Public : Strings.Summary_Private,
+            string.Format(CultureInfo.CurrentCulture, Strings.Summary_Port, profile.Port),
         };
         if (profile.Crossplay)
         {
@@ -46,32 +49,32 @@ public static class ProfileSummary
 
         var backups = (profile.BackupBeforeStart, profile.BackupAfterStop) switch
         {
-            (true, true) => "backup antes de iniciar e depois de parar",
-            (true, false) => "backup só antes de iniciar",
-            (false, true) => "backup só depois de parar",
-            _ => "sem backup automático",
+            (true, true) => Strings.Summary_BackupBoth,
+            (true, false) => Strings.Summary_BackupBeforeOnly,
+            (false, true) => Strings.Summary_BackupAfterOnly,
+            _ => Strings.Summary_NoAutoBackup,
         };
 
         var lines = new List<SummaryLine>
         {
-            new("Preset", presetIsNormal ? preset.Label : $"{preset.Label} — {preset.Description}", WorldSection, !presetIsNormal),
-            new("Modificadores",
+            new(Strings.Summary_PresetLabel, presetIsNormal ? preset.Label : $"{preset.Label} — {preset.Description}", WorldSection, !presetIsNormal),
+            new(Strings.Summary_ModifiersLabel,
                 modifiers.Count == 0
-                    ? presetIsNormal ? "nenhum (tudo no padrão)" : $"nenhum além do preset {preset.Label}"
+                    ? presetIsNormal ? Strings.Summary_NoModifiers : string.Format(CultureInfo.CurrentCulture, Strings.Summary_NoModifiersBeyondPreset, preset.Label)
                     : string.Join(" · ", modifiers),
                 WorldSection,
                 modifiers.Count > 0),
-            new("Opções do mundo", options.Count == 0 ? "nenhuma" : string.Join(" · ", options), WorldSection, options.Count > 0),
-            new("Acesso", string.Join(" · ", access), ServerSection, false),
-            new("Saves", $"a cada {Interval(profile.SaveIntervalSeconds)} · {backups}", ServerSection, !profile.BackupBeforeStart || !profile.BackupAfterStop),
-            new("Manutenção", profile.FixWorldAfterStop
-                ? "corrige duplicados e marcas ao parar"
-                : "desligada (o mundo não é corrigido ao parar)", ServerSection, !profile.FixWorldAfterStop),
+            new(Strings.Summary_WorldOptionsLabel, options.Count == 0 ? Strings.Summary_NoWorldOptions : string.Join(" · ", options), WorldSection, options.Count > 0),
+            new(Strings.Summary_AccessLabel, string.Join(" · ", access), ServerSection, false),
+            new(Strings.Summary_SavesLabel, string.Format(CultureInfo.CurrentCulture, Strings.Summary_SaveEvery, Interval(profile.SaveIntervalSeconds)) + " · " + backups, ServerSection, !profile.BackupBeforeStart || !profile.BackupAfterStop),
+            new(Strings.Summary_MaintenanceLabel, profile.FixWorldAfterStop
+                ? Strings.Summary_MaintenanceOn
+                : Strings.Summary_MaintenanceOff, ServerSection, !profile.FixWorldAfterStop),
         };
 
         if (!string.IsNullOrWhiteSpace(profile.ExtraArguments))
         {
-            lines.Add(new("Argumentos extras", profile.ExtraArguments, ServerSection, true));
+            lines.Add(new(Strings.Summary_ExtraArgumentsLabel, profile.ExtraArguments, ServerSection, true));
         }
 
         return lines;

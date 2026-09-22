@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Profiles;
 using ValheimServerManager.Core.Worlds;
 
@@ -62,13 +63,13 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             var report = WorldInspector.Inspect(profile.SaveDirectory, profile.WorldName);
             if (!report.Exists || report.LatestSave is null)
             {
-                throw new InvalidOperationException($"O mundo \"{profile.WorldName}\" ainda não tem save para copiar.");
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Strings.Backup_NoSaveToCopy, profile.WorldName));
             }
 
             if (report.HasErrors)
             {
                 throw new InvalidOperationException(
-                    "O mundo tem problemas e não pode ser copiado como backup válido: " +
+                    Strings.Backup_WorldHasProblems + " " +
                     string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message)));
             }
 
@@ -80,12 +81,12 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             {
                 // The server finished a new save and cleaned old files mid-copy. Re-inspect and retry.
                 last = ex;
-                _logger.LogWarning("Arquivo sumiu durante o backup (tentativa {Attempt}): {File}", attempt, ex.FileName);
+                _logger.LogWarning("A file vanished during the backup (attempt {Attempt}): {File}", attempt, ex.FileName);
                 await Task.Delay(TimeSpan.FromSeconds(2), time, ct).ConfigureAwait(false);
             }
         }
 
-        throw new IOException("O backup não conseguiu uma cópia consistente após 3 tentativas.", last);
+        throw new IOException(Strings.Backup_NoConsistentCopy, last);
     }
 
     private async Task<BackupEntry> CopySaveSetAsync(
@@ -135,11 +136,11 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             var verification = await VerifyDirectoryAsync(partial, manifest, ct).ConfigureAwait(false);
             if (!verification.Ok)
             {
-                throw new IOException("O backup não passou na verificação: " + string.Join(" ", verification.Problems));
+                throw new IOException(Strings.Backup_FailedVerification + " " + string.Join(" ", verification.Problems));
             }
 
             Directory.Move(partial, final);
-            _logger.LogInformation("Backup {Name} criado ({Files} arquivos, save {Save})", name, manifest.Files.Count, manifest.SaveNumber);
+            _logger.LogInformation("Backup {Name} created ({Files} files, save {Save})", name, manifest.Files.Count, manifest.SaveNumber);
 
             var entry = ToEntry(final, manifest);
             if (entry.IsAutomatic)
@@ -245,7 +246,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             }
             catch (JsonException ex)
             {
-                _logger.LogWarning(ex, "Manifesto ilegível em {Dir}", directory);
+                _logger.LogWarning(ex, "Unreadable manifest in {Dir}", directory);
             }
         }
 
@@ -276,7 +277,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
         var problems = report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message).ToList();
         if (report.LatestSave is null)
         {
-            problems.Add("Nenhum save encontrado.");
+            problems.Add(Strings.Backup_NoSaveFound);
         }
 
         return new BackupVerification(problems.Count == 0, problems);
@@ -290,14 +291,14 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             var path = Path.Combine(directory, file.Name);
             if (!File.Exists(path))
             {
-                problems.Add($"Falta {file.Name}.");
+                problems.Add(string.Format(CultureInfo.CurrentCulture, Strings.Backup_FileMissing, file.Name));
                 continue;
             }
 
             var hash = await HashFileAsync(path, ct).ConfigureAwait(false);
             if (!hash.Equals(file.Sha256, StringComparison.OrdinalIgnoreCase))
             {
-                problems.Add($"{file.Name} está diferente do original.");
+                problems.Add(string.Format(CultureInfo.CurrentCulture, Strings.Backup_FileDiffers, file.Name));
             }
         }
 
@@ -307,7 +308,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             problems.AddRange(report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message));
             if (report.LatestSave?.Number != manifest.SaveNumber)
             {
-                problems.Add($"O backup deveria conter o save {manifest.SaveNumber}.");
+                problems.Add(string.Format(CultureInfo.CurrentCulture, Strings.Backup_ShouldContainSave, manifest.SaveNumber));
             }
         }
 
@@ -325,20 +326,19 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
         ArgumentNullException.ThrowIfNull(entry);
         if (entry.Kind == BackupKind.Quarantine)
         {
-            throw new InvalidOperationException("Cópias de quarentena guardam um mundo com defeito e não podem ser restauradas.");
+            throw new InvalidOperationException(Strings.Backup_QuarantineNotRestorable);
         }
 
         if (!entry.WorldName.Equals(profile.WorldName, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
-                $"Este backup é do mundo \"{entry.WorldName}\", e o perfil usa \"{profile.WorldName}\". " +
-                "Troque o mundo do perfil antes de restaurar.");
+                string.Format(CultureInfo.CurrentCulture, Strings.Backup_WrongWorld, entry.WorldName, profile.WorldName));
         }
 
         var verification = await VerifyAsync(entry, ct).ConfigureAwait(false);
         if (!verification.Ok)
         {
-            throw new InvalidOperationException("O backup escolhido não passou na verificação: " + string.Join(" ", verification.Problems));
+            throw new InvalidOperationException(Strings.Backup_ChosenFailedVerification + " " + string.Join(" ", verification.Problems));
         }
 
         var source = WorldInspector.InspectDirectory(entry.Directory, entry.WorldName);
@@ -350,8 +350,8 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
         {
             var current = WorldInspector.InspectDirectory(worldDir, profile.WorldName);
             safety = current.IsHealthy
-                ? await CreateAsync(profile, BackupKind.PreRestore, $"Antes de restaurar {entry.Name}", ct).ConfigureAwait(false)
-                : await QuarantineAsync(profile, $"Mundo com defeito substituído por {entry.Name}", ct).ConfigureAwait(false);
+                ? await CreateAsync(profile, BackupKind.PreRestore, string.Format(CultureInfo.CurrentCulture, Strings.Backup_NoteBeforeRestore, entry.Name), ct).ConfigureAwait(false)
+                : await QuarantineAsync(profile, string.Format(CultureInfo.CurrentCulture, Strings.Backup_NoteReplacedBroken, entry.Name), ct).ConfigureAwait(false);
 
             var replacedRoot = Path.Combine(profile.EffectiveBackupDirectory, ReplacedFolderName);
             Directory.CreateDirectory(replacedRoot);
@@ -377,7 +377,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             var restored = WorldInspector.InspectDirectory(staging, profile.WorldName);
             if (!restored.IsHealthy)
             {
-                throw new IOException("A cópia restaurada não passou na inspeção: " +
+                throw new IOException(Strings.Backup_RestoredCopyFailedInspection + " " +
                     string.Join(" ", restored.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message)));
             }
 
@@ -394,7 +394,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
             throw;
         }
 
-        _logger.LogInformation("Mundo {World} restaurado de {Backup}", profile.WorldName, entry.Name);
+        _logger.LogInformation("World {World} restored from {Backup}", profile.WorldName, entry.Name);
         return new RestoreResult(entry, safety, replaced);
     }
 
@@ -404,7 +404,7 @@ public sealed partial class BackupService(TimeProvider time, ILogger<BackupServi
         var target = Path.GetFullPath(entry.Directory);
         if (entry.Kind == BackupKind.GameAuto || !target.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("Só é possível excluir backups da pasta de backups do gerenciador.");
+            throw new InvalidOperationException(Strings.Backup_DeleteOnlyManaged);
         }
 
         Directory.Delete(target, recursive: true);

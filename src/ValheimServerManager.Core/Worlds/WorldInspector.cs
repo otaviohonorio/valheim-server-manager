@@ -1,3 +1,6 @@
+using System.Globalization;
+using ValheimServerManager.Core.Localization;
+
 namespace ValheimServerManager.Core.Worlds;
 
 public enum IssueSeverity
@@ -57,7 +60,7 @@ public static class WorldInspector
         if (!System.IO.Directory.Exists(worldDirectory))
         {
             issues.Add(new(IssueSeverity.Info, "NEW_WORLD",
-                $"A pasta do mundo \"{worldName}\" não existe. O servidor vai criar um mundo NOVO, com seed aleatória."));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_NewWorld, worldName)));
             return new WorldHealthReport { WorldName = worldName, Directory = worldDirectory, Exists = false, Issues = issues };
         }
 
@@ -65,14 +68,14 @@ public static class WorldInspector
         if (allFiles.Any(f => f.EndsWith(".db", StringComparison.OrdinalIgnoreCase) || f.EndsWith(".fwl", StringComparison.OrdinalIgnoreCase)))
         {
             issues.Add(new(IssueSeverity.Info, "LEGACY_FILES",
-                "Há arquivos no formato antigo (.db/.fwl). O Valheim 1.0 converte na primeira gravação."));
+                Strings.Inspector_LegacyFiles));
         }
 
         var saveSets = WorldFolder.ScanSaveSets(worldDirectory);
         if (saveSets.Count == 0)
         {
             issues.Add(new(IssueSeverity.Warning, "EMPTY_WORLD_FOLDER",
-                "A pasta do mundo existe, mas não tem nenhum save (_main.N.*). O servidor vai gerar um mundo NOVO."));
+                Strings.Inspector_EmptyWorldFolder));
             return new WorldHealthReport { WorldName = worldName, Directory = worldDirectory, Exists = true, Issues = issues };
         }
 
@@ -87,13 +90,13 @@ public static class WorldInspector
             catch (Exception ex) when (ex is InvalidDataException or IOException)
             {
                 issues.Add(new(IssueSeverity.Error, "BAD_METADATA",
-                    $"O arquivo {Path.GetFileName(latest.Fwl2)} está corrompido: {ex.Message}"));
+                    string.Format(CultureInfo.CurrentCulture, Strings.Inspector_BadMetadata, Path.GetFileName(latest.Fwl2), ex.Message)));
             }
 
             if (pending is not null)
             {
                 issues.Add(new(IssueSeverity.Info, "NEW_WORLD_SEEDED",
-                    $"Mundo novo com a seed \"{pending.SeedName}\". Ele será gerado no primeiro início do servidor."));
+                    string.Format(CultureInfo.CurrentCulture, Strings.Inspector_NewWorldSeeded, pending.SeedName)));
             }
 
             return new WorldHealthReport
@@ -110,12 +113,10 @@ public static class WorldInspector
         {
             var olderComplete = saveSets.LastOrDefault(s => s.IsComplete && s.Number < latest.Number);
             var hint = olderComplete is null
-                ? "Não há nenhum save completo anterior nesta pasta."
-                : $"Existe o save {olderComplete.Number} completo, mas o jogo tentaria carregar o {latest.Number}.";
+                ? Strings.Inspector_NoOlderCompleteSave
+                : string.Format(CultureInfo.CurrentCulture, Strings.Inspector_OlderCompleteSave, olderComplete.Number, latest.Number);
             issues.Add(new(IssueSeverity.Error, "INCOMPLETE_LATEST_SAVE",
-                $"O save mais recente ({latest.Number}) está incompleto: falta {string.Join(", ", latest.MissingParts)}. " +
-                $"Se o servidor subir assim, ele gera um mundo NOVO por cima e apaga as construções antigas. {hint} " +
-                "Restaure um backup antes de iniciar."));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_IncompleteLatestSave, latest.Number, string.Join(", ", latest.MissingParts), hint)));
             return new WorldHealthReport
             {
                 WorldName = worldName,
@@ -129,7 +130,7 @@ public static class WorldInspector
         if (saveSets.Count > 1)
         {
             issues.Add(new(IssueSeverity.Info, "OLD_SAVES_PRESENT",
-                $"Há {saveSets.Count - 1} save(s) antigo(s) na pasta; o Valheim apaga esses arquivos ao carregar."));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_OldSavesPresent, saveSets.Count - 1)));
         }
 
         ChunkIndex? index = null;
@@ -140,7 +141,7 @@ public static class WorldInspector
         catch (Exception ex) when (ex is InvalidDataException or IOException)
         {
             issues.Add(new(IssueSeverity.Error, "BAD_CHUNK_INDEX",
-                $"O índice {Path.GetFileName(latest.Chunks)} está corrompido: {ex.Message}"));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_BadChunkIndex, Path.GetFileName(latest.Chunks), ex.Message)));
         }
 
         WorldMetadata? metadata = null;
@@ -151,13 +152,13 @@ public static class WorldInspector
         catch (Exception ex) when (ex is InvalidDataException or IOException)
         {
             issues.Add(new(IssueSeverity.Error, "BAD_METADATA",
-                $"O arquivo {Path.GetFileName(latest.Fwl2)} está corrompido: {ex.Message}"));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_BadMetadata, Path.GetFileName(latest.Fwl2), ex.Message)));
         }
 
         if (metadata is not null && !string.Equals(metadata.Name, worldName, StringComparison.Ordinal))
         {
             issues.Add(new(IssueSeverity.Warning, "NAME_MISMATCH",
-                $"O nome gravado no mundo é \"{metadata.Name}\", mas a pasta se chama \"{worldName}\" (maiúsculas contam)."));
+                string.Format(CultureInfo.CurrentCulture, Strings.Inspector_NameMismatch, metadata.Name, worldName)));
         }
 
         var saveSetFiles = latest.ExistingFiles.ToList();
@@ -169,7 +170,7 @@ public static class WorldInspector
                 if (!File.Exists(chunkPath))
                 {
                     issues.Add(new(IssueSeverity.Error, "MISSING_CHUNK",
-                        $"O save {latest.Number} referencia {entry.FileName} ({entry.ZdoCount} objetos), mas o arquivo não existe."));
+                        string.Format(CultureInfo.CurrentCulture, Strings.Inspector_MissingChunk, latest.Number, entry.FileName, entry.ZdoCount)));
                     continue;
                 }
 
@@ -180,19 +181,19 @@ public static class WorldInspector
                     if (header.ZdoCount != entry.ZdoCount)
                     {
                         issues.Add(new(IssueSeverity.Error, "CHUNK_COUNT_MISMATCH",
-                            $"{entry.FileName} tem {header.ZdoCount} objetos, mas o índice espera {entry.ZdoCount}."));
+                            string.Format(CultureInfo.CurrentCulture, Strings.Inspector_ChunkCountMismatch, entry.FileName, header.ZdoCount, entry.ZdoCount)));
                     }
 
                     if (header.Version != index.Version)
                     {
                         issues.Add(new(IssueSeverity.Warning, "CHUNK_VERSION_MISMATCH",
-                            $"{entry.FileName} está na versão {header.Version}, o índice na {index.Version}."));
+                            string.Format(CultureInfo.CurrentCulture, Strings.Inspector_ChunkVersionMismatch, entry.FileName, header.Version, index.Version)));
                     }
                 }
                 catch (Exception ex) when (ex is InvalidDataException or IOException or EndOfStreamException)
                 {
                     issues.Add(new(IssueSeverity.Error, "BAD_CHUNK",
-                        $"Não foi possível ler {entry.FileName}: {ex.Message}"));
+                        string.Format(CultureInfo.CurrentCulture, Strings.Inspector_BadChunk, entry.FileName, ex.Message)));
                 }
             }
         }

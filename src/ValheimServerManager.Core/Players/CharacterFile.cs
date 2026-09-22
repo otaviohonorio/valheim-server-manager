@@ -1,5 +1,7 @@
 using System.Buffers.Binary;
+using System.Globalization;
 using System.Security.Cryptography;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Worlds;
 
 namespace ValheimServerManager.Core.Players;
@@ -66,24 +68,24 @@ public static class CharacterFile
         var data = File.ReadAllBytes(path);
         if (data.Length < 8)
         {
-            throw new InvalidDataException("Arquivo de personagem muito curto.");
+            throw new InvalidDataException(Strings.Character_TooShort);
         }
 
         var length = BinaryPrimitives.ReadInt32LittleEndian(data);
         if (length <= 0 || 4 + length > data.Length)
         {
-            throw new InvalidDataException("Arquivo de personagem com tamanho inválido.");
+            throw new InvalidDataException(Strings.Character_BadSize);
         }
 
         var package = data[4..(4 + length)];
         var playerData = FindPlayerData(package)
-            ?? throw new InvalidDataException("Não encontrei os dados do jogador no arquivo.");
+            ?? throw new InvalidDataException(Strings.Character_NoPlayerData);
 
         var o = playerData.Offset;
         var version = BinaryPrimitives.ReadInt32LittleEndian(package.AsSpan(o));
         if (version < 33)
         {
-            throw new InvalidDataException($"Versão de personagem não suportada: {version}.");
+            throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Strings.Character_UnsupportedVersion, version));
         }
 
         o += 4 + (4 * 4);                         // version, max health, health, max stamina, time since death
@@ -93,7 +95,7 @@ public static class CharacterFile
         var itemsVersion = BinaryPrimitives.ReadInt32LittleEndian(package.AsSpan(o));
         if (itemsVersion is < 106 or > 200)
         {
-            throw new InvalidDataException($"Inventário em formato inesperado (versão {itemsVersion}).");
+            throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Strings.Character_UnexpectedInventory, itemsVersion));
         }
 
         var count = BinaryPrimitives.ReadUInt16LittleEndian(package.AsSpan(o + 4));

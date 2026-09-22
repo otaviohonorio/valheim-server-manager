@@ -12,4 +12,1015 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Backup_NoSaveToCopy" xml:space="preserve">
+    <value>O mundo "{0}" ainda não tem save para copiar.</value>
+  </data>
+  <data name="Backup_WorldHasProblems" xml:space="preserve">
+    <value>O mundo tem problemas e não pode ser copiado como backup válido:</value>
+  </data>
+  <data name="Backup_NoConsistentCopy" xml:space="preserve">
+    <value>O backup não conseguiu uma cópia consistente após 3 tentativas.</value>
+  </data>
+  <data name="Backup_FailedVerification" xml:space="preserve">
+    <value>O backup não passou na verificação:</value>
+  </data>
+  <data name="Backup_NoSaveFound" xml:space="preserve">
+    <value>Nenhum save encontrado.</value>
+  </data>
+  <data name="Backup_FileMissing" xml:space="preserve">
+    <value>Falta {0}.</value>
+  </data>
+  <data name="Backup_FileDiffers" xml:space="preserve">
+    <value>{0} está diferente do original.</value>
+  </data>
+  <data name="Backup_ShouldContainSave" xml:space="preserve">
+    <value>O backup deveria conter o save {0}.</value>
+  </data>
+  <data name="Backup_QuarantineNotRestorable" xml:space="preserve">
+    <value>Cópias de quarentena guardam um mundo com defeito e não podem ser restauradas.</value>
+  </data>
+  <data name="Backup_WrongWorld" xml:space="preserve">
+    <value>Este backup é do mundo "{0}", e o perfil usa "{1}". Troque o mundo do perfil antes de restaurar.</value>
+  </data>
+  <data name="Backup_ChosenFailedVerification" xml:space="preserve">
+    <value>O backup escolhido não passou na verificação:</value>
+  </data>
+  <data name="Backup_NoteBeforeRestore" xml:space="preserve">
+    <value>Antes de restaurar {0}</value>
+  </data>
+  <data name="Backup_NoteReplacedBroken" xml:space="preserve">
+    <value>Mundo com defeito substituído por {0}</value>
+  </data>
+  <data name="Backup_RestoredCopyFailedInspection" xml:space="preserve">
+    <value>A cópia restaurada não passou na inspeção:</value>
+  </data>
+  <data name="Backup_DeleteOnlyManaged" xml:space="preserve">
+    <value>Só é possível excluir backups da pasta de backups do gerenciador.</value>
+  </data>
+  <data name="Profile_DefaultDisplayName" xml:space="preserve">
+    <value>Meu servidor</value>
+  </data>
+  <data name="Process_WindowsDidNotStart" xml:space="preserve">
+    <value>O Windows não iniciou o processo do servidor.</value>
+  </data>
+  <data name="Validator_ServerDirRequired" xml:space="preserve">
+    <value>Informe a pasta do Valheim Dedicated Server.</value>
+  </data>
+  <data name="Validator_ServerExeNotFound" xml:space="preserve">
+    <value>Não encontrei {0} em "{1}".</value>
+  </data>
+  <data name="Validator_SaveDirRequired" xml:space="preserve">
+    <value>Informe a pasta de saves do servidor.</value>
+  </data>
+  <data name="Validator_SaveDirNotFullPath" xml:space="preserve">
+    <value>A pasta de saves precisa ser um caminho completo (ex.: D:\Valheim\ServerSave).</value>
+  </data>
+  <data name="Validator_SaveDirIsGameFolder" xml:space="preserve">
+    <value>Esta é a pasta de saves do próprio jogo. Servidor e jogo abrindo os mesmos arquivos foi o que apagou o mundo em 16/09/2026. Use uma pasta só do servidor.</value>
+  </data>
+  <data name="Validator_SaveDirInsideGameFolder" xml:space="preserve">
+    <value>A pasta de saves fica dentro da pasta do jogo. Funciona, mas é fácil confundir os dois. Prefira outro lugar.</value>
+  </data>
+  <data name="Validator_SaveDirInsideAppFolder" xml:space="preserve">
+    <value>A pasta de saves fica dentro da pasta do programa, que é trocada a cada atualização e apagada ao desinstalar. Use uma pasta só do servidor.</value>
+  </data>
+  <data name="Validator_SaveDirInCloud" xml:space="preserve">
+    <value>A pasta de saves fica no {0}. Ele trava e troca arquivos enquanto o servidor salva e pode deixar saves antigos só na nuvem. Use uma pasta fora do {0} (os backups podem ficar lá).</value>
+  </data>
+  <data name="Validator_BackupsInsideWorlds" xml:space="preserve">
+    <value>Os backups não podem ficar dentro de worlds_local: o Valheim trataria cada backup como um mundo.</value>
+  </data>
+  <data name="Validator_BackupsInsideAppFolder" xml:space="preserve">
+    <value>Os backups não podem ficar dentro da pasta do programa: ela é trocada a cada atualização e apagada ao desinstalar.</value>
+  </data>
+  <data name="Validator_BackupDirNotFullPath" xml:space="preserve">
+    <value>A pasta de backups precisa ser um caminho completo.</value>
+  </data>
+  <data name="Validator_ServerNameRequired" xml:space="preserve">
+    <value>Dê um nome ao servidor.</value>
+  </data>
+  <data name="Validator_ServerNameQuotes" xml:space="preserve">
+    <value>O nome do servidor não pode ter aspas.</value>
+  </data>
+  <data name="Validator_WorldNameRequired" xml:space="preserve">
+    <value>Informe o nome do mundo.</value>
+  </data>
+  <data name="Validator_WorldNameInvalidChars" xml:space="preserve">
+    <value>O nome do mundo tem caracteres que não podem ser usados em nome de pasta.</value>
+  </data>
+  <data name="Validator_WorldNameIsGameBackup" xml:space="preserve">
+    <value>Esse nome é de um backup automático do Valheim, não de um mundo.</value>
+  </data>
+  <data name="Validator_PortRange" xml:space="preserve">
+    <value>A porta deve estar entre 1024 e 65534 (o servidor usa ela e a seguinte).</value>
+  </data>
+  <data name="Validator_PasswordRequired" xml:space="preserve">
+    <value>O servidor dedicado exige senha.</value>
+  </data>
+  <data name="Validator_PasswordTooShort" xml:space="preserve">
+    <value>A senha precisa ter pelo menos {0} caracteres.</value>
+  </data>
+  <data name="Validator_PasswordQuotes" xml:space="preserve">
+    <value>A senha não pode ter aspas.</value>
+  </data>
+  <data name="Validator_PasswordInServerName" xml:space="preserve">
+    <value>A senha não pode aparecer dentro do nome do servidor.</value>
+  </data>
+  <data name="Validator_SaveIntervalTooShort" xml:space="preserve">
+    <value>O intervalo de save precisa ser de pelo menos 60 segundos.</value>
+  </data>
+  <data name="Validator_SaveIntervalLong" xml:space="preserve">
+    <value>Mais de 1 hora entre saves: uma queda de energia perde muito progresso.</value>
+  </data>
+  <data name="Validator_GameBackupCountRange" xml:space="preserve">
+    <value>Quantidade de backups do jogo deve ficar entre 1 e 100.</value>
+  </data>
+  <data name="Validator_StopTimeoutRange" xml:space="preserve">
+    <value>O tempo de espera para desligar deve ficar entre 15 e 900 segundos.</value>
+  </data>
+  <data name="Validator_RetentionRange" xml:space="preserve">
+    <value>A retenção de backups automáticos deve ficar entre 1 e 500.</value>
+  </data>
+  <data name="Validator_NoBackupBeforeStart" xml:space="preserve">
+    <value>Sem backup antes de iniciar, um mundo corrompido não tem volta.</value>
+  </data>
+  <data name="Validator_ManagedArgument" xml:space="preserve">
+    <value>"{0}" é controlado pelo gerenciador; configure pela tela em vez de argumentos extras.</value>
+  </data>
+  <data name="Validator_HammerIsCreative" xml:space="preserve">
+    <value>O preset Martelo já liga construção sem custo: o servidor fica sempre em modo criativo.</value>
+  </data>
+  <data name="Import_NoServerLine" xml:space="preserve">
+    <value>Não encontrei uma linha que execute valheim_server no arquivo.</value>
+  </data>
+  <data name="Import_NoSaveDir" xml:space="preserve">
+    <value>O .bat não usa -savedir: o servidor estava gravando na pasta do próprio jogo. Escolha uma pasta só do servidor antes de iniciar.</value>
+  </data>
+  <data name="Import_UnknownPreset" xml:space="preserve">
+    <value>Preset desconhecido ignorado: {0}</value>
+  </data>
+  <data name="Import_ModifierIgnored" xml:space="preserve">
+    <value>Modificador ignorado: {0} {1}</value>
+  </data>
+  <data name="Import_UnknownKey" xml:space="preserve">
+    <value>Chave desconhecida ignorada: {0}</value>
+  </data>
+  <data name="Verify_ServerName" xml:space="preserve">
+    <value>Nome do servidor</value>
+  </data>
+  <data name="Verify_Port" xml:space="preserve">
+    <value>Porta</value>
+  </data>
+  <data name="Verify_World" xml:space="preserve">
+    <value>Mundo</value>
+  </data>
+  <data name="Verify_Password" xml:space="preserve">
+    <value>Senha</value>
+  </data>
+  <data name="Verify_Public" xml:space="preserve">
+    <value>Servidor público</value>
+  </data>
+  <data name="Verify_Crossplay" xml:space="preserve">
+    <value>Crossplay</value>
+  </data>
+  <data name="Verify_SaveDir" xml:space="preserve">
+    <value>Pasta de saves</value>
+  </data>
+  <data name="Verify_LogFile" xml:space="preserve">
+    <value>Arquivo de log</value>
+  </data>
+  <data name="Verify_SaveInterval" xml:space="preserve">
+    <value>Intervalo de save</value>
+  </data>
+  <data name="Verify_GameBackups" xml:space="preserve">
+    <value>Backups do Valheim</value>
+  </data>
+  <data name="Verify_GameBackupShort" xml:space="preserve">
+    <value>Primeiro backup do Valheim</value>
+  </data>
+  <data name="Verify_GameBackupLong" xml:space="preserve">
+    <value>Intervalo dos backups do Valheim</value>
+  </data>
+  <data name="Verify_Preset" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="Verify_Absent" xml:space="preserve">
+    <value>(ausente)</value>
+  </data>
+  <data name="Verify_ProfilePassword" xml:space="preserve">
+    <value>senha do perfil</value>
+  </data>
+  <data name="Verify_OtherPassword" xml:space="preserve">
+    <value>outra senha</value>
+  </data>
+  <data name="Verify_Modifier" xml:space="preserve">
+    <value>Modificador {0}</value>
+  </data>
+  <data name="Verify_Key" xml:space="preserve">
+    <value>Chave {0}</value>
+  </data>
+  <data name="Verify_ExtraArguments" xml:space="preserve">
+    <value>Argumentos extras</value>
+  </data>
+  <data name="Verify_PresetApplied" xml:space="preserve">
+    <value>Preset aplicado pelo servidor</value>
+  </data>
+  <data name="Verify_NoneInLog" xml:space="preserve">
+    <value>(nenhum no log)</value>
+  </data>
+  <data name="Verify_NotApplied" xml:space="preserve">
+    <value>(não aplicado)</value>
+  </data>
+  <data name="Verify_ModifierApplied" xml:space="preserve">
+    <value>Modificador {0} aplicado pelo servidor</value>
+  </data>
+  <data name="Verify_Yes" xml:space="preserve">
+    <value>sim</value>
+  </data>
+  <data name="Verify_No" xml:space="preserve">
+    <value>não</value>
+  </data>
+  <data name="Verify_On" xml:space="preserve">
+    <value>ligado</value>
+  </data>
+  <data name="Verify_Off" xml:space="preserve">
+    <value>desligado</value>
+  </data>
+  <data name="Verify_None" xml:space="preserve">
+    <value>(nenhum)</value>
+  </data>
+  <data name="Modifier_Preset_Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="Modifier_Preset_Normal_Desc" xml:space="preserve">
+    <value>Experiência padrão do Valheim.</value>
+  </data>
+  <data name="Modifier_Preset_Casual" xml:space="preserve">
+    <value>Casual</value>
+  </data>
+  <data name="Modifier_Preset_Casual_Desc" xml:space="preserve">
+    <value>Combate fácil, sem perder itens ao morrer, portais liberados.</value>
+  </data>
+  <data name="Modifier_Preset_Easy" xml:space="preserve">
+    <value>Fácil</value>
+  </data>
+  <data name="Modifier_Preset_Easy_Desc" xml:space="preserve">
+    <value>Inimigos mais fracos.</value>
+  </data>
+  <data name="Modifier_Preset_Hard" xml:space="preserve">
+    <value>Difícil</value>
+  </data>
+  <data name="Modifier_Preset_Hard_Desc" xml:space="preserve">
+    <value>Inimigos mais fortes.</value>
+  </data>
+  <data name="Modifier_Preset_Hardcore" xml:space="preserve">
+    <value>Hardcore</value>
+  </data>
+  <data name="Modifier_Preset_Hardcore_Desc" xml:space="preserve">
+    <value>Morte apaga o personagem.</value>
+  </data>
+  <data name="Modifier_Preset_Immersive" xml:space="preserve">
+    <value>Imersivo</value>
+  </data>
+  <data name="Modifier_Preset_Immersive_Desc" xml:space="preserve">
+    <value>Sem mapa, portais restritos.</value>
+  </data>
+  <data name="Modifier_Preset_Hammer" xml:space="preserve">
+    <value>Martelo (criativo)</value>
+  </data>
+  <data name="Modifier_Preset_Hammer_Desc" xml:space="preserve">
+    <value>Construção sem custo, sem raids. Sempre criativo.</value>
+  </data>
+  <data name="Modifier_Combat_VeryEasy" xml:space="preserve">
+    <value>Muito fácil</value>
+  </data>
+  <data name="Modifier_Combat_VeryEasy_Desc" xml:space="preserve">
+    <value>Inimigos causam bem menos dano.</value>
+  </data>
+  <data name="Modifier_Combat_Easy" xml:space="preserve">
+    <value>Fácil</value>
+  </data>
+  <data name="Modifier_Combat_Easy_Desc" xml:space="preserve">
+    <value>Inimigos causam menos dano.</value>
+  </data>
+  <data name="Modifier_Combat_Default" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Modifier_Combat_Default_Desc" xml:space="preserve">
+    <value>Dano normal.</value>
+  </data>
+  <data name="Modifier_Combat_Hard" xml:space="preserve">
+    <value>Difícil</value>
+  </data>
+  <data name="Modifier_Combat_Hard_Desc" xml:space="preserve">
+    <value>Inimigos causam mais dano.</value>
+  </data>
+  <data name="Modifier_Combat_VeryHard" xml:space="preserve">
+    <value>Muito difícil</value>
+  </data>
+  <data name="Modifier_Combat_VeryHard_Desc" xml:space="preserve">
+    <value>Inimigos causam muito mais dano.</value>
+  </data>
+  <data name="Modifier_Death_Casual" xml:space="preserve">
+    <value>Casual</value>
+  </data>
+  <data name="Modifier_Death_Casual_Desc" xml:space="preserve">
+    <value>Mantém o equipamento; o resto cai. Perde 1% de habilidade.</value>
+  </data>
+  <data name="Modifier_Death_VeryEasy" xml:space="preserve">
+    <value>Muito fácil</value>
+  </data>
+  <data name="Modifier_Death_VeryEasy_Desc" xml:space="preserve">
+    <value>Tudo cai. Perde 1% de habilidade.</value>
+  </data>
+  <data name="Modifier_Death_Easy" xml:space="preserve">
+    <value>Fácil</value>
+  </data>
+  <data name="Modifier_Death_Easy_Desc" xml:space="preserve">
+    <value>Tudo cai. Perde 2,5% de habilidade.</value>
+  </data>
+  <data name="Modifier_Death_Default" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Modifier_Death_Default_Desc" xml:space="preserve">
+    <value>Tudo cai. Perde 5% de habilidade.</value>
+  </data>
+  <data name="Modifier_Death_Hard" xml:space="preserve">
+    <value>Difícil</value>
+  </data>
+  <data name="Modifier_Death_Hard_Desc" xml:space="preserve">
+    <value>Equipamento cai, o resto é destruído. Perde 7,5%.</value>
+  </data>
+  <data name="Modifier_Death_Hardcore" xml:space="preserve">
+    <value>Hardcore</value>
+  </data>
+  <data name="Modifier_Death_Hardcore_Desc" xml:space="preserve">
+    <value>Tudo é destruído. Perde 100% de habilidade.</value>
+  </data>
+  <data name="Modifier_Resources_MuchLess" xml:space="preserve">
+    <value>Muito menos (0,5x)</value>
+  </data>
+  <data name="Modifier_Resources_MuchLess_Desc" xml:space="preserve">
+    <value>Metade dos recursos.</value>
+  </data>
+  <data name="Modifier_Resources_Less" xml:space="preserve">
+    <value>Menos (0,75x)</value>
+  </data>
+  <data name="Modifier_Resources_Less_Desc" xml:space="preserve">
+    <value>Três quartos dos recursos.</value>
+  </data>
+  <data name="Modifier_Resources_Default" xml:space="preserve">
+    <value>Padrão (1x)</value>
+  </data>
+  <data name="Modifier_Resources_Default_Desc" xml:space="preserve">
+    <value>Quantidade normal.</value>
+  </data>
+  <data name="Modifier_Resources_More" xml:space="preserve">
+    <value>Mais (1,5x)</value>
+  </data>
+  <data name="Modifier_Resources_More_Desc" xml:space="preserve">
+    <value>50% a mais. Não afeta peixes, troféus e drops de chefe.</value>
+  </data>
+  <data name="Modifier_Resources_MuchMore" xml:space="preserve">
+    <value>Muito mais (2x)</value>
+  </data>
+  <data name="Modifier_Resources_MuchMore_Desc" xml:space="preserve">
+    <value>O dobro.</value>
+  </data>
+  <data name="Modifier_Resources_Most" xml:space="preserve">
+    <value>Máximo (3x)</value>
+  </data>
+  <data name="Modifier_Resources_Most_Desc" xml:space="preserve">
+    <value>O triplo.</value>
+  </data>
+  <data name="Modifier_Raids_None" xml:space="preserve">
+    <value>Nenhuma</value>
+  </data>
+  <data name="Modifier_Raids_None_Desc" xml:space="preserve">
+    <value>Sem raids (ataques noturnos continuam).</value>
+  </data>
+  <data name="Modifier_Raids_MuchLess" xml:space="preserve">
+    <value>Muito menos</value>
+  </data>
+  <data name="Modifier_Raids_MuchLess_Desc" xml:space="preserve">
+    <value>Raids bem raras.</value>
+  </data>
+  <data name="Modifier_Raids_Less" xml:space="preserve">
+    <value>Menos</value>
+  </data>
+  <data name="Modifier_Raids_Less_Desc" xml:space="preserve">
+    <value>Raids raras.</value>
+  </data>
+  <data name="Modifier_Raids_Default" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Modifier_Raids_Default_Desc" xml:space="preserve">
+    <value>Frequência normal.</value>
+  </data>
+  <data name="Modifier_Raids_More" xml:space="preserve">
+    <value>Mais</value>
+  </data>
+  <data name="Modifier_Raids_More_Desc" xml:space="preserve">
+    <value>Raids frequentes.</value>
+  </data>
+  <data name="Modifier_Raids_MuchMore" xml:space="preserve">
+    <value>Muito mais</value>
+  </data>
+  <data name="Modifier_Raids_MuchMore_Desc" xml:space="preserve">
+    <value>Raids muito frequentes.</value>
+  </data>
+  <data name="Modifier_Portals_Casual" xml:space="preserve">
+    <value>Casual</value>
+  </data>
+  <data name="Modifier_Portals_Casual_Desc" xml:space="preserve">
+    <value>Qualquer item passa pelo portal.</value>
+  </data>
+  <data name="Modifier_Portals_Default" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Modifier_Portals_Default_Desc" xml:space="preserve">
+    <value>Minérios e metais não passam.</value>
+  </data>
+  <data name="Modifier_Portals_Hard" xml:space="preserve">
+    <value>Difícil</value>
+  </data>
+  <data name="Modifier_Portals_Hard_Desc" xml:space="preserve">
+    <value>Portais só entre pontos já descobertos.</value>
+  </data>
+  <data name="Modifier_Portals_VeryHard" xml:space="preserve">
+    <value>Muito difícil</value>
+  </data>
+  <data name="Modifier_Portals_VeryHard_Desc" xml:space="preserve">
+    <value>Sem portais.</value>
+  </data>
+  <data name="Summary_Combat" xml:space="preserve">
+    <value>Combate</value>
+  </data>
+  <data name="Summary_DeathPenalty" xml:space="preserve">
+    <value>Penalidade de morte</value>
+  </data>
+  <data name="Summary_Resources" xml:space="preserve">
+    <value>Recursos</value>
+  </data>
+  <data name="Summary_Raids" xml:space="preserve">
+    <value>Raids</value>
+  </data>
+  <data name="Summary_Portals" xml:space="preserve">
+    <value>Portais</value>
+  </data>
+  <data name="Summary_CreativeByHammer" xml:space="preserve">
+    <value>Modo criativo (pelo preset Martelo)</value>
+  </data>
+  <data name="Summary_CreativeMode" xml:space="preserve">
+    <value>Modo criativo — construção e craft sem custo</value>
+  </data>
+  <data name="Summary_PlayerEvents" xml:space="preserve">
+    <value>Eventos por jogador</value>
+  </data>
+  <data name="Summary_PassiveMobs" xml:space="preserve">
+    <value>Inimigos passivos</value>
+  </data>
+  <data name="Summary_NoMap" xml:space="preserve">
+    <value>Sem mapa</value>
+  </data>
+  <data name="Summary_Public" xml:space="preserve">
+    <value>Público</value>
+  </data>
+  <data name="Summary_Private" xml:space="preserve">
+    <value>Privado</value>
+  </data>
+  <data name="Summary_Port" xml:space="preserve">
+    <value>porta {0}</value>
+  </data>
+  <data name="Summary_BackupBoth" xml:space="preserve">
+    <value>backup antes de iniciar e depois de parar</value>
+  </data>
+  <data name="Summary_BackupBeforeOnly" xml:space="preserve">
+    <value>backup só antes de iniciar</value>
+  </data>
+  <data name="Summary_BackupAfterOnly" xml:space="preserve">
+    <value>backup só depois de parar</value>
+  </data>
+  <data name="Summary_NoAutoBackup" xml:space="preserve">
+    <value>sem backup automático</value>
+  </data>
+  <data name="Summary_PresetLabel" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="Summary_ModifiersLabel" xml:space="preserve">
+    <value>Modificadores</value>
+  </data>
+  <data name="Summary_NoModifiers" xml:space="preserve">
+    <value>nenhum (tudo no padrão)</value>
+  </data>
+  <data name="Summary_NoModifiersBeyondPreset" xml:space="preserve">
+    <value>nenhum além do preset {0}</value>
+  </data>
+  <data name="Summary_WorldOptionsLabel" xml:space="preserve">
+    <value>Opções do mundo</value>
+  </data>
+  <data name="Summary_NoWorldOptions" xml:space="preserve">
+    <value>nenhuma</value>
+  </data>
+  <data name="Summary_AccessLabel" xml:space="preserve">
+    <value>Acesso</value>
+  </data>
+  <data name="Summary_SavesLabel" xml:space="preserve">
+    <value>Saves</value>
+  </data>
+  <data name="Summary_SaveEvery" xml:space="preserve">
+    <value>a cada {0}</value>
+  </data>
+  <data name="Summary_MaintenanceLabel" xml:space="preserve">
+    <value>Manutenção</value>
+  </data>
+  <data name="Summary_MaintenanceOn" xml:space="preserve">
+    <value>corrige duplicados e marcas ao parar</value>
+  </data>
+  <data name="Summary_MaintenanceOff" xml:space="preserve">
+    <value>desligada (o mundo não é corrigido ao parar)</value>
+  </data>
+  <data name="Summary_ExtraArgumentsLabel" xml:space="preserve">
+    <value>Argumentos extras</value>
+  </data>
+  <data name="Inspector_NewWorld" xml:space="preserve">
+    <value>A pasta do mundo "{0}" não existe. O servidor vai criar um mundo NOVO, com seed aleatória.</value>
+  </data>
+  <data name="Inspector_LegacyFiles" xml:space="preserve">
+    <value>Há arquivos no formato antigo (.db/.fwl). O Valheim 1.0 converte na primeira gravação.</value>
+  </data>
+  <data name="Inspector_EmptyWorldFolder" xml:space="preserve">
+    <value>A pasta do mundo existe, mas não tem nenhum save (_main.N.*). O servidor vai gerar um mundo NOVO.</value>
+  </data>
+  <data name="Inspector_BadMetadata" xml:space="preserve">
+    <value>O arquivo {0} está corrompido: {1}</value>
+  </data>
+  <data name="Inspector_NewWorldSeeded" xml:space="preserve">
+    <value>Mundo novo com a seed "{0}". Ele será gerado no primeiro início do servidor.</value>
+  </data>
+  <data name="Inspector_NoOlderCompleteSave" xml:space="preserve">
+    <value>Não há nenhum save completo anterior nesta pasta.</value>
+  </data>
+  <data name="Inspector_OlderCompleteSave" xml:space="preserve">
+    <value>Existe o save {0} completo, mas o jogo tentaria carregar o {1}.</value>
+  </data>
+  <data name="Inspector_IncompleteLatestSave" xml:space="preserve">
+    <value>O save mais recente ({0}) está incompleto: falta {1}. Se o servidor subir assim, ele gera um mundo NOVO por cima e apaga as construções antigas. {2} Restaure um backup antes de iniciar.</value>
+  </data>
+  <data name="Inspector_OldSavesPresent" xml:space="preserve">
+    <value>Há {0} save(s) antigo(s) na pasta; o Valheim apaga esses arquivos ao carregar.</value>
+  </data>
+  <data name="Inspector_BadChunkIndex" xml:space="preserve">
+    <value>O índice {0} está corrompido: {1}</value>
+  </data>
+  <data name="Inspector_NameMismatch" xml:space="preserve">
+    <value>O nome gravado no mundo é "{0}", mas a pasta se chama "{1}" (maiúsculas contam).</value>
+  </data>
+  <data name="Inspector_MissingChunk" xml:space="preserve">
+    <value>O save {0} referencia {1} ({2} objetos), mas o arquivo não existe.</value>
+  </data>
+  <data name="Inspector_ChunkCountMismatch" xml:space="preserve">
+    <value>{0} tem {1} objetos, mas o índice espera {2}.</value>
+  </data>
+  <data name="Inspector_ChunkVersionMismatch" xml:space="preserve">
+    <value>{0} está na versão {1}, o índice na {2}.</value>
+  </data>
+  <data name="Inspector_BadChunk" xml:space="preserve">
+    <value>Não foi possível ler {0}: {1}</value>
+  </data>
+  <data name="Seed_Required" xml:space="preserve">
+    <value>Informe uma seed ou gere uma aleatória.</value>
+  </data>
+  <data name="Seed_TooLong" xml:space="preserve">
+    <value>A seed pode ter no máximo {0} caracteres (como no jogo).</value>
+  </data>
+  <data name="Seed_InvalidChars" xml:space="preserve">
+    <value>Use só letras sem acento e números na seed.</value>
+  </data>
+  <data name="Creator_NoCompleteSave" xml:space="preserve">
+    <value>a pasta não tem um save completo.</value>
+  </data>
+  <data name="Creator_WorldUnusable" xml:space="preserve">
+    <value>Esse mundo não pode ser usado: {0}</value>
+  </data>
+  <data name="Creator_AlreadyInSaveDir" xml:space="preserve">
+    <value>O mundo já está na pasta de saves deste servidor.</value>
+  </data>
+  <data name="Creator_CopyNotIntact" xml:space="preserve">
+    <value>A cópia do mundo não ficou íntegra.</value>
+  </data>
+  <data name="Creator_WorldExists" xml:space="preserve">
+    <value>Já existe um mundo "{0}" nesta pasta de saves. Escolha outro nome ou outra pasta.</value>
+  </data>
+  <data name="Chunks_IndexTooShort" xml:space="preserve">
+    <value>Índice de chunks muito curto ({0} bytes; mínimo {1}).</value>
+  </data>
+  <data name="Chunks_IndexLengthMismatch" xml:space="preserve">
+    <value>Índice de chunks declara {0} entradas ({1} bytes), mas tem {2} bytes.</value>
+  </data>
+  <data name="Chunks_IndexTotalMismatch" xml:space="preserve">
+    <value>Índice de chunks declara {0} objetos no total, mas as entradas somam {1}.</value>
+  </data>
+  <data name="Chunks_NoHeader" xml:space="preserve">
+    <value>Arquivo de chunk sem cabeçalho.</value>
+  </data>
+  <data name="Metadata_SizeMismatch" xml:space="preserve">
+    <value>Tamanho declarado ({0}) não confere com o arquivo ({1}).</value>
+  </data>
+  <data name="Metadata_BadKeyCount" xml:space="preserve">
+    <value>Quantidade de chaves inválida no .fwl2: {0}.</value>
+  </data>
+  <data name="Metadata_BadPlayerCount" xml:space="preserve">
+    <value>Quantidade de jogadores inválida no .fwl2: {0}.</value>
+  </data>
+  <data name="Metadata_Truncated" xml:space="preserve">
+    <value>Arquivo .fwl2 terminou antes do esperado.</value>
+  </data>
+  <data name="Recovery_BadChunkName" xml:space="preserve">
+    <value>Nome de chunk inválido: {0}</value>
+  </data>
+  <data name="Recovery_ChunkVersionMismatch" xml:space="preserve">
+    <value>{0} está na versão {1}; os outros na {2}.</value>
+  </data>
+  <data name="Recovery_NoChunks" xml:space="preserve">
+    <value>Nenhum chunk informado.</value>
+  </data>
+  <data name="Recovery_DuplicateRevision" xml:space="preserve">
+    <value>Mais de uma revisão para o mesmo chunk ({0}, {1}). Escolha só uma.</value>
+  </data>
+  <data name="Character_TooShort" xml:space="preserve">
+    <value>Arquivo de personagem muito curto.</value>
+  </data>
+  <data name="Character_BadSize" xml:space="preserve">
+    <value>Arquivo de personagem com tamanho inválido.</value>
+  </data>
+  <data name="Character_NoPlayerData" xml:space="preserve">
+    <value>Não encontrei os dados do jogador no arquivo.</value>
+  </data>
+  <data name="Character_UnsupportedVersion" xml:space="preserve">
+    <value>Versão de personagem não suportada: {0}.</value>
+  </data>
+  <data name="Character_UnexpectedInventory" xml:space="preserve">
+    <value>Inventário em formato inesperado (versão {0}).</value>
+  </data>
+  <data name="Repair_CategoryMushrooms" xml:space="preserve">
+    <value>cogumelos</value>
+  </data>
+  <data name="Repair_CategoryCopperTin" xml:space="preserve">
+    <value>veios de cobre e estanho</value>
+  </data>
+  <data name="Repair_CategorySpawners" xml:space="preserve">
+    <value>geradores de inimigos</value>
+  </data>
+  <data name="Repair_CategoryZoneControls" xml:space="preserve">
+    <value>controles de spawn de zona</value>
+  </data>
+  <data name="Repair_CategoryTreasureChests" xml:space="preserve">
+    <value>baús de tesouro</value>
+  </data>
+  <data name="Repair_CategoryEntrances" xml:space="preserve">
+    <value>entradas e estruturas</value>
+  </data>
+  <data name="Repair_CategoryPickables" xml:space="preserve">
+    <value>coletáveis (pedras, galhos, sílex, flores, frutas)</value>
+  </data>
+  <data name="Repair_CategoryTrees" xml:space="preserve">
+    <value>árvores e troncos</value>
+  </data>
+  <data name="Repair_CategoryRocks" xml:space="preserve">
+    <value>rochas</value>
+  </data>
+  <data name="Repair_CategoryBushes" xml:space="preserve">
+    <value>arbustos</value>
+  </data>
+  <data name="Repair_CategoryOtherNature" xml:space="preserve">
+    <value>outros objetos da natureza</value>
+  </data>
+  <data name="Repair_CategoryLocationContent" xml:space="preserve">
+    <value>conteúdo de ruínas e locais repetidos</value>
+  </data>
+  <data name="Repair_CategoryStacked" xml:space="preserve">
+    <value>objetos empilhados no mesmo ponto</value>
+  </data>
+  <data name="Repair_VerificationFailed" xml:space="preserve">
+    <value>A conferência do mundo reparado falhou.</value>
+  </data>
+  <data name="Repair_WorldMustBeIntact" xml:space="preserve">
+    <value>O mundo precisa estar íntegro para ser analisado:</value>
+  </data>
+  <data name="World_FileAlreadyExists" xml:space="preserve">
+    <value>O arquivo {0} já existe; nada foi alterado.</value>
+  </data>
+  <data name="CheatMarks_VerificationFailed" xml:space="preserve">
+    <value>A conferência do mundo limpo falhou.</value>
+  </data>
+  <data name="CheatMarks_WorldMustBeIntact" xml:space="preserve">
+    <value>O mundo precisa estar íntegro:</value>
+  </data>
+  <data name="Objects_BadObjectCount" xml:space="preserve">
+    <value>Quantidade de objetos inválida no chunk: {0}.</value>
+  </data>
+  <data name="Objects_TrailingBytes" xml:space="preserve">
+    <value>O chunk tem {0} bytes sobrando depois de {1} objetos.</value>
+  </data>
+  <data name="Objects_ChunkTruncated" xml:space="preserve">
+    <value>O chunk terminou antes do esperado.</value>
+  </data>
+  <data name="Objects_ChunkEndedMidObject" xml:space="preserve">
+    <value>O chunk terminou no meio de um objeto.</value>
+  </data>
+  <data name="Objects_ZoneBlockUnreadable" xml:space="preserve">
+    <value>O bloco de zonas do .db2 não pôde ser lido.</value>
+  </data>
+  <data name="Objects_Db2TooShort" xml:space="preserve">
+    <value>Arquivo .db2 muito curto.</value>
+  </data>
+  <data name="Objects_BadZoneBlockSize" xml:space="preserve">
+    <value>Tamanho do bloco de zonas inválido no .db2: {0}.</value>
+  </data>
+  <data name="Objects_BadZoneCount" xml:space="preserve">
+    <value>Quantidade de zonas inválida no .db2: {0}.</value>
+  </data>
+  <data name="Manager_ProfileDoesNotExist" xml:space="preserve">
+    <value>Perfil {0} não existe.</value>
+  </data>
+  <data name="Manager_ProfileNotFound" xml:space="preserve">
+    <value>Perfil não encontrado.</value>
+  </data>
+  <data name="Manager_StopBeforeDeletingProfile" xml:space="preserve">
+    <value>Pare o servidor antes de excluir o perfil.</value>
+  </data>
+  <data name="Manager_ImportedServerName" xml:space="preserve">
+    <value>Servidor importado</value>
+  </data>
+  <data name="Controller_ConfigVerified" xml:space="preserve">
+    <value>Configuração conferida: o servidor usa exatamente o perfil ({0} opções).</value>
+  </data>
+  <data name="Controller_ConfigMismatch" xml:space="preserve">
+    <value>O servidor não está usando a configuração salva:</value>
+  </data>
+  <data name="Controller_AlreadyRunning" xml:space="preserve">
+    <value>Este servidor já está em execução.</value>
+  </data>
+  <data name="Controller_WorldInUse" xml:space="preserve">
+    <value>Já existe um valheim_server (PID {0}) usando este mundo e esta pasta de saves.</value>
+  </data>
+  <data name="Controller_PortInUse" xml:space="preserve">
+    <value>A porta {0} já está em uso pelo servidor "{1}" (PID {2}).</value>
+  </data>
+  <data name="Controller_ScanFailed" xml:space="preserve">
+    <value>Não foi possível listar servidores em execução: {0}</value>
+  </data>
+  <data name="Controller_PortBusy" xml:space="preserve">
+    <value>Outro programa já usa a porta UDP {0} ou {1}.</value>
+  </data>
+  <data name="Controller_WorldDuplicates" xml:space="preserve">
+    <value>O mundo tem {0:N0} objetos duplicados e {1} zonas que o jogo vai gerar de novo por cima ({2}). Isso causa itens que "voltam", minério que quebra duas vezes e inimigos em dobro. Use "Reparar mundo" no Painel antes de iniciar.</value>
+  </data>
+  <data name="Controller_CannotStart" xml:space="preserve">
+    <value>O servidor não pode iniciar.</value>
+  </data>
+  <data name="Controller_ConfirmWarnings" xml:space="preserve">
+    <value>Confirme os avisos antes de iniciar.</value>
+  </data>
+  <data name="Controller_StartingCreative" xml:space="preserve">
+    <value>Iniciando em modo criativo…</value>
+  </data>
+  <data name="Controller_Starting" xml:space="preserve">
+    <value>Iniciando…</value>
+  </data>
+  <data name="Controller_SaveAlreadyBackedUp" xml:space="preserve">
+    <value>O save {0} já tem backup verificado; pulando a cópia.</value>
+  </data>
+  <data name="Controller_BackingUpBeforeStart" xml:space="preserve">
+    <value>Fazendo backup antes de iniciar…</value>
+  </data>
+  <data name="Controller_BackupFailedTitle" xml:space="preserve">
+    <value>Backup falhou</value>
+  </data>
+  <data name="Controller_NotStartedBackupFailed" xml:space="preserve">
+    <value>O servidor não foi iniciado porque o backup falhou: {0}</value>
+  </data>
+  <data name="Controller_BackupBeforeStartFailed" xml:space="preserve">
+    <value>Backup antes de iniciar falhou: {0}</value>
+  </data>
+  <data name="Controller_StartFailedTitle" xml:space="preserve">
+    <value>Falha ao iniciar</value>
+  </data>
+  <data name="Controller_WindowsCouldNotStart" xml:space="preserve">
+    <value>O Windows não conseguiu iniciar o servidor: {0}</value>
+  </data>
+  <data name="Controller_ProcessStarted" xml:space="preserve">
+    <value>Processo iniciado (PID {0}). Carregando o mundo…</value>
+  </data>
+  <data name="Controller_ServerStarting" xml:space="preserve">
+    <value>Servidor iniciando.</value>
+  </data>
+  <data name="Controller_AlreadyRunningAttached" xml:space="preserve">
+    <value>Servidor já estava rodando (PID {0}); acompanhando.</value>
+  </data>
+  <data name="Controller_NoLogTitle" xml:space="preserve">
+    <value>Servidor sem log</value>
+  </data>
+  <data name="Controller_NoLogMessage" xml:space="preserve">
+    <value>Este servidor foi iniciado sem -logFile, então não dá para acompanhar saves e jogadores. Pare com segurança e inicie pelo gerenciador para ter tudo.</value>
+  </data>
+  <data name="Controller_RegeneratedTitle" xml:space="preserve">
+    <value>Mundo regenerado nesta sessão</value>
+  </data>
+  <data name="Controller_RegeneratedMessage" xml:space="preserve">
+    <value>O log mostra que o servidor não achou {0} ao iniciar e gerou um mundo novo. Pare o servidor e restaure um backup.</value>
+  </data>
+  <data name="Controller_LoadingObjects" xml:space="preserve">
+    <value>Carregando {0:N0} objetos de {1} chunks…</value>
+  </data>
+  <data name="Controller_ServerOnline" xml:space="preserve">
+    <value>Servidor online.</value>
+  </data>
+  <data name="Controller_ServerOnlineTitle" xml:space="preserve">
+    <value>Servidor online</value>
+  </data>
+  <data name="Controller_AcceptingConnections" xml:space="preserve">
+    <value>"{0}" está aceitando conexões.</value>
+  </data>
+  <data name="Controller_SomeoneConnecting" xml:space="preserve">
+    <value>Alguém está conectando — {0} online.</value>
+  </data>
+  <data name="Controller_PlayerDied" xml:space="preserve">
+    <value>{0} morreu.</value>
+  </data>
+  <data name="Controller_PlayerJoinedWorld" xml:space="preserve">
+    <value>{0} entrou no mundo.</value>
+  </data>
+  <data name="Controller_PlayerJoinedTitle" xml:space="preserve">
+    <value>Jogador entrou</value>
+  </data>
+  <data name="Controller_PlayerJoinedServer" xml:space="preserve">
+    <value>{0} entrou em "{1}".</value>
+  </data>
+  <data name="Controller_PlayerLeft" xml:space="preserve">
+    <value>{0} saiu.</value>
+  </data>
+  <data name="Controller_PlayerLeftTitle" xml:space="preserve">
+    <value>Jogador saiu</value>
+  </data>
+  <data name="Controller_PlayerLeftServer" xml:space="preserve">
+    <value>{0} saiu de "{1}".</value>
+  </data>
+  <data name="Controller_WorldSaved" xml:space="preserve">
+    <value>Mundo salvo.</value>
+  </data>
+  <data name="Controller_WorldSavedDetails" xml:space="preserve">
+    <value>Mundo salvo (save {0}, {1} ms).</value>
+  </data>
+  <data name="Controller_ModeMismatchTitle" xml:space="preserve">
+    <value>Modo do mundo não confere</value>
+  </data>
+  <data name="Controller_ModeMismatchCreative" xml:space="preserve">
+    <value>O servidor foi iniciado em modo criativo, mas o mundo salvo não tem a chave nobuildcost.</value>
+  </data>
+  <data name="Controller_ModeMismatchNormal" xml:space="preserve">
+    <value>O servidor está em modo normal, mas o mundo salvo ainda tem nobuildcost: construção continua de graça.</value>
+  </data>
+  <data name="Controller_EmergencyMessage" xml:space="preserve">
+    <value>O servidor não encontrou {0} e começou a gerar um mundo NOVO por cima do seu. Ele foi encerrado imediatamente, sem salvar, para preservar os arquivos existentes. Restaure um backup antes de iniciar de novo.</value>
+  </data>
+  <data name="Controller_EmergencyActivity" xml:space="preserve">
+    <value>EMERGÊNCIA: mundo sendo regenerado — servidor encerrado sem salvar.</value>
+  </data>
+  <data name="Controller_EmergencyTitle" xml:space="preserve">
+    <value>Servidor encerrado para proteger o mundo</value>
+  </data>
+  <data name="Controller_NotRunning" xml:space="preserve">
+    <value>O servidor não está em execução.</value>
+  </data>
+  <data name="Controller_StoppingSafely" xml:space="preserve">
+    <value>Desligando com segurança (Ctrl+C)… aguardando o save.</value>
+  </data>
+  <data name="Controller_CouldNotStopTitle" xml:space="preserve">
+    <value>Não foi possível desligar</value>
+  </data>
+  <data name="Controller_StopSignalFailed" xml:space="preserve">
+    <value>O sinal de desligamento falhou ({0}).</value>
+  </data>
+  <data name="Controller_StopSignalFailedStillRunning" xml:space="preserve">
+    <value>O sinal de desligamento falhou ({0}). O servidor continua rodando.</value>
+  </data>
+  <data name="Controller_AlreadyStopped" xml:space="preserve">
+    <value>O servidor já está parado.</value>
+  </data>
+  <data name="Controller_StoppedWorldSaved" xml:space="preserve">
+    <value>Servidor desligado com o mundo salvo.</value>
+  </data>
+  <data name="Controller_SlowStopTitle" xml:space="preserve">
+    <value>O servidor está demorando para desligar</value>
+  </data>
+  <data name="Controller_SlowStopMessage" xml:space="preserve">
+    <value>Já se passaram {0:N0} s. Você pode continuar esperando ou forçar o encerramento (forçar perde o que não foi salvo).</value>
+  </data>
+  <data name="Controller_NotStoppedYet" xml:space="preserve">
+    <value>O servidor ainda não desligou.</value>
+  </data>
+  <data name="Controller_ForcedByUser" xml:space="preserve">
+    <value>Encerramento forçado pelo usuário (sem salvar).</value>
+  </data>
+  <data name="Controller_ExitEmergency" xml:space="preserve">
+    <value>Encerrado na emergência para proteger o mundo.</value>
+  </data>
+  <data name="Controller_ExitForced" xml:space="preserve">
+    <value>Encerramento forçado: o progresso desde o último save foi perdido.</value>
+  </data>
+  <data name="Controller_ExitClean" xml:space="preserve">
+    <value>Desligado com segurança.</value>
+  </data>
+  <data name="Controller_ExitNoFinalSave" xml:space="preserve">
+    <value>O servidor saiu sem confirmar o save final no log.</value>
+  </data>
+  <data name="Controller_ExitUnexpected" xml:space="preserve">
+    <value>O servidor parou sozinho (queda ou fechado fora do gerenciador).</value>
+  </data>
+  <data name="Controller_ServerStoppedTitle" xml:space="preserve">
+    <value>Servidor parou</value>
+  </data>
+  <data name="Controller_ServerShutDownTitle" xml:space="preserve">
+    <value>Servidor desligado</value>
+  </data>
+  <data name="Controller_WorldSavedBeforeShutdown" xml:space="preserve">
+    <value>O mundo foi salvo antes de desligar.</value>
+  </data>
+  <data name="Controller_WorldProblemAfterStopTitle" xml:space="preserve">
+    <value>Mundo com problema depois de parar</value>
+  </data>
+  <data name="Controller_BackingUpAfterStop" xml:space="preserve">
+    <value>Fazendo backup depois de parar…</value>
+  </data>
+  <data name="Controller_BackupAfterStopFailedTitle" xml:space="preserve">
+    <value>Backup depois de parar falhou</value>
+  </data>
+  <data name="Controller_MaintenanceRepaired" xml:space="preserve">
+    <value>Manutenção: {0:N0} objetos duplicados removidos e {1} regiões protegidas.</value>
+  </data>
+  <data name="Controller_WorldFixedAfterStopTitle" xml:space="preserve">
+    <value>Mundo corrigido depois de parar</value>
+  </data>
+  <data name="Controller_MaintenanceCleaned" xml:space="preserve">
+    <value>Manutenção: marca de trapaça removida de {0:N0} objetos e {1:N0} itens.</value>
+  </data>
+  <data name="Controller_MarksRemovedAfterStopTitle" xml:space="preserve">
+    <value>Marcas removidas depois de parar</value>
+  </data>
+  <data name="Controller_MaintenanceNotDoneTitle" xml:space="preserve">
+    <value>Manutenção do mundo não foi feita</value>
+  </data>
+  <data name="Controller_MaintenanceNotDoneMessage" xml:space="preserve">
+    <value>O mundo continua como estava; use "Reparar mundo" no Painel.</value>
+  </data>
+  <data name="Controller_StopBeforeRepair" xml:space="preserve">
+    <value>Pare o servidor antes de reparar o mundo.</value>
+  </data>
+  <data name="Controller_WorldInUseByOther" xml:space="preserve">
+    <value>O mundo está em uso por outro servidor.</value>
+  </data>
+  <data name="Controller_NothingToRepair" xml:space="preserve">
+    <value>O mundo não tem objetos duplicados nem zonas por marcar.</value>
+  </data>
+  <data name="Controller_BackingUpBeforeRepair" xml:space="preserve">
+    <value>Fazendo backup antes de reparar o mundo…</value>
+  </data>
+  <data name="Controller_NoteBeforeRepair" xml:space="preserve">
+    <value>antes de reparar duplicados</value>
+  </data>
+  <data name="Controller_WorldRepaired" xml:space="preserve">
+    <value>Mundo reparado: {0:N0} cópias removidas e {1} regiões protegidas contra nova geração (save {2} → {3}). Backup: {4}.</value>
+  </data>
+  <data name="Controller_WorldRepairedTitle" xml:space="preserve">
+    <value>Mundo reparado</value>
+  </data>
+  <data name="Controller_RepairNotDone" xml:space="preserve">
+    <value>O reparo não foi feito; o mundo continua como estava.</value>
+  </data>
+  <data name="Controller_StopBeforeCleaning" xml:space="preserve">
+    <value>Pare o servidor antes de limpar as marcas.</value>
+  </data>
+  <data name="Controller_NothingToClean" xml:space="preserve">
+    <value>O mundo não tem itens nem objetos marcados.</value>
+  </data>
+  <data name="Controller_BackingUpBeforeCleaning" xml:space="preserve">
+    <value>Fazendo backup antes de limpar as marcas…</value>
+  </data>
+  <data name="Controller_NoteBeforeCleaning" xml:space="preserve">
+    <value>antes de limpar marcas de trapaça</value>
+  </data>
+  <data name="Controller_MarksRemoved" xml:space="preserve">
+    <value>Marcas removidas de {0:N0} objetos e {1:N0} itens (save {2} → {3}). Backup: {4}.</value>
+  </data>
+  <data name="Controller_MarksRemovedTitle" xml:space="preserve">
+    <value>Marcas removidas</value>
+  </data>
+  <data name="Controller_CleaningNotDone" xml:space="preserve">
+    <value>A limpeza não foi feita; o mundo continua como estava.</value>
+  </data>
+  <data name="Controller_BackupVerified" xml:space="preserve">
+    <value>Backup verificado: {0}</value>
+  </data>
 </root>

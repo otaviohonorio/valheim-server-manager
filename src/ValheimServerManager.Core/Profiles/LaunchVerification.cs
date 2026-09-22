@@ -1,4 +1,5 @@
 using System.Globalization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Profiles;
 
@@ -13,19 +14,19 @@ public static class LaunchVerification
 {
     private static readonly Dictionary<string, string> Labels = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["-name"] = "Nome do servidor",
-        ["-port"] = "Porta",
-        ["-world"] = "Mundo",
-        ["-password"] = "Senha",
-        ["-public"] = "Servidor público",
-        ["-crossplay"] = "Crossplay",
-        ["-savedir"] = "Pasta de saves",
-        ["-logfile"] = "Arquivo de log",
-        ["-saveinterval"] = "Intervalo de save",
-        ["-backups"] = "Backups do Valheim",
-        ["-backupshort"] = "Primeiro backup do Valheim",
-        ["-backuplong"] = "Intervalo dos backups do Valheim",
-        ["-preset"] = "Preset",
+        ["-name"] = Strings.Verify_ServerName,
+        ["-port"] = Strings.Verify_Port,
+        ["-world"] = Strings.Verify_World,
+        ["-password"] = Strings.Verify_Password,
+        ["-public"] = Strings.Verify_Public,
+        ["-crossplay"] = Strings.Verify_Crossplay,
+        ["-savedir"] = Strings.Verify_SaveDir,
+        ["-logfile"] = Strings.Verify_LogFile,
+        ["-saveinterval"] = Strings.Verify_SaveInterval,
+        ["-backups"] = Strings.Verify_GameBackups,
+        ["-backupshort"] = Strings.Verify_GameBackupShort,
+        ["-backuplong"] = Strings.Verify_GameBackupLong,
+        ["-preset"] = Strings.Verify_Preset,
     };
 
     /// <summary>Values Valheim uses when the argument is absent.</summary>
@@ -39,7 +40,7 @@ public static class LaunchVerification
 
     private static readonly HashSet<string> PathOptions = new(StringComparer.OrdinalIgnoreCase) { "-savedir", "-logfile" };
 
-    private const string Absent = "(ausente)";
+    private static string Absent => Strings.Verify_Absent;
 
     public static int CheckedSettingsCount(ServerProfile profile)
     {
@@ -76,7 +77,7 @@ public static class LaunchVerification
             }
 
             diffs.Add(option.Equals("-password", StringComparison.OrdinalIgnoreCase)
-                ? new(label, "senha do perfil", have == Absent ? Absent : "outra senha")
+                ? new(label, Strings.Verify_ProfilePassword, have == Absent ? Absent : Strings.Verify_OtherPassword)
                 : new(label, Describe(option, want), Describe(option, have)));
         }
 
@@ -86,7 +87,7 @@ public static class LaunchVerification
             var have = actual.Modifiers.GetValueOrDefault(name) ?? "default";
             if (!want.Equals(have, StringComparison.OrdinalIgnoreCase))
             {
-                diffs.Add(new($"Modificador {name}", want, have));
+                diffs.Add(new(string.Format(CultureInfo.CurrentCulture, Strings.Verify_Modifier, name), want, have));
             }
         }
 
@@ -96,13 +97,13 @@ public static class LaunchVerification
             var have = actual.Keys.Contains(key);
             if (want != have)
             {
-                diffs.Add(new($"Chave {key}", OnOff(want), OnOff(have)));
+                diffs.Add(new(string.Format(CultureInfo.CurrentCulture, Strings.Verify_Key, key), OnOff(want), OnOff(have)));
             }
         }
 
         if (!expected.Extras.SequenceEqual(actual.Extras, StringComparer.Ordinal))
         {
-            diffs.Add(new("Argumentos extras", Join(expected.Extras), Join(actual.Extras)));
+            diffs.Add(new(Strings.Verify_ExtraArguments, Join(expected.Extras), Join(actual.Extras)));
         }
 
         return diffs;
@@ -135,21 +136,21 @@ public static class LaunchVerification
         var wantPreset = expected.Values.GetValueOrDefault("-preset") ?? Absent;
         if (!wantPreset.Equals(preset ?? Absent, StringComparison.OrdinalIgnoreCase))
         {
-            diffs.Add(new("Preset aplicado pelo servidor", wantPreset, preset ?? "(nenhum no log)"));
+            diffs.Add(new(Strings.Verify_PresetApplied, wantPreset, preset ?? Strings.Verify_NoneInLog));
         }
 
         foreach (var (name, value) in expected.Modifiers)
         {
-            var have = logged.GetValueOrDefault(name) ?? "(não aplicado)";
+            var have = logged.GetValueOrDefault(name) ?? Strings.Verify_NotApplied;
             if (!value.Equals(have, StringComparison.OrdinalIgnoreCase))
             {
-                diffs.Add(new($"Modificador {name} aplicado pelo servidor", value, have));
+                diffs.Add(new(string.Format(CultureInfo.CurrentCulture, Strings.Verify_ModifierApplied, name), value, have));
             }
         }
 
         foreach (var (name, value) in logged.Where(kv => !expected.Modifiers.ContainsKey(kv.Key)))
         {
-            diffs.Add(new($"Modificador {name} aplicado pelo servidor", "default", value));
+            diffs.Add(new(string.Format(CultureInfo.CurrentCulture, Strings.Verify_ModifierApplied, name), "default", value));
         }
 
         return diffs;
@@ -180,15 +181,15 @@ public static class LaunchVerification
     private static string Describe(string option, string value) => option.ToLowerInvariant() switch
     {
         _ when value == Absent => value,
-        "-public" => value == "1" ? "sim" : "não",
+        "-public" => value == "1" ? Strings.Verify_Yes : Strings.Verify_No,
         "-saveinterval" or "-backupshort" or "-backuplong" when int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var s)
             => s % 3600 == 0 ? $"{s / 3600} h" : s % 60 == 0 ? $"{s / 60} min" : $"{s} s",
         _ => value,
     };
 
-    private static string OnOff(bool on) => on ? "ligado" : "desligado";
+    private static string OnOff(bool on) => on ? Strings.Verify_On : Strings.Verify_Off;
 
-    private static string Join(IReadOnlyList<string> args) => args.Count == 0 ? "(nenhum)" : CommandLine.Join(args);
+    private static string Join(IReadOnlyList<string> args) => args.Count == 0 ? Strings.Verify_None : CommandLine.Join(args);
 
     private sealed class ParsedArgs
     {

@@ -112,8 +112,8 @@ public sealed class ServerControllerTests : IDisposable
         Assert.Equal("76561190000000001", players[0].SteamId);
         Assert.Equal("76561190000000002", players[1].SteamId);
         Assert.Equal(new DateTimeOffset(new DateTime(2026, 9, 16, 20, 42, 24)), players[0].Since);
-        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn entrou no mundo.");
-        Assert.Contains(_controller.RecentActivity, a => a.Message == "Bjorn morreu.");
+        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn joined the world.");
+        Assert.Contains(_controller.RecentActivity, a => a.Message == "Bjorn died.");
 
         WriteLog(
             "09/16/2026 21:49:40: Player connection lost server \"Servidor de Teste\" that has join code 123456, now 1 player(s)",
@@ -121,7 +121,7 @@ public sealed class ServerControllerTests : IDisposable
             "09/16/2026 21:49:40: Destroying abandoned non persistent zdo -123456789:1 owner -123456789");
         await WaitUntil(() => _controller.Status.OnlinePlayers.Count == 1);
         Assert.Equal("Astrid", _controller.Status.OnlinePlayers[0].Name);
-        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn saiu.");
+        Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn left.");
 
         WriteLog(
             "09/16/2026 21:55:00: Closing socket 76561190000000002",
@@ -156,7 +156,7 @@ public sealed class ServerControllerTests : IDisposable
         await WaitUntil(() => _controller.Status.ConfigDifferences is { Count: > 0 });
 
         var diff = Assert.Single(_controller.Status.ConfigDifferences!);
-        Assert.Equal("Senha", diff.Setting);
+        Assert.Equal("Password", diff.Setting);
         Assert.DoesNotContain("senhaNova99", diff.Expected + diff.Actual);
         Assert.True(_controller.HasPendingChanges);
 
@@ -178,7 +178,7 @@ public sealed class ServerControllerTests : IDisposable
             "09/16/2026 05:21:57: Game server connected");
         await WaitUntil(() => _controller.Status.ConfigDifferences is not null);
 
-        Assert.Contains(_controller.Status.ConfigDifferences!, d => d.Setting.Contains("resources") && d.Actual == "(não aplicado)");
+        Assert.Contains(_controller.Status.ConfigDifferences!, d => d.Setting.Contains("resources") && d.Actual == "(not applied)");
 
         await _controller.ForceKillAsync();
         await WaitUntil(() => !_controller.Status.IsActive);
@@ -251,7 +251,7 @@ public sealed class ServerControllerTests : IDisposable
             "09/16/2026 05:40:00: World save (5/5) done. Total time [40ms]");
 
         await WaitUntil(() => _controller.Status.ModeVerified == false);
-        Assert.Contains(alerts, a => a.Title.Contains("Modo"));
+        Assert.Contains(alerts, a => a.Title.Contains("mode"));
 
         await _controller.ForceKillAsync();
         await WaitUntil(() => !_controller.Status.IsActive);
@@ -272,7 +272,7 @@ public sealed class ServerControllerTests : IDisposable
         {
             if (sw.Elapsed > TimeSpan.FromSeconds(20))
             {
-                Assert.Fail("Condição não atingida em 20 s.");
+                Assert.Fail("Condition not met within 20 s.");
             }
 
             await Task.Delay(100);

@@ -1,3 +1,5 @@
+using ValheimServerManager.Core.Localization;
+
 namespace ValheimServerManager.Core.Profiles;
 
 public enum WorldPreset { Normal, Casual, Easy, Hard, Hardcore, Immersive, Hammer }
@@ -17,66 +19,66 @@ public sealed record ModifierOption<T>(T Value, string Token, string Label, stri
     where T : struct, Enum;
 
 /// <summary>
-/// Every world modifier accepted by the dedicated server, with Portuguese labels for the UI.
+/// Every world modifier accepted by the dedicated server, with localized labels for the UI.
 /// </summary>
 public static class ModifierCatalog
 {
     public static readonly IReadOnlyList<ModifierOption<WorldPreset>> Presets =
     [
-        new(WorldPreset.Normal, "normal", "Normal", "Experiência padrão do Valheim."),
-        new(WorldPreset.Casual, "casual", "Casual", "Combate fácil, sem perder itens ao morrer, portais liberados."),
-        new(WorldPreset.Easy, "easy", "Fácil", "Inimigos mais fracos."),
-        new(WorldPreset.Hard, "hard", "Difícil", "Inimigos mais fortes."),
-        new(WorldPreset.Hardcore, "hardcore", "Hardcore", "Morte apaga o personagem."),
-        new(WorldPreset.Immersive, "immersive", "Imersivo", "Sem mapa, portais restritos."),
-        new(WorldPreset.Hammer, "hammer", "Martelo (criativo)", "Construção sem custo, sem raids. Sempre criativo."),
+        new(WorldPreset.Normal, "normal", Strings.Modifier_Preset_Normal, Strings.Modifier_Preset_Normal_Desc),
+        new(WorldPreset.Casual, "casual", Strings.Modifier_Preset_Casual, Strings.Modifier_Preset_Casual_Desc),
+        new(WorldPreset.Easy, "easy", Strings.Modifier_Preset_Easy, Strings.Modifier_Preset_Easy_Desc),
+        new(WorldPreset.Hard, "hard", Strings.Modifier_Preset_Hard, Strings.Modifier_Preset_Hard_Desc),
+        new(WorldPreset.Hardcore, "hardcore", Strings.Modifier_Preset_Hardcore, Strings.Modifier_Preset_Hardcore_Desc),
+        new(WorldPreset.Immersive, "immersive", Strings.Modifier_Preset_Immersive, Strings.Modifier_Preset_Immersive_Desc),
+        new(WorldPreset.Hammer, "hammer", Strings.Modifier_Preset_Hammer, Strings.Modifier_Preset_Hammer_Desc),
     ];
 
     public static readonly IReadOnlyList<ModifierOption<CombatLevel>> Combat =
     [
-        new(CombatLevel.VeryEasy, "veryeasy", "Muito fácil", "Inimigos causam bem menos dano."),
-        new(CombatLevel.Easy, "easy", "Fácil", "Inimigos causam menos dano."),
-        new(CombatLevel.Default, "default", "Padrão", "Dano normal."),
-        new(CombatLevel.Hard, "hard", "Difícil", "Inimigos causam mais dano."),
-        new(CombatLevel.VeryHard, "veryhard", "Muito difícil", "Inimigos causam muito mais dano."),
+        new(CombatLevel.VeryEasy, "veryeasy", Strings.Modifier_Combat_VeryEasy, Strings.Modifier_Combat_VeryEasy_Desc),
+        new(CombatLevel.Easy, "easy", Strings.Modifier_Combat_Easy, Strings.Modifier_Combat_Easy_Desc),
+        new(CombatLevel.Default, "default", Strings.Modifier_Combat_Default, Strings.Modifier_Combat_Default_Desc),
+        new(CombatLevel.Hard, "hard", Strings.Modifier_Combat_Hard, Strings.Modifier_Combat_Hard_Desc),
+        new(CombatLevel.VeryHard, "veryhard", Strings.Modifier_Combat_VeryHard, Strings.Modifier_Combat_VeryHard_Desc),
     ];
 
     public static readonly IReadOnlyList<ModifierOption<DeathPenaltyLevel>> DeathPenalty =
     [
-        new(DeathPenaltyLevel.Casual, "casual", "Casual", "Mantém o equipamento; o resto cai. Perde 1% de habilidade."),
-        new(DeathPenaltyLevel.VeryEasy, "veryeasy", "Muito fácil", "Tudo cai. Perde 1% de habilidade."),
-        new(DeathPenaltyLevel.Easy, "easy", "Fácil", "Tudo cai. Perde 2,5% de habilidade."),
-        new(DeathPenaltyLevel.Default, "default", "Padrão", "Tudo cai. Perde 5% de habilidade."),
-        new(DeathPenaltyLevel.Hard, "hard", "Difícil", "Equipamento cai, o resto é destruído. Perde 7,5%."),
-        new(DeathPenaltyLevel.Hardcore, "hardcore", "Hardcore", "Tudo é destruído. Perde 100% de habilidade."),
+        new(DeathPenaltyLevel.Casual, "casual", Strings.Modifier_Death_Casual, Strings.Modifier_Death_Casual_Desc),
+        new(DeathPenaltyLevel.VeryEasy, "veryeasy", Strings.Modifier_Death_VeryEasy, Strings.Modifier_Death_VeryEasy_Desc),
+        new(DeathPenaltyLevel.Easy, "easy", Strings.Modifier_Death_Easy, Strings.Modifier_Death_Easy_Desc),
+        new(DeathPenaltyLevel.Default, "default", Strings.Modifier_Death_Default, Strings.Modifier_Death_Default_Desc),
+        new(DeathPenaltyLevel.Hard, "hard", Strings.Modifier_Death_Hard, Strings.Modifier_Death_Hard_Desc),
+        new(DeathPenaltyLevel.Hardcore, "hardcore", Strings.Modifier_Death_Hardcore, Strings.Modifier_Death_Hardcore_Desc),
     ];
 
     public static readonly IReadOnlyList<ModifierOption<ResourceRate>> Resources =
     [
-        new(ResourceRate.MuchLess, "muchless", "Muito menos (0,5x)", "Metade dos recursos."),
-        new(ResourceRate.Less, "less", "Menos (0,75x)", "Três quartos dos recursos."),
-        new(ResourceRate.Default, "default", "Padrão (1x)", "Quantidade normal."),
-        new(ResourceRate.More, "more", "Mais (1,5x)", "50% a mais. Não afeta peixes, troféus e drops de chefe."),
-        new(ResourceRate.MuchMore, "muchmore", "Muito mais (2x)", "O dobro."),
-        new(ResourceRate.Most, "most", "Máximo (3x)", "O triplo."),
+        new(ResourceRate.MuchLess, "muchless", Strings.Modifier_Resources_MuchLess, Strings.Modifier_Resources_MuchLess_Desc),
+        new(ResourceRate.Less, "less", Strings.Modifier_Resources_Less, Strings.Modifier_Resources_Less_Desc),
+        new(ResourceRate.Default, "default", Strings.Modifier_Resources_Default, Strings.Modifier_Resources_Default_Desc),
+        new(ResourceRate.More, "more", Strings.Modifier_Resources_More, Strings.Modifier_Resources_More_Desc),
+        new(ResourceRate.MuchMore, "muchmore", Strings.Modifier_Resources_MuchMore, Strings.Modifier_Resources_MuchMore_Desc),
+        new(ResourceRate.Most, "most", Strings.Modifier_Resources_Most, Strings.Modifier_Resources_Most_Desc),
     ];
 
     public static readonly IReadOnlyList<ModifierOption<RaidFrequency>> Raids =
     [
-        new(RaidFrequency.None, "none", "Nenhuma", "Sem raids (ataques noturnos continuam)."),
-        new(RaidFrequency.MuchLess, "muchless", "Muito menos", "Raids bem raras."),
-        new(RaidFrequency.Less, "less", "Menos", "Raids raras."),
-        new(RaidFrequency.Default, "default", "Padrão", "Frequência normal."),
-        new(RaidFrequency.More, "more", "Mais", "Raids frequentes."),
-        new(RaidFrequency.MuchMore, "muchmore", "Muito mais", "Raids muito frequentes."),
+        new(RaidFrequency.None, "none", Strings.Modifier_Raids_None, Strings.Modifier_Raids_None_Desc),
+        new(RaidFrequency.MuchLess, "muchless", Strings.Modifier_Raids_MuchLess, Strings.Modifier_Raids_MuchLess_Desc),
+        new(RaidFrequency.Less, "less", Strings.Modifier_Raids_Less, Strings.Modifier_Raids_Less_Desc),
+        new(RaidFrequency.Default, "default", Strings.Modifier_Raids_Default, Strings.Modifier_Raids_Default_Desc),
+        new(RaidFrequency.More, "more", Strings.Modifier_Raids_More, Strings.Modifier_Raids_More_Desc),
+        new(RaidFrequency.MuchMore, "muchmore", Strings.Modifier_Raids_MuchMore, Strings.Modifier_Raids_MuchMore_Desc),
     ];
 
     public static readonly IReadOnlyList<ModifierOption<PortalRule>> Portals =
     [
-        new(PortalRule.Casual, "casual", "Casual", "Qualquer item passa pelo portal."),
-        new(PortalRule.Default, "default", "Padrão", "Minérios e metais não passam."),
-        new(PortalRule.Hard, "hard", "Difícil", "Portais só entre pontos já descobertos."),
-        new(PortalRule.VeryHard, "veryhard", "Muito difícil", "Sem portais."),
+        new(PortalRule.Casual, "casual", Strings.Modifier_Portals_Casual, Strings.Modifier_Portals_Casual_Desc),
+        new(PortalRule.Default, "default", Strings.Modifier_Portals_Default, Strings.Modifier_Portals_Default_Desc),
+        new(PortalRule.Hard, "hard", Strings.Modifier_Portals_Hard, Strings.Modifier_Portals_Hard_Desc),
+        new(PortalRule.VeryHard, "veryhard", Strings.Modifier_Portals_VeryHard, Strings.Modifier_Portals_VeryHard_Desc),
     ];
 
     public static string Token<T>(IReadOnlyList<ModifierOption<T>> options, T value)

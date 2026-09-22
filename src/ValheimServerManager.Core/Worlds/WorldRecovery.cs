@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Globalization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -91,7 +92,7 @@ public static class ChunkIndexRebuilder
         {
             if (!ChunkFileName.TryParse(path, out var x, out var z, out var flag, out var revision))
             {
-                throw new InvalidDataException($"Nome de chunk inválido: {Path.GetFileName(path)}");
+                throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Strings.Recovery_BadChunkName, Path.GetFileName(path)));
             }
 
             var header = ChunkFileHeader.Read(path);
@@ -99,7 +100,7 @@ public static class ChunkIndexRebuilder
             if (header.Version != version)
             {
                 throw new InvalidDataException(
-                    $"{Path.GetFileName(path)} está na versão {header.Version}; os outros na {version}.");
+                    string.Format(CultureInfo.CurrentCulture, Strings.Recovery_ChunkVersionMismatch, Path.GetFileName(path), header.Version, version));
             }
 
             entries.Add(new ChunkIndexEntry(x, z, flag, revision, header.ZdoCount));
@@ -107,14 +108,14 @@ public static class ChunkIndexRebuilder
 
         if (version is null)
         {
-            throw new InvalidDataException("Nenhum chunk informado.");
+            throw new InvalidDataException(Strings.Recovery_NoChunks);
         }
 
         var duplicated = entries.GroupBy(e => (e.X, e.Z)).FirstOrDefault(g => g.Count() > 1);
         if (duplicated is not null)
         {
-            throw new InvalidDataException(string.Create(CultureInfo.InvariantCulture,
-                $"Mais de uma revisão para o mesmo chunk ({duplicated.Key.X}, {duplicated.Key.Z}). Escolha só uma."));
+            throw new InvalidDataException(string.Format(CultureInfo.InvariantCulture,
+                Strings.Recovery_DuplicateRevision, duplicated.Key.X, duplicated.Key.Z));
         }
 
         return new ChunkIndex(version.Value, entries);

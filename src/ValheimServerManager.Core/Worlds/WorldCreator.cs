@@ -1,5 +1,7 @@
+using System.Globalization;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Platform;
 
 namespace ValheimServerManager.Core.Worlds;
@@ -26,15 +28,15 @@ public static class WorldSeed
     {
         if (string.IsNullOrEmpty(seed))
         {
-            return "Informe uma seed ou gere uma aleatória.";
+            return Strings.Seed_Required;
         }
 
         if (seed.Length > MaxLength)
         {
-            return $"A seed pode ter no máximo {MaxLength} caracteres (como no jogo).";
+            return string.Format(CultureInfo.CurrentCulture, Strings.Seed_TooLong, MaxLength);
         }
 
-        return seed.All(char.IsAsciiLetterOrDigit) ? null : "Use só letras sem acento e números na seed.";
+        return seed.All(char.IsAsciiLetterOrDigit) ? null : Strings.Seed_InvalidChars;
     }
 }
 
@@ -89,15 +91,15 @@ public static class WorldCreator
         if (!source.IsHealthy || source.Metadata is null)
         {
             var reason = source.Issues.FirstOrDefault(i => i.Severity == IssueSeverity.Error)?.Message
-                         ?? "a pasta não tem um save completo.";
-            throw new InvalidOperationException($"Esse mundo não pode ser usado: {reason}");
+                         ?? Strings.Creator_NoCompleteSave;
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Strings.Creator_WorldUnusable, reason));
         }
 
         var worldName = source.Metadata.Name;
         var target = WorldFolder.WorldDirectory(saveDirectory, worldName);
         if (ValheimPaths.SameDirectory(target, sourceWorldDirectory))
         {
-            throw new InvalidOperationException("O mundo já está na pasta de saves deste servidor.");
+            throw new InvalidOperationException(Strings.Creator_AlreadyInSaveDir);
         }
 
         EnsureFreeTarget(target, worldName);
@@ -118,7 +120,7 @@ public static class WorldCreator
             var copy = WorldInspector.InspectDirectory(staging, worldName);
             if (!copy.IsHealthy || copy.LatestSave?.Number != source.LatestSave!.Number)
             {
-                throw new IOException("A cópia do mundo não ficou íntegra.");
+                throw new IOException(Strings.Creator_CopyNotIntact);
             }
 
             Directory.Move(staging, target);
@@ -168,7 +170,7 @@ public static class WorldCreator
         if (Directory.Exists(dir) && Directory.EnumerateFileSystemEntries(dir).Any())
         {
             throw new InvalidOperationException(
-                $"Já existe um mundo \"{worldName}\" nesta pasta de saves. Escolha outro nome ou outra pasta.");
+                string.Format(CultureInfo.CurrentCulture, Strings.Creator_WorldExists, worldName));
         }
     }
 }

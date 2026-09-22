@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Profiles;
 
@@ -77,7 +78,7 @@ public static partial class BatchFileImporter
 
         if (!found)
         {
-            throw new InvalidDataException("Não encontrei uma linha que execute valheim_server no arquivo.");
+            throw new InvalidDataException(Strings.Import_NoServerLine);
         }
 
         if (string.IsNullOrWhiteSpace(profile.ServerDirectory))
@@ -94,7 +95,7 @@ public static partial class BatchFileImporter
 
         if (string.IsNullOrWhiteSpace(profile.SaveDirectory))
         {
-            messages.Add("O .bat não usa -savedir: o servidor estava gravando na pasta do próprio jogo. Escolha uma pasta só do servidor antes de iniciar.");
+            messages.Add(Strings.Import_NoSaveDir);
         }
 
         notes = messages;
@@ -166,7 +167,7 @@ public static partial class BatchFileImporter
                     }
                     else
                     {
-                        notes.Add($"Preset desconhecido ignorado: {preset}");
+                        notes.Add(string.Format(CultureInfo.CurrentCulture, Strings.Import_UnknownPreset, preset));
                     }
 
                     break;
@@ -202,7 +203,7 @@ public static partial class BatchFileImporter
 
         if (!ok)
         {
-            notes.Add($"Modificador ignorado: {name} {value}");
+            notes.Add(string.Format(CultureInfo.CurrentCulture, Strings.Import_ModifierIgnored, name, value));
         }
     }
 
@@ -235,7 +236,7 @@ public static partial class BatchFileImporter
                 profile.NoMap = true;
                 break;
             default:
-                notes.Add($"Chave desconhecida ignorada: {key}");
+                notes.Add(string.Format(CultureInfo.CurrentCulture, Strings.Import_UnknownKey, key));
                 break;
         }
     }

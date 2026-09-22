@@ -16,12 +16,12 @@ internal static class EndToEndTest
 {
     public static Command Command()
     {
-        var serverDir = new Option<string>("--server-dir") { Required = true, Description = "Instalação do Valheim Dedicated Server." };
-        var source = new Option<string>("--world-source") { Required = true, Description = "Pasta de um mundo (será copiada)." };
+        var serverDir = new Option<string>("--server-dir") { Required = true, Description = "Valheim Dedicated Server installation." };
+        var source = new Option<string>("--world-source") { Required = true, Description = "A world folder (it will be copied)." };
         var port = new Option<int>("--port") { DefaultValueFactory = _ => 2466 };
-        var work = new Option<string?>("--work-dir") { Description = "Pasta de trabalho (padrão: temporária)." };
-        var keep = new Option<bool>("--keep") { Description = "Não apagar a pasta de trabalho no fim." };
-        var command = new Command("e2e", "Teste de ponta a ponta com o servidor real, numa cópia do mundo.");
+        var work = new Option<string?>("--work-dir") { Description = "Working folder (default: temporary)." };
+        var keep = new Option<bool>("--keep") { Description = "Don't delete the working folder at the end." };
+        var command = new Command("e2e", "End-to-end test with the real server, on a copy of the world.");
         command.Options.Add(serverDir);
         command.Options.Add(source);
         command.Options.Add(port);
@@ -40,7 +40,7 @@ internal static class EndToEndTest
         var sourceReport = WorldInspector.InspectDirectory(source);
         if (!sourceReport.IsHealthy)
         {
-            Console.Error.WriteLine("O mundo de origem não está íntegro.");
+            Console.Error.WriteLine("The source world is not healthy.");
             return 2;
         }
 
@@ -61,8 +61,8 @@ internal static class EndToEndTest
 
         var worldDir = WorldFolder.WorldDirectory(profile.SaveDirectory, worldName);
         CopyDirectory(source, worldDir);
-        Console.WriteLine($"Pasta de trabalho: {root}");
-        Console.WriteLine($"Mundo {worldName}, save {sourceReport.LatestSave!.Number}, {sourceReport.TotalZdos:N0} objetos\n");
+        Console.WriteLine($"Working folder: {root}");
+        Console.WriteLine($"World {worldName}, save {sourceReport.LatestSave!.Number}, {sourceReport.TotalZdos:N0} objects\n");
 
         var failures = 0;
         await using var manager = CliApp.CreateManager(Path.Combine(root, "appdata"));
@@ -81,17 +81,17 @@ internal static class EndToEndTest
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"      exceção: {ex.Message}");
+                Console.WriteLine($"      exception: {ex.Message}");
                 ok = false;
             }
 
             if (!ok && controller.Status.IsActive)
             {
-                Console.WriteLine("      (parando o servidor que ficou ligado)");
+                Console.WriteLine("      (stopping the server that was left running)");
                 await controller.StopAsync(ct).ConfigureAwait(false);
             }
 
-            Console.WriteLine($"  {(ok ? "PASSOU" : "FALHOU")} ({sw.Elapsed.TotalSeconds:N1} s)\n");
+            Console.WriteLine($"  {(ok ? "PASSED" : "FAILED")} ({sw.Elapsed.TotalSeconds:N1} s)\n");
             if (!ok)
             {
                 failures++;
@@ -131,43 +131,43 @@ internal static class EndToEndTest
             var before = controller.Status.LastSaveNumber;
             var result = await controller.StopAsync(ct).ConfigureAwait(false);
             var status = controller.Status;
-            Console.WriteLine($"      {result.Message} (save {status.LastSaveNumber}, saída {status.LastExit?.ExitCode})");
+            Console.WriteLine($"      {result.Message} (save {status.LastSaveNumber}, exit {status.LastExit?.ExitCode})");
             return result.Success && status.LastExit is { Clean: true } && status.LastSaveNumber is not null && status.LastSaveNumber != before;
         }
 
         bool WorldHasCreativeKey()
         {
             var report = WorldInspector.Inspect(profile.SaveDirectory, worldName);
-            Console.WriteLine($"      save {report.LatestSave?.Number}: chaves [{string.Join(", ", report.Metadata?.KeyNames ?? [])}]");
+            Console.WriteLine($"      save {report.LatestSave?.Number}: keys [{string.Join(", ", report.Metadata?.KeyNames ?? [])}]");
             return report.Metadata?.IsCreative ?? false;
         }
 
-        await Step("Reparar objetos duplicados (o servidor carrega o resultado nos passos seguintes)", async () =>
+        await Step("Repair duplicate objects (the server loads the result in the next steps)", async () =>
         {
             var before = WorldRepair.Scan(profile.SaveDirectory, worldName);
             var result = await controller.RepairWorldAsync(ct).ConfigureAwait(false);
             var after = WorldRepair.Scan(profile.SaveDirectory, worldName);
-            Console.WriteLine($"      antes: {before.ExtraCopies:N0} cópias, {before.ZonesToMark} zonas; {result.Message}");
+            Console.WriteLine($"      before: {before.ExtraCopies:N0} copies, {before.ZonesToMark} zones; {result.Message}");
             return result.Success && !after.NeedsRepair && after.Objects == before.Objects - before.ExtraCopies;
         }).ConfigureAwait(false);
 
-        await Step("Iniciar em modo normal (com backup antes)", async () =>
+        await Step("Start in normal mode (with a backup first)", async () =>
             await StartAndWait().ConfigureAwait(false) &&
             manager.Backups.List(profile).Any(b => b.Kind == BackupKind.PreStart)).ConfigureAwait(false);
 
-        await Step("Backup manual com o servidor rodando", async () =>
+        await Step("Manual backup while the server is running", async () =>
         {
-            var entry = await manager.Backups.CreateAsync(profile, BackupKind.Manual, "e2e em execução", ct).ConfigureAwait(false);
+            var entry = await manager.Backups.CreateAsync(profile, BackupKind.Manual, "e2e while running", ct).ConfigureAwait(false);
             return (await manager.Backups.VerifyAsync(entry, ct).ConfigureAwait(false)).Ok;
         }).ConfigureAwait(false);
 
-        await Step("Parar com segurança (Ctrl+C) e confirmar o save", StopClean).ConfigureAwait(false);
+        await Step("Stop safely (Ctrl+C) and confirm the save", StopClean).ConfigureAwait(false);
 
-        await Step("Mundo íntegro e backup depois de parar", () => Task.FromResult(
+        await Step("Healthy world and a backup after stopping", () => Task.FromResult(
             WorldInspector.Inspect(profile.SaveDirectory, worldName).IsHealthy &&
             manager.Backups.List(profile).Any(b => b.Kind == BackupKind.PostStop))).ConfigureAwait(false);
 
-        await Step("Modo criativo: nobuildcost gravado no mundo", async () =>
+        await Step("Creative mode: nobuildcost written to the world", async () =>
         {
             var p = controller.Profile;
             p.CreativeMode = true;
@@ -175,7 +175,7 @@ internal static class EndToEndTest
             return await StartAndWait().ConfigureAwait(false) && await StopClean().ConfigureAwait(false) && WorldHasCreativeKey();
         }).ConfigureAwait(false);
 
-        await Step("Volta ao normal: nobuildcost removido do mundo", async () =>
+        await Step("Back to normal: nobuildcost removed from the world", async () =>
         {
             var p = controller.Profile;
             p.CreativeMode = false;
@@ -183,7 +183,7 @@ internal static class EndToEndTest
             return await StartAndWait().ConfigureAwait(false) && await StopClean().ConfigureAwait(false) && !WorldHasCreativeKey();
         }).ConfigureAwait(false);
 
-        await Step("Todas as opções fora do padrão chegam ao servidor", async () =>
+        await Step("Every non-default option reaches the server", async () =>
         {
             var p = controller.Profile;
             p.ServerName = "VSM E2E Opcoes " + Environment.ProcessId;
@@ -218,7 +218,7 @@ internal static class EndToEndTest
             var diffs = controller.Status.ConfigDifferences ?? [];
             foreach (var d in diffs)
             {
-                Console.WriteLine($"      DIFERENÇA {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+                Console.WriteLine($"      DIFFERENCE {d.Setting}: in use {d.Actual}; saved {d.Expected}");
             }
 
             string log;
@@ -233,15 +233,15 @@ internal static class EndToEndTest
                 Console.WriteLine("      log: " + line.Trim());
             }
 
-            Console.WriteLine($"      {controller.Status.ConfigCheckedCount} opções conferidas; join code {controller.Status.JoinCode ?? "(ainda sem)"}");
+            Console.WriteLine($"      {controller.Status.ConfigCheckedCount} options checked; join code {controller.Status.JoinCode ?? "(none yet)"}");
             var stopped = await StopClean().ConfigureAwait(false);
             var meta = WorldInspector.Inspect(profile.SaveDirectory, worldName).Metadata;
-            Console.WriteLine($"      chaves no mundo: [{string.Join(", ", meta?.KeyNames ?? [])}]");
+            Console.WriteLine($"      keys in the world: [{string.Join(", ", meta?.KeyNames ?? [])}]");
             var keysOk = meta is not null && new[] { "nobuildcost", "playerevents", "passivemobs", "nomap" }.All(meta.HasKey);
             return checkedOk && diffs.Count == 0 && stopped && keysOk;
         }).ConfigureAwait(false);
 
-        await Step("Editar com o servidor rodando é detectado e reiniciar aplica", async () =>
+        await Step("Editing while the server runs is detected and restarting applies it", async () =>
         {
             if (!await StartAndWait().ConfigureAwait(false) ||
                 !await WaitFor(() => controller.Status.ConfigDifferences is { Count: 0 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false))
@@ -257,13 +257,13 @@ internal static class EndToEndTest
             var detected = await WaitFor(() => controller.Status.ConfigDifferences is { Count: 3 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
             foreach (var d in controller.Status.ConfigDifferences ?? [])
             {
-                Console.WriteLine($"      pendente: {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+                Console.WriteLine($"      pending: {d.Setting}: in use {d.Actual}; saved {d.Expected}");
             }
 
             var restart = await controller.RestartAsync(StartOptions.Default, ct).ConfigureAwait(false);
             var online = restart.Success && await WaitFor(() => controller.Status.State == ServerRunState.Running, TimeSpan.FromMinutes(4)).ConfigureAwait(false);
             var applied = online && await WaitFor(() => controller.Status.ConfigDifferences is { Count: 0 }, TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            Console.WriteLine($"      depois de reiniciar: {controller.Status.ConfigDifferences?.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"} diferença(s)");
+            Console.WriteLine($"      after restarting: {controller.Status.ConfigDifferences?.Count.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"} difference(s)");
             var stopped = await StopClean().ConfigureAwait(false);
 
             // Back to the simple profile for the remaining steps.
@@ -287,7 +287,7 @@ internal static class EndToEndTest
         }).ConfigureAwait(false);
 
         BackupEntry? good = null;
-        await Step("Recusa iniciar mundo com o .db2 faltando (cenário de 16/09)", async () =>
+        await Step("Refuses to start a world with the .db2 missing (the 09/16 scenario)", async () =>
         {
             good = manager.Backups.List(controller.Profile).First(b => b.Kind == BackupKind.PostStop);
             var latest = WorldInspector.Inspect(profile.SaveDirectory, worldName).LatestSave!;
@@ -298,17 +298,17 @@ internal static class EndToEndTest
                    controller.Status.State == ServerRunState.Stopped;
         }).ConfigureAwait(false);
 
-        await Step("Restaurar o backup e voltar a iniciar", async () =>
+        await Step("Restore the backup and start again", async () =>
         {
             var result = await manager.Backups.RestoreAsync(profile, good!, ct).ConfigureAwait(false);
-            Console.WriteLine($"      cópia de segurança: {result.SafetyCopy?.Kind}; pasta antiga: {Path.GetFileName(result.ReplacedFolder)}");
+            Console.WriteLine($"      safety copy: {result.SafetyCopy?.Kind}; old folder: {Path.GetFileName(result.ReplacedFolder)}");
             return result.SafetyCopy?.Kind == BackupKind.Quarantine &&
                    await StartAndWait().ConfigureAwait(false) &&
                    await StopClean().ConfigureAwait(false);
         }).ConfigureAwait(false);
 
         ServerController? seeded = null;
-        await Step("Mundo novo com a seed escolhida", async () =>
+        await Step("New world with the chosen seed", async () =>
         {
             var p = new ServerProfile
             {
@@ -324,7 +324,7 @@ internal static class EndToEndTest
             };
             WorldCreator.CreateSeeded(p.SaveDirectory, p.WorldName, "VSMe2e2026");
             var before = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);
-            Console.WriteLine($"      antes: {string.Join(" ", before.Issues.Select(i => i.Code))}");
+            Console.WriteLine($"      before: {string.Join(" ", before.Issues.Select(i => i.Code))}");
             manager.AddProfile(p);
             seeded = manager.GetController(p.Id);
             var start = await seeded.StartAsync(StartOptions.Default, ct).ConfigureAwait(false);
@@ -338,12 +338,12 @@ internal static class EndToEndTest
             var stop = online && (await seeded.StopAsync(ct).ConfigureAwait(false)).Success;
             var after = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);
             var meta = after.Metadata;
-            Console.WriteLine($"      depois: save {after.LatestSave?.Number}, seed {meta?.SeedName}, hash confere {meta?.Seed == StableHash.Compute("VSMe2e2026")}, {after.TotalZdos:N0} objetos, emergência: {seeded.Status.Emergency ?? "nenhuma"}");
+            Console.WriteLine($"      after: save {after.LatestSave?.Number}, seed {meta?.SeedName}, hash matches {meta?.Seed == StableHash.Compute("VSMe2e2026")}, {after.TotalZdos:N0} objects, emergency: {seeded.Status.Emergency ?? "none"}");
             return online && stop && after.IsHealthy && meta?.SeedName == "VSMe2e2026" &&
                    meta.Seed == StableHash.Compute("VSMe2e2026") && seeded.Status.Emergency is null;
         }).ConfigureAwait(false);
 
-        await Step("Dois servidores ao mesmo tempo, com as travas", async () =>
+        await Step("Two servers at the same time, with the locks", async () =>
         {
             if (seeded is null)
             {
@@ -353,20 +353,20 @@ internal static class EndToEndTest
             var bothOnline = await StartAndWait().ConfigureAwait(false) &&
                              (await seeded.StartAsync(StartOptions.Default, ct).ConfigureAwait(false)).Success &&
                              await WaitFor(() => seeded.Status.State == ServerRunState.Running, TimeSpan.FromMinutes(4)).ConfigureAwait(false);
-            Console.WriteLine($"      rodando juntos: {bothOnline} (portas {controller.Profile.Port} e {seeded.Profile.Port})");
+            Console.WriteLine($"      running together: {bothOnline} (ports {controller.Profile.Port} and {seeded.Profile.Port})");
 
             // Same world and save folder as the first server, different port: must be refused.
-            var sameWorld = controller.Profile.Duplicate("E2E mesmo mundo");
+            var sameWorld = controller.Profile.Duplicate("E2E same world");
             sameWorld.Port = port + 40;
             manager.AddProfile(sameWorld);
             var r1 = await manager.GetController(sameWorld.Id).StartAsync(StartOptions.Confirmed, ct).ConfigureAwait(false);
             var worldLocked = !r1.Success && r1.Checks.Any(c => c.Code == "WORLD_IN_USE");
-            Console.WriteLine($"      mesmo mundo recusado: {worldLocked} ({r1.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
+            Console.WriteLine($"      same world refused: {worldLocked} ({r1.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
 
             // Another world on the port of the second server: must be refused.
             var samePort = new ServerProfile
             {
-                DisplayName = "E2E mesma porta",
+                DisplayName = "E2E same port",
                 ServerDirectory = serverDir,
                 SaveDirectory = Path.Combine(root, "ServerSavePort"),
                 ServerName = "VSM-E2E-Porta",
@@ -379,7 +379,7 @@ internal static class EndToEndTest
             manager.AddProfile(samePort);
             var r2 = await manager.GetController(samePort.Id).StartAsync(StartOptions.Confirmed, ct).ConfigureAwait(false);
             var portLocked = !r2.Success && r2.Checks.Any(c => c.Code is "PORT_IN_USE" or "PORT_BUSY");
-            Console.WriteLine($"      mesma porta recusada: {portLocked} ({r2.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
+            Console.WriteLine($"      same port refused: {portLocked} ({r2.Checks.FirstOrDefault(c => c.Level == CheckLevel.Blocker)?.Message})");
 
             var stopped = (await controller.StopAsync(ct).ConfigureAwait(false)).Success &
                           (await seeded.StopAsync(ct).ConfigureAwait(false)).Success;
@@ -391,7 +391,7 @@ internal static class EndToEndTest
             await c.ForceKillAsync().ConfigureAwait(false);
         }
 
-        Console.WriteLine(failures == 0 ? "TODOS OS PASSOS PASSARAM" : $"{failures} PASSO(S) FALHARAM");
+        Console.WriteLine(failures == 0 ? "ALL STEPS PASSED" : $"{failures} STEP(S) FAILED");
         if (!keep && failures == 0)
         {
             await Task.Delay(1000, ct).ConfigureAwait(false);

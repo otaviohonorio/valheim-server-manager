@@ -1,1 +1,4 @@
-github: [otaviohonorio]
+# Draws the "Sponsor" button at the top of the repository.
+# Ko-fi takes a one-off tip with no account needed; GitHub Sponsors is recurring and needs a GitHub account.
+github: otaviohonorio
+ko_fi: ottorocket

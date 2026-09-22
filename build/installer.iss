@@ -6,6 +6,9 @@
 ;  - never close the manager through Restart Manager: its session-end handler stops every server;
 ;  - never touch settings, worlds or backups, on install or uninstall;
 ;  - never install into a folder that already holds something else (saves, Steam, the game).
+;
+; Languages: English, Brazilian Portuguese and Spanish, picked from the Windows display language.
+; Every text of ours is a [CustomMessages] entry in all three.
 
 #ifndef AppVersion
   #define AppVersion "1.0.0"
@@ -26,7 +29,7 @@
 #define AppExe "ValheimServerManager.exe"
 #define RunningMutex "ValheimServerManager.Running"
 #define RepoUrl "https://github.com/otaviohonorio/valheim-server-manager"
-#define SponsorUrl "https://github.com/sponsors/otaviohonorio"
+#define KofiUrl "https://ko-fi.com/ottorocket"
 
 [Setup]
 AppId={#AppId}
@@ -56,6 +59,10 @@ MinVersion=10.0.19041
 CloseApplications=no
 RestartApplications=no
 
+; The Windows display language picks the installer language; the list only shows when none matches.
+LanguageDetectionMethod=uilanguage
+ShowLanguageDialog=auto
+
 OutputDir={#OutputDir}
 OutputBaseFilename=ValheimServerManager-Setup-{#AppVersion}
 SetupIconFile=..\src\ValheimServerManager.App\Assets\AppIcon.ico
@@ -67,30 +74,74 @@ SolidCompression=yes
 LZMANumBlockThreads=4
 
 [Languages]
+Name: "en"; MessagesFile: "compiler:Default.isl"
 Name: "ptbr"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
+Name: "es"; MessagesFile: "compiler:Languages\Spanish.isl"
+
+[CustomMessages]
+en.AppComment=Manages Valheim dedicated servers safely
+ptbr.AppComment=Gerencia servidores dedicados de Valheim com segurança
+es.AppComment=Administra servidores dedicados de Valheim con seguridad
+
+en.SupportProject=Support the project on Ko-fi (optional, no account needed)
+ptbr.SupportProject=Apoiar o projeto no Ko-fi (opcional, sem precisar de conta)
+es.SupportProject=Apoyar el proyecto en Ko-fi (opcional, sin necesidad de cuenta)
+
+en.AppOpen=Valheim Server Manager is open.%n%nClose it from the tray icon (next to the clock): right-click > Exit… > "Exit and keep running". Servers keep running and the app picks them up again when it opens.%n%nThen click Retry.
+ptbr.AppOpen=O Valheim Server Manager está aberto.%n%nFeche-o pelo ícone da bandeja (perto do relógio): clique com o botão direito > Sair… > "Sair e deixar rodando". Os servidores continuam ligados e o app volta a acompanhá-los quando abrir de novo.%n%nDepois clique em Repetir.
+es.AppOpen=Valheim Server Manager está abierto.%n%nCiérralo desde el icono de la bandeja (junto al reloj): clic derecho > Salir… > "Salir y dejar funcionando". Los servidores siguen funcionando y la aplicación los vuelve a seguir cuando se abre.%n%nLuego haz clic en Reintentar.
+
+en.AppOpenShort=Close Valheim Server Manager (tray icon > Exit… > "Exit and keep running") and run the installer again.
+ptbr.AppOpenShort=Feche o Valheim Server Manager (ícone da bandeja > Sair… > "Sair e deixar rodando") e rode o instalador de novo.
+es.AppOpenShort=Cierra Valheim Server Manager (icono de la bandeja > Salir… > "Salir y dejar funcionando") y vuelve a ejecutar el instalador.
+
+en.DirIsSaves=This is a Valheim save folder. The program cannot live next to the worlds.
+ptbr.DirIsSaves=Esta pasta é de saves do Valheim. O programa não pode ficar junto dos mundos.
+es.DirIsSaves=Esta es una carpeta de guardados de Valheim. El programa no puede estar junto a los mundos.
+
+en.DirIsGame=This folder belongs to Valheim or Steam. Choose a folder just for the manager.
+ptbr.DirIsGame=Esta pasta é do Valheim ou da Steam. Escolha uma pasta só para o gerenciador.
+es.DirIsGame=Esta carpeta es de Valheim o de Steam. Elige una carpeta solo para el administrador.
+
+en.DirNotEmpty=This folder already has other files. Choose an empty folder (or the one of a previous install) so that updating or uninstalling never touches anything of yours.
+ptbr.DirNotEmpty=Esta pasta já tem outros arquivos. Escolha uma pasta vazia (ou a de uma instalação anterior) para que atualizar ou desinstalar nunca mexa em nada seu.
+es.DirNotEmpty=Esta carpeta ya tiene otros archivos. Elige una carpeta vacía (o la de una instalación anterior) para que actualizar o desinstalar nunca toque nada tuyo.
+
+en.ReadyDataKept=Your settings, worlds and backups are not touched.
+ptbr.ReadyDataKept=Suas configurações, mundos e backups não são tocados.
+es.ReadyDataKept=Tu configuración, mundos y copias de seguridad no se tocan.
+
+en.ReadySettings=Settings:
+ptbr.ReadySettings=Configurações:
+es.ReadySettings=Configuración:
+
+en.ReadyServersRunning=Running servers keep running during the update.
+ptbr.ReadyServersRunning=Servidores ligados continuam ligados durante a atualização.
+es.ReadyServersRunning=Los servidores encendidos siguen funcionando durante la actualización.
+
+en.ServerRunning=A Valheim server is running.%n%nOpen Valheim Server Manager and stop the servers with "Stop" (that saves the world). Then uninstall again.
+ptbr.ServerRunning=Há um servidor Valheim ligado.%n%nAbra o Valheim Server Manager e desligue os servidores com "Parar" (isso salva o mundo). Depois desinstale de novo.
+es.ServerRunning=Hay un servidor de Valheim encendido.%n%nAbre Valheim Server Manager y detén los servidores con "Detener" (eso guarda el mundo). Luego desinstala de nuevo.
+
+en.UninstallKept=The program was removed. Your worlds, backups and settings were kept:%n%n%1%n(and the save and backup folders you chose for each server).
+ptbr.UninstallKept=O programa foi removido. Seus mundos, backups e configurações foram mantidos:%n%n%1%n(e as pastas de saves e backups que você escolheu para cada servidor).
+es.UninstallKept=El programa se eliminó. Tus mundos, copias de seguridad y configuración se conservaron:%n%n%1%n(y las carpetas de guardados y copias de seguridad que elegiste para cada servidor).
 
 [Tasks]
-Name: "desktopicon"; Description: "Criar atalho na Área de Trabalho"; GroupDescription: "Atalhos:"
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; Comment: "Gerencia servidores dedicados de Valheim com segurança"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; Comment: "Gerencia servidores dedicados de Valheim com segurança"; Tasks: desktopicon
+Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; Comment: "{cm:AppComment}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; WorkingDir: "{app}"; Comment: "{cm:AppComment}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#AppExe}"; Description: "Abrir o {#AppName}"; Flags: nowait postinstall skipifsilent
-Filename: "{#SponsorUrl}"; Description: "Apoiar o projeto no GitHub Sponsors (opcional)"; Flags: shellexec nowait postinstall skipifsilent unchecked
+Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
+Filename: "{#KofiUrl}"; Description: "{cm:SupportProject}"; Flags: shellexec nowait postinstall skipifsilent unchecked
 
 [Code]
-const
-  AppOpenMessage =
-    'O Valheim Server Manager está aberto.' + #13#10 + #13#10 +
-    'Feche-o pelo ícone da bandeja (perto do relógio): clique com o botão direito > Sair... > "Sair e deixar rodando". ' +
-    'Os servidores continuam ligados e o app volta a acompanhá-los quando abrir de novo.' + #13#10 + #13#10 +
-    'Depois clique em Repetir.';
-
 function ProcessCount(const ExeName: String): Integer;
 var
   Locator, Service, Items: Variant;
@@ -122,7 +173,7 @@ begin
   Result := True;
   while IsAppOpen do
   begin
-    if SuppressibleMsgBox(AppOpenMessage, mbInformation, MB_RETRYCANCEL, IDCANCEL) = IDCANCEL then
+    if SuppressibleMsgBox(CustomMessage('AppOpen'), mbInformation, MB_RETRYCANCEL, IDCANCEL) = IDCANCEL then
     begin
       Result := False;
       Exit;
@@ -158,13 +209,12 @@ begin
   Lower := Lowercase(AddBackslash(Dir));
   if (Pos('\irongate\valheim\', Lower) > 0) or DirExists(AddBackslash(Dir) + 'worlds_local') or
      DirExists(AddBackslash(Dir) + 'worlds') then
-    Result := 'Esta pasta é de saves do Valheim. O programa não pode ficar junto dos mundos.'
+    Result := CustomMessage('DirIsSaves')
   else if FileExists(AddBackslash(Dir) + 'valheim_server.exe') or FileExists(AddBackslash(Dir) + 'valheim.exe') or
           (Pos('\steamapps\', Lower) > 0) then
-    Result := 'Esta pasta é do Valheim ou da Steam. Escolha uma pasta só para o gerenciador.'
+    Result := CustomMessage('DirIsGame')
   else if DirExists(Dir) and not FileExists(AddBackslash(Dir) + '{#AppExe}') and not IsDirEmpty(Dir) then
-    Result := 'Esta pasta já tem outros arquivos. Escolha uma pasta vazia (ou a de uma instalação anterior) ' +
-              'para que atualizar ou desinstalar nunca mexa em nada seu.';
+    Result := CustomMessage('DirNotEmpty');
 end;
 
 function InitializeSetup: Boolean;
@@ -195,7 +245,7 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   Result := InstallDirProblem(ExpandConstant('{app}'));
   if (Result = '') and IsAppOpen then
-    Result := 'Feche o Valheim Server Manager (ícone da bandeja > Sair... > "Sair e deixar rodando") e rode o instalador de novo.';
+    Result := CustomMessage('AppOpenShort');
 end;
 
 function UpdateReadyMemo(Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo, MemoComponentsInfo,
@@ -205,10 +255,10 @@ begin
   if MemoTasksInfo <> '' then
     Result := Result + MemoTasksInfo + NewLine + NewLine;
   Result := Result +
-    'Suas configurações, mundos e backups não são tocados.' + NewLine +
-    'Configurações: ' + ExpandConstant('{localappdata}') + '\ValheimServerManager';
+    CustomMessage('ReadyDataKept') + NewLine +
+    CustomMessage('ReadySettings') + ' ' + ExpandConstant('{localappdata}') + '\ValheimServerManager';
   if RunningServerCount > 0 then
-    Result := Result + NewLine + NewLine + 'Servidores ligados continuam ligados durante a atualização.';
+    Result := Result + NewLine + NewLine + CustomMessage('ReadyServersRunning');
 end;
 
 function InitializeUninstall: Boolean;
@@ -220,11 +270,7 @@ begin
   { Without the manager, a server started hidden has no window to stop it with a save. }
   if RunningServerCount > 0 then
   begin
-    SuppressibleMsgBox(
-      'Há um servidor Valheim ligado.' + #13#10 + #13#10 +
-      'Abra o Valheim Server Manager e desligue os servidores com "Parar" (isso salva o mundo). ' +
-      'Depois desinstale de novo.',
-      mbError, MB_OK, IDOK);
+    SuppressibleMsgBox(CustomMessage('ServerRunning'), mbError, MB_OK, IDOK);
     Result := False;
   end;
 end;
@@ -233,8 +279,6 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
     SuppressibleMsgBox(
-      'O programa foi removido. Seus mundos, backups e configurações foram mantidos:' + #13#10 + #13#10 +
-      ExpandConstant('{localappdata}') + '\ValheimServerManager' + #13#10 +
-      '(e as pastas de saves e backups que você escolheu para cada servidor).',
+      FmtMessage(CustomMessage('UninstallKept'), [ExpandConstant('{localappdata}') + '\ValheimServerManager']),
       mbInformation, MB_OK, IDOK);
 end;

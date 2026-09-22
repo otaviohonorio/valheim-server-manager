@@ -62,7 +62,16 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
 
 ## Conventions
 
-- UI text is Brazilian Portuguese; identifiers and comments in English.
+- UI text lives in `Localization/<Name>.resx` (English, the key language) with `<Name>.pt-BR.resx`
+  and `<Name>.es.resx` beside it; `Directory.Build.targets` generates a public class per file
+  (Core `Strings`, CLI `CliStrings`, App `ShellStrings`, `DashboardStrings`, `SettingsStrings`,
+  `WorldStrings`). XAML: `xmlns:loc="using:ValheimServerManager.App.Localization"` and
+  `{x:Bind loc:ShellStrings.Key}`; C#: `string.Format(CultureInfo.CurrentCulture, X.Key, ...)`.
+  Add every key to all three files — `LocalizationTests` fails on a missing key or mismatched
+  placeholders. Log templates, identifiers and comments are plain English.
+- The language comes from `AppLanguage` (setting `Language`, else the Windows display language;
+  pt* → pt-BR, es* → es, otherwise en), applied in `Program.Main` before any UI. CLI: `VSM_LANG`
+  overrides. Tests force the invariant (English) UI culture.
 - View models never touch XAML types except `InfoBarSeverity`; controller events arrive on
   worker threads — always go through `UiDispatcher`.
 - MVVM Toolkit partial properties (`[ObservableProperty] public partial T X { get; set; }`).
@@ -101,7 +110,7 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
 
 ## Installer and releases
 
-- `build/installer.iss` (Inno Setup 6, per-user, pt-BR) packages `dist/`. `build/make-installer.ps1`
+- `build/installer.iss` (Inno Setup 6, per-user, en/pt-BR/es from `[CustomMessages]`) packages `dist/`. `build/make-installer.ps1`
   publishes, compiles and writes a `.sha256`; `-TestAppId <guid>` builds a side-by-side test
   installer ("Valheim Server Manager Teste", `artifacts/installer-test/`) whose shortcuts and
   uninstall entry never collide with the real install — use it for install/uninstall tests.

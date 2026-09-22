@@ -19,7 +19,9 @@ and Valheim regenerated the world over the player's base (see `docs/incident-202
 - Safety rules live in Core with unit tests (`ServerController`, `ProfileValidator`,
   `WorldInspector`, `BackupService`).
 - Never commit save files, passwords or real SteamIDs.
-- UI text in pt-BR; code and comments in English. Warnings are errors.
+- UI text only through `Localization/*.resx`: English is the key language, every key also in
+  `.pt-BR.resx` and `.es.resx` (a test enforces it). Code, comments, logs and the repo in English.
+  Warnings are errors.
 
 ## Quick commands
 

@@ -4,117 +4,136 @@
 
 # Valheim Server Manager
 
-Gerenciador de servidores dedicados de **Valheim 1.0** para Windows. Liga, desliga salvando o mundo,
-alterna entre modo normal e criativo, faz backups verificados, restaura com segurança e edita
-senha, modificadores e listas de jogadores — tudo por uma interface nativa do Windows 11.
+> 🇧🇷 [Leia em português](README-ptBR.md)
 
-Ele existe por causa de um incidente real: um servidor e o jogo abriram a mesma pasta de saves, um
-save ficou pela metade e o Valheim gerou um mundo novo por cima da base
-([relato completo](docs/incident-2026-09-16.md)). Cada proteção do app vem dali.
+A manager for **Valheim 1.0** dedicated servers on Windows. It starts servers, stops them with the
+world saved, switches between normal and creative mode, makes verified backups, restores them
+safely and edits the password, modifiers and player lists — all from a native Windows 11 app, in
+English, Brazilian Portuguese or Spanish.
 
-## O que ele faz
+It exists because of a real incident: a server and the game opened the same save folder, a save
+was left half-written and Valheim generated a brand-new world over the base
+([full write-up](docs/incident-2026-09-16.md)). Every protection in the app comes from there.
+
+## What it does
 
 | | |
 |---|---|
-| **Iniciar / parar com segurança** | O servidor roda sem janela (não há um "X" para fechar sem salvar). Parar envia Ctrl+C e espera o log confirmar o save. |
-| **Modo criativo de verdade** | Um botão liga/desliga construção sem custo. O preset vai sempre na linha de comando, então desligar remove a chave do mundo — e o app confere no arquivo depois do primeiro save. |
-| **Verificação antes de iniciar** | Save incompleto, chunk faltando, pasta compartilhada com o jogo (mesmo por atalho ou junção), porta ocupada, mundo em uso: o servidor nem sobe. Pasta de saves no OneDrive/Dropbox exige confirmação. Mundo inexistente só é criado com confirmação. |
-| **Freio de emergência** | Se o log mostrar que o Valheim não achou os dados e começou a gerar outro mundo, o servidor é encerrado na hora, antes de gravar por cima. |
-| **Backups verificados** | Antes de iniciar e depois de parar (e quando você quiser). Cada backup guarda um save completo, conferido por SHA-256, com manifesto e retenção. |
-| **Restauração segura** | Copia o mundo atual antes (ou guarda em quarentena), move a pasta antiga para `_substituidos`, nunca mistura arquivos. |
-| **Configuração completa** | Nome, senha (criptografada com DPAPI), porta, público, crossplay, pastas, intervalo de save, backups do jogo, presets e todos os modificadores. |
-| **Jogadores** | Quem está online agora (nome, Steam ID e desde quando), avisos de entrada e saída, e admin, banidos e permitidos com os nomes lidos do próprio mundo. |
-| **Log ao vivo** | Eventos importantes filtrados, e o log de cada sessão arquivado. |
-| **Desligar o PC sem perder nada** | Se o Windows for desligado com servidores rodando, o app segura o desligamento por alguns segundos e salva os mundos antes. |
-| **Bandeja do sistema** | Fechar a janela com servidores rodando deixa o app na bandeja; notificações de jogadores e problemas aparecem por ali. |
-| **Criar servidores** | Assistente "Novo servidor": mundo novo com a seed que você escolher (ou aleatória), ou cópia de um mundo que você já joga — só o último save completo, conferido. |
-| **Vários servidores ao mesmo tempo** | Cada perfil tem seu mundo, pasta e porta, e vários podem rodar juntos. Travas impedem dois servidores no mesmo mundo/pasta ou na mesma porta (o Valheim usa a porta e a seguinte). Servidores abertos fora do app são detectados e podem ser adotados. |
-| **Reparo de mundo duplicado** | Detecta objetos que o jogo gerou duas vezes (itens que "voltam", minério que quebra duas vezes, inimigos em dobro) e zonas que ele ainda vai gerar de novo; o Painel avisa e repara com backup antes. |
-| **Manutenção automática** | A cada parada (inclusive no Reiniciar, antes de subir de novo), o gerenciador confere o mundo e corrige sozinho: duplicados, regiões por marcar e marcas de trapaça. Também dá para rodar quando quiser, em Mundo → "Conferir e corrigir agora". |
-| **Marcas de trapaça** | Encontra o que o jogo marcou como "feito com trapaça" (itens marcados não empilham com os iguais) e tira a marca do mundo inteiro, sem alterar quantidades nem donos. |
-| **Diagnóstico** | Inspeção do save e contagem de peças construídas por jogadores (bancadas, baús, portais…). |
+| **Safe start and stop** | The server runs without a window (there is no X to close it without saving). Stopping sends Ctrl+C and waits for the log to confirm the save. |
+| **Creative mode that really turns off** | One button turns free building on and off. The preset always goes on the command line, so turning it off removes the key from the world — and the app checks the world file after the first save. |
+| **Checks before starting** | Incomplete save, missing chunk, a folder shared with the game (even through a shortcut or junction), port in use, world already running: the server does not start. A save folder in OneDrive/Dropbox needs confirmation. A world that does not exist is only created after you confirm. |
+| **Emergency stop** | If the log shows Valheim could not find the world data and started generating another world, the server is killed at once, before it saves over yours. |
+| **Verified backups** | Before starting and after stopping (and whenever you want). Each backup holds one complete save, checked with SHA-256, with a manifest and retention. |
+| **Safe restore** | Copies the current world first (or quarantines it), moves the old folder to `_substituidos` and never mixes files. |
+| **Full configuration** | Name, password (encrypted with DPAPI), port, public, crossplay, folders, save interval, game backups, presets and every world modifier. |
+| **Players** | Who is online right now (name, Steam ID and since when), join and leave notices, and the admin, banned and permitted lists with names read from the world itself. |
+| **Live log** | Important events filtered out, and every session's log archived. |
+| **Shut the PC down without losing anything** | If Windows shuts down with servers running, the app holds the shutdown for a few seconds and saves the worlds first. |
+| **System tray** | Closing the window with servers running keeps the app in the tray; player and problem notifications show up there. |
+| **Create servers** | A "New server" wizard: a new world with the seed you choose (or a random one), or a copy of a world you already play — only its latest complete save, checked. |
+| **Several servers at once** | Each profile has its own world, folder and port, and several can run together. Locks prevent two servers on the same world/folder or port (Valheim uses the port and the next one). Servers started outside the app are detected and can be adopted. |
+| **Duplicated-world repair** | Finds objects the game generated twice (items that "come back", ore that breaks twice, double enemies) and zones it is still going to generate again; the Dashboard warns you and repairs with a backup first. |
+| **Automatic maintenance** | After every stop (including Restart, before starting again), the manager checks the world and fixes it by itself: duplicates, zones to mark and cheat marks. You can also run it any time from World → "Check and fix now". |
+| **Cheat marks** | Finds what the game marked as "made with cheats" (marked items do not stack with their twins) and removes the mark from the whole world, without changing amounts or owners. |
+| **Diagnostics** | Save inspection and a count of player-built pieces (workbenches, chests, portals…). |
 
-## Instalação
+## Installing
 
-1. Baixe o **`ValheimServerManager-Setup-x.y.z.exe`** na página de
-   [Releases](https://github.com/otaviohonorio/valheim-server-manager/releases/latest).
-2. Abra e siga o assistente: você escolhe a pasta de instalação e se quer atalho na Área de Trabalho.
-   Não pede senha de administrador.
-3. No primeiro uso, clique em **Criar meu primeiro servidor**. Se um servidor já estiver rodando por
-   um `.bat`, o app o detecta e oferece adotá-lo.
+1. Download **`ValheimServerManager-Setup-x.y.z.exe`** from the
+   [Releases](https://github.com/otaviohonorio/valheim-server-manager/releases/latest) page.
+2. Run it and follow the wizard: you pick the install folder and whether you want a desktop
+   shortcut. It does not ask for an administrator password.
+3. On first use, click **Create my first server**. If a server is already running from a `.bat`,
+   the app detects it and offers to adopt it.
 
-Requer Windows 10 2004+ ou Windows 11 (x64) e o **Valheim Dedicated Server**, instalado pela Steam
-(Biblioteca → Ferramentas). Não é preciso instalar .NET nem Windows App SDK.
+Requires Windows 10 2004+ or Windows 11 (x64) and the **Valheim Dedicated Server**, installed from
+Steam (Library → Tools). There is no need to install .NET or the Windows App SDK.
 
-> **"O Windows protegeu o computador"?** O instalador ainda não tem assinatura digital, então o
-> SmartScreen avisa nos primeiros downloads. Clique em **Mais informações → Executar assim mesmo**.
-> O arquivo `.sha256` ao lado do instalador na página de Releases permite conferir que ele é o original.
+The app follows the Windows display language (English, Portuguese or Spanish; anything else falls
+back to English). You can change it in **Protections & about → Language**.
 
-**Atualizar** é só rodar o instalador novo: ele usa a mesma pasta, mantém tudo e os servidores
-ligados continuam ligados (feche o app pela bandeja com "Sair e deixar rodando" antes).
-**Desinstalar** fica em Configurações → Aplicativos. Nenhum dos dois mexe em mundos, backups ou
-configurações (`%LOCALAPPDATA%\ValheimServerManager`), e a desinstalação só acontece com os servidores
-desligados, para que nenhum fique rodando sem ter como salvar.
+> **"Windows protected your PC"?** The installer is not digitally signed yet, so SmartScreen warns
+> on the first downloads. Click **More info → Run anyway**. The `.sha256` file next to the
+> installer on the Releases page lets you check it is the original.
 
-### Jogo e servidor nunca dividem o mesmo mundo
+**Updating** is just running the new installer: it uses the same folder, keeps everything, and
+running servers keep running (close the app from the tray with "Exit and keep running" first).
+**Uninstalling** is in Settings → Apps. Neither touches worlds, backups or settings
+(`%LOCALAPPDATA%\ValheimServerManager`), and uninstalling only happens with the servers stopped, so
+none is left running with no way to save.
 
-Cada servidor criado pelo app tem a **própria pasta de saves**, separada da pasta do jogo
-(`AppData\LocalLow\IronGate\Valheim`). O app recusa usar a pasta do jogo, inclusive por atalhos,
-links ou junções que apontem para ela, e avisa se a pasta estiver no OneDrive, Dropbox ou Google Drive,
-que travam arquivos no meio do save.
+### The game and the server never share a world
 
-Se você criar o servidor a partir de um mundo que já joga, ele recebe uma **cópia**. O mundo que
-aparece no jogo em "Iniciar jogo" continua existindo, mas não recebe o que for feito no servidor.
-Para jogar no mundo do servidor, mesmo sozinho, entre por **"Entrar no jogo"** (IP ou código de
-entrada).
+Every server created by the app has **its own save folder**, separate from the game's
+(`AppData\LocalLow\IronGate\Valheim`). The app refuses the game's folder, including through
+shortcuts, links or junctions that point to it, and warns when the folder is in OneDrive, Dropbox
+or Google Drive, which lock files in the middle of a save.
 
-### Instalar a partir do código
+If you create the server from a world you already play, it gets a **copy**. The world in your
+in-game list keeps existing but does not receive what happens on the server. To play on the
+server's world, even alone, use **Join Game** (IP or join code), like your friends do.
 
-`build/make-installer.ps1` gera o instalador (precisa do .NET SDK 10 e do
-[Inno Setup 6](https://jrsoftware.org/isinfo.php)); `build/install.ps1 -Publish` instala direto,
-sem instalador.
+### Building from source
 
-## Apoie o projeto
+`build/make-installer.ps1` builds the installer (needs the .NET 10 SDK and
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)); `build/install.ps1 -Publish` installs directly,
+without an installer.
 
-O app é gratuito e de código aberto. Se ele salvou o seu mundo (ou a sua paciência), considere
-[apoiar pelo GitHub Sponsors](https://github.com/sponsors/otaviohonorio) ❤️
+## Command line
 
-## Linha de comando
-
-`cli\vsm.exe` faz o mesmo que o app, útil para agendar tarefas:
+`cli\vsm.exe` does what the app does, handy for scheduled tasks. It speaks the same language as the
+app (override with the `VSM_LANG` environment variable: `en`, `pt-BR`, `es`).
 
 ```
-vsm profiles                      lista perfis e servidores em execução
-vsm create  --name X --password Y [--seed S | --copy-world <pasta>] [--port N] [--private]
-vsm status  -p "Meu servidor"     estado do servidor e do mundo
-vsm start   -p "Meu servidor"     inicia com todas as verificações
-vsm stop    -p "Meu servidor"     Ctrl+C e espera o save
-vsm restart -p "Meu servidor"     para, corrige o mundo e inicia de novo
-vsm backup  -p "Meu servidor"     backup verificado (pode ser com o servidor rodando)
-vsm backups / vsm restore --backup <nome>
-vsm inspect <pasta-do-mundo> --pieces --duplicates --cheats
-vsm clean-cheat-marks -p "Meu servidor"   tira a marca de trapaça do mundo
-vsm clean-character <arquivo.fch> --apply   tira a marca dos itens na mochila de um personagem
-vsm repair-world -p "Meu servidor"   remove objetos duplicados (servidor parado; backup antes)
-vsm rebuild-index <pasta-do-mundo> --save-number N    recuperação de mundo
-vsm e2e ...                       teste de ponta a ponta com o servidor real
+vsm profiles                      list profiles and running servers
+vsm create  --name X --password Y [--seed S | --copy-world <folder>] [--port N] [--private]
+vsm status  -p "My server"        server and world status
+vsm start   -p "My server"        start with every check
+vsm stop    -p "My server"        Ctrl+C and wait for the save
+vsm restart -p "My server"        stop, fix the world and start again
+vsm backup  -p "My server"        verified backup (fine while the server runs)
+vsm backups / vsm restore --backup <name>
+vsm inspect <world-folder> --pieces --duplicates --cheats
+vsm clean-cheat-marks -p "My server"        remove the cheat mark from the world
+vsm clean-character <file.fch> --apply      remove the mark from a character's inventory
+vsm repair-world -p "My server"   remove duplicated objects (server stopped; backup first)
+vsm rebuild-index <world-folder> --save-number N    world recovery
+vsm e2e ...                       end-to-end test against the real server
 ```
 
-## Desenvolvimento
+## Development
 
 - .NET 10 · WinUI 3 (Windows App SDK 2.4) · CommunityToolkit.Mvvm · Generic Host · Serilog
-- `Core` sem dependência de interface, coberto por testes xUnit v3
+- `Core` has no UI dependency and is covered by xUnit v3 tests
 - `dotnet build ValheimServerManager.slnx` · `dotnet test --project tests/ValheimServerManager.Core.Tests`
-- `build/publish.ps1` gera a versão autocontida em `dist/`; `build/make-installer.ps1`, o instalador em `artifacts/installer/`
-- Tag `vX.Y.Z` no GitHub → o workflow `release.yml` testa, gera e publica o instalador em Releases
+- `build/publish.ps1` builds the self-contained app into `dist/`; `build/make-installer.ps1` builds the installer into `artifacts/installer/`
+- Pushing a `vX.Y.Z` tag runs `release.yml`, which tests, builds and publishes the installer on Releases
 
-Veja [docs/architecture.md](docs/architecture.md) e as skills em `.claude/skills/`.
+**Translations.** English is the key language. Each area has `Localization/<Name>.resx` with
+`<Name>.pt-BR.resx` and `<Name>.es.resx` next to it; a test fails when a key is missing in any
+language or its placeholders differ. A new language is one more file per area plus an entry in
+`AppLanguage.Supported`.
 
-## Aviso
+See [docs/architecture.md](docs/architecture.md), the skills in `.claude/skills/` and the
+[CHANGELOG](CHANGELOG.md).
 
-Projeto independente, sem relação com a Iron Gate ou a Coffee Stain. Valheim é marca dos seus
-respectivos donos.
+## Support
 
-## Licença
+The app is free and always will be. If it saved your world (or your patience), there are two ways
+to help, and both pay for the same thing — the hours that go into keeping it current with each
+Valheim update:
 
-[MIT](LICENSE). Valheim é marca da Iron Gate AB; este projeto não é afiliado nem endossado por ela.
+- **[Ko-fi](https://ko-fi.com/ottorocket)** — a one-off tip, any amount, **no account needed**.
+- **[GitHub Sponsors](https://github.com/sponsors/otaviohonorio)** — recurring, if you'd rather.
+
+Doing neither costs you nothing here. A good bug report is worth just as much.
+
+## Disclaimer
+
+An independent project, not affiliated with Iron Gate or Coffee Stain. Valheim is a trademark of
+its respective owners.
+
+## License
+
+[MIT](LICENSE). Valheim is a trademark of Iron Gate AB; this project is not affiliated with or
+endorsed by it.

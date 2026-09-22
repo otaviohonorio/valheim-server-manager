@@ -304,8 +304,8 @@ public class WorldRepairTests
         Assert.Equal(3, scan.ExtraCopies);   // the mushroom, the zone control and one of the stacked trees
         Assert.Equal(1, scan.ZonesWithDoubleSpawn);
         Assert.Equal(1, scan.ZonesToMark);
-        Assert.Contains(("cogumelos", 1), scan.ByCategory);
-        Assert.Contains(("controles de spawn de zona", 1), scan.ByCategory);
+        Assert.Contains(("mushrooms", 1), scan.ByCategory);
+        Assert.Contains(("zone spawn controls", 1), scan.ByCategory);
         Assert.True(scan.NeedsRepair);
     }
 
@@ -371,8 +371,8 @@ public class WorldRepairTests
 
         var scan = WorldRepair.Scan(temp.Path, "Mundo");
         Assert.Equal(4, scan.ExtraCopies);
-        Assert.Contains(("entradas e estruturas", 1), scan.ByCategory);
-        Assert.Contains(("conteúdo de ruínas e locais repetidos", 2), scan.ByCategory);
+        Assert.Contains(("entrances and structures", 1), scan.ByCategory);
+        Assert.Contains(("ruin contents and repeated locations", 2), scan.ByCategory);
 
         var result = WorldRepair.Repair(temp.Path, "Mundo");
         Assert.Equal(7, result.ObjectsAfter);

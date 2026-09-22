@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Text;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -69,7 +71,7 @@ public sealed class WorldMetadata
             if (payloadLength != stream.Length - sizeof(int))
             {
                 throw new InvalidDataException(
-                    $"Tamanho declarado ({payloadLength}) não confere com o arquivo ({stream.Length - sizeof(int)}).");
+                    string.Format(CultureInfo.CurrentCulture, Strings.Metadata_SizeMismatch, payloadLength, stream.Length - sizeof(int)));
             }
 
             var version = reader.ReadInt32();
@@ -80,7 +82,7 @@ public sealed class WorldMetadata
             var worldGen = reader.ReadInt32();
             var hasBeenSaved = reader.ReadBoolean();
 
-            var keyCount = ReadCount(reader, "chaves");
+            var keyCount = ReadCount(reader, Strings.Metadata_BadKeyCount);
             var keys = new List<string>(keyCount);
             for (var i = 0; i < keyCount; i++)
             {
@@ -90,7 +92,7 @@ public sealed class WorldMetadata
             var players = new List<WorldPlayer>();
             if (stream.Position < stream.Length)
             {
-                var playerCount = ReadCount(reader, "jogadores");
+                var playerCount = ReadCount(reader, Strings.Metadata_BadPlayerCount);
                 for (var i = 0; i < playerCount; i++)
                 {
                     players.Add(new WorldPlayer(
@@ -113,7 +115,7 @@ public sealed class WorldMetadata
         }
         catch (EndOfStreamException ex)
         {
-            throw new InvalidDataException("Arquivo .fwl2 terminou antes do esperado.", ex);
+            throw new InvalidDataException(Strings.Metadata_Truncated, ex);
         }
     }
 
@@ -153,12 +155,12 @@ public sealed class WorldMetadata
         return file;
     }
 
-    private static int ReadCount(BinaryReader reader, string what)
+    private static int ReadCount(BinaryReader reader, string invalidCountMessage)
     {
         var count = reader.ReadInt32();
         if (count is < 0 or > 10_000)
         {
-            throw new InvalidDataException($"Quantidade de {what} inválida no .fwl2: {count}.");
+            throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, invalidCountMessage, count));
         }
 
         return count;

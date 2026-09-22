@@ -1,4 +1,6 @@
+using System.Globalization;
 using System.Runtime.Versioning;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Worlds;
 
@@ -31,44 +33,37 @@ public static class ProfileValidator
         // Server install
         if (string.IsNullOrWhiteSpace(profile.ServerDirectory))
         {
-            Error(nameof(profile.ServerDirectory), "Informe a pasta do Valheim Dedicated Server.");
+            Error(nameof(profile.ServerDirectory), Strings.Validator_ServerDirRequired);
         }
         else if (!File.Exists(profile.ServerExecutable))
         {
-            Error(nameof(profile.ServerDirectory), $"Não encontrei {ValheimPaths.ServerExecutableName} em \"{profile.ServerDirectory}\".");
+            Error(nameof(profile.ServerDirectory), string.Format(CultureInfo.CurrentCulture, Strings.Validator_ServerExeNotFound, ValheimPaths.ServerExecutableName, profile.ServerDirectory));
         }
 
         // Save directory — the rule that would have prevented the incident
         if (string.IsNullOrWhiteSpace(profile.SaveDirectory))
         {
-            Error(nameof(profile.SaveDirectory), "Informe a pasta de saves do servidor.");
+            Error(nameof(profile.SaveDirectory), Strings.Validator_SaveDirRequired);
         }
         else if (!Path.IsPathFullyQualified(profile.SaveDirectory))
         {
-            Error(nameof(profile.SaveDirectory), "A pasta de saves precisa ser um caminho completo (ex.: D:\\Valheim\\ServerSave).");
+            Error(nameof(profile.SaveDirectory), Strings.Validator_SaveDirNotFullPath);
         }
         else if (ValheimPaths.SameDirectory(profile.SaveDirectory, gameDataDirectory))
         {
-            Error(nameof(profile.SaveDirectory),
-                "Esta é a pasta de saves do próprio jogo. Servidor e jogo abrindo os mesmos arquivos foi o que " +
-                "apagou o mundo em 16/09/2026. Use uma pasta só do servidor.");
+            Error(nameof(profile.SaveDirectory), Strings.Validator_SaveDirIsGameFolder);
         }
         else if (ValheimPaths.IsInside(profile.SaveDirectory, gameDataDirectory))
         {
-            Warn(nameof(profile.SaveDirectory),
-                "A pasta de saves fica dentro da pasta do jogo. Funciona, mas é fácil confundir os dois. Prefira outro lugar.");
+            Warn(nameof(profile.SaveDirectory), Strings.Validator_SaveDirInsideGameFolder);
         }
         else if (appInstallDirectory is not null && IsSameOrInside(profile.SaveDirectory, appInstallDirectory))
         {
-            Error(nameof(profile.SaveDirectory),
-                "A pasta de saves fica dentro da pasta do programa, que é trocada a cada atualização e apagada ao desinstalar. " +
-                "Use uma pasta só do servidor.");
+            Error(nameof(profile.SaveDirectory), Strings.Validator_SaveDirInsideAppFolder);
         }
         else if (ValheimPaths.CloudSyncProvider(profile.SaveDirectory) is { } cloud)
         {
-            Warn(nameof(profile.SaveDirectory),
-                $"A pasta de saves fica no {cloud}. Ele trava e troca arquivos enquanto o servidor salva e pode deixar saves " +
-                $"antigos só na nuvem. Use uma pasta fora do {cloud} (os backups podem ficar lá).");
+            Warn(nameof(profile.SaveDirectory), string.Format(CultureInfo.CurrentCulture, Strings.Validator_SaveDirInCloud, cloud));
         }
 
         // Backups
@@ -78,101 +73,99 @@ public static class ProfileValidator
             var worlds = WorldFolder.WorldsDirectory(profile.SaveDirectory);
             if (ValheimPaths.SameDirectory(backups, worlds) || ValheimPaths.IsInside(backups, worlds))
             {
-                Error(nameof(profile.BackupDirectory),
-                    "Os backups não podem ficar dentro de worlds_local: o Valheim trataria cada backup como um mundo.");
+                Error(nameof(profile.BackupDirectory), Strings.Validator_BackupsInsideWorlds);
             }
             else if (appInstallDirectory is not null && IsSameOrInside(backups, appInstallDirectory))
             {
-                Error(nameof(profile.BackupDirectory),
-                    "Os backups não podem ficar dentro da pasta do programa: ela é trocada a cada atualização e apagada ao desinstalar.");
+                Error(nameof(profile.BackupDirectory), Strings.Validator_BackupsInsideAppFolder);
             }
         }
 
         if (!string.IsNullOrWhiteSpace(profile.BackupDirectory) && !Path.IsPathFullyQualified(profile.BackupDirectory))
         {
-            Error(nameof(profile.BackupDirectory), "A pasta de backups precisa ser um caminho completo.");
+            Error(nameof(profile.BackupDirectory), Strings.Validator_BackupDirNotFullPath);
         }
 
         // Identity
         if (string.IsNullOrWhiteSpace(profile.ServerName))
         {
-            Error(nameof(profile.ServerName), "Dê um nome ao servidor.");
+            Error(nameof(profile.ServerName), Strings.Validator_ServerNameRequired);
         }
         else if (profile.ServerName.Contains('"'))
         {
-            Error(nameof(profile.ServerName), "O nome do servidor não pode ter aspas.");
+            Error(nameof(profile.ServerName), Strings.Validator_ServerNameQuotes);
         }
 
         if (string.IsNullOrWhiteSpace(profile.WorldName))
         {
-            Error(nameof(profile.WorldName), "Informe o nome do mundo.");
+            Error(nameof(profile.WorldName), Strings.Validator_WorldNameRequired);
         }
         else if (profile.WorldName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || profile.WorldName.Contains('"'))
         {
-            Error(nameof(profile.WorldName), "O nome do mundo tem caracteres que não podem ser usados em nome de pasta.");
+            Error(nameof(profile.WorldName), Strings.Validator_WorldNameInvalidChars);
         }
         else if (profile.WorldName.Contains(WorldFolder.GameAutoBackupMarker, StringComparison.OrdinalIgnoreCase))
         {
-            Error(nameof(profile.WorldName), "Esse nome é de um backup automático do Valheim, não de um mundo.");
+            Error(nameof(profile.WorldName), Strings.Validator_WorldNameIsGameBackup);
         }
 
         if (profile.Port is < 1024 or > 65534)
         {
-            Error(nameof(profile.Port), "A porta deve estar entre 1024 e 65534 (o servidor usa ela e a seguinte).");
+            Error(nameof(profile.Port), Strings.Validator_PortRange);
         }
 
         // Password rules enforced by valheim_server itself
         if (string.IsNullOrEmpty(profile.Password))
         {
-            Error(nameof(profile.Password), "O servidor dedicado exige senha.");
+            Error(nameof(profile.Password), Strings.Validator_PasswordRequired);
         }
         else
         {
             if (profile.Password.Length < MinPasswordLength)
             {
-                Error(nameof(profile.Password), $"A senha precisa ter pelo menos {MinPasswordLength} caracteres.");
+                Error(nameof(profile.Password), string.Format(CultureInfo.CurrentCulture, Strings.Validator_PasswordTooShort, MinPasswordLength));
             }
 
             if (profile.Password.Contains('"'))
             {
-                Error(nameof(profile.Password), "A senha não pode ter aspas.");
+                Error(nameof(profile.Password), Strings.Validator_PasswordQuotes);
             }
 
             if (!string.IsNullOrEmpty(profile.ServerName) &&
                 profile.ServerName.Contains(profile.Password, StringComparison.OrdinalIgnoreCase))
             {
-                Error(nameof(profile.Password), "A senha não pode aparecer dentro do nome do servidor.");
+                Error(nameof(profile.Password), Strings.Validator_PasswordInServerName);
             }
         }
 
         // Save cadence
         if (profile.SaveIntervalSeconds < 60)
         {
-            Error(nameof(profile.SaveIntervalSeconds), "O intervalo de save precisa ser de pelo menos 60 segundos.");
+            Error(nameof(profile.SaveIntervalSeconds), Strings.Validator_SaveIntervalTooShort);
         }
         else if (profile.SaveIntervalSeconds > 3600)
         {
-            Warn(nameof(profile.SaveIntervalSeconds), "Mais de 1 hora entre saves: uma queda de energia perde muito progresso.");
+            Warn(nameof(profile.SaveIntervalSeconds), Strings.Validator_SaveIntervalLong);
         }
 
         if (profile.GameBackupCount is < 1 or > 100)
         {
-            Error(nameof(profile.GameBackupCount), "Quantidade de backups do jogo deve ficar entre 1 e 100.");
+            Error(nameof(profile.GameBackupCount), Strings.Validator_GameBackupCountRange);
         }
 
         if (profile.StopTimeoutSeconds is < 15 or > 900)
         {
-            Error(nameof(profile.StopTimeoutSeconds), "O tempo de espera para desligar deve ficar entre 15 e 900 segundos.");
+            Error(nameof(profile.StopTimeoutSeconds), Strings.Validator_StopTimeoutRange);
         }
 
         if (profile.AutoBackupRetention is < 1 or > 500)
         {
-            Error(nameof(profile.AutoBackupRetention), "A retenção de backups automáticos deve ficar entre 1 e 500.");
+            Error(nameof(profile.AutoBackupRetention), Strings.Validator_RetentionRange);
         }
 
         if (!profile.BackupBeforeStart)
         {
-            Warn(nameof(profile.BackupBeforeStart), "Sem backup antes de iniciar, um mundo corrompido não tem volta.");
+            Warn(nameof(profile.BackupBeforeStart), Strings.Validator_NoBackupBeforeStart);
         }
 
         // Extra arguments cannot override managed ones
@@ -180,14 +173,13 @@ public static class ProfileValidator
         {
             if (LaunchArguments.ManagedArguments.Contains(arg))
             {
-                Error(nameof(profile.ExtraArguments),
-                    $"\"{arg}\" é controlado pelo gerenciador; configure pela tela em vez de argumentos extras.");
+                Error(nameof(profile.ExtraArguments), string.Format(CultureInfo.CurrentCulture, Strings.Validator_ManagedArgument, arg));
             }
         }
 
         if (profile.Preset == WorldPreset.Hammer && !profile.CreativeMode)
         {
-            Warn(nameof(profile.Preset), "O preset Martelo já liga construção sem custo: o servidor fica sempre em modo criativo.");
+            Warn(nameof(profile.Preset), Strings.Validator_HammerIsCreative);
         }
 
         return issues;

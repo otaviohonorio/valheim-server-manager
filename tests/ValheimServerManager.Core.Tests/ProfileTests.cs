@@ -212,10 +212,10 @@ public class ProfileValidatorTests
     }
 
     [Theory]
-    [InlineData("1234", "pelo menos 5")]
-    [InlineData("Servidor", "nome do servidor")]
-    [InlineData("abc\"def", "aspas")]
-    [InlineData("", "exige senha")]
+    [InlineData("1234", "at least 5")]
+    [InlineData("Servidor", "server name")]
+    [InlineData("abc\"def", "quotes")]
+    [InlineData("", "requires a password")]
     public void Password_rules(string password, string expectedFragment)
     {
         using var tmp = new TempDir();

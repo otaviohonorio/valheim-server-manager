@@ -64,7 +64,7 @@ public sealed record SignalHelperCommand(string ExecutablePath, IReadOnlyList<st
     public const string AppSwitch = "--vsm-send-ctrl-c";
 
     public static SignalHelperCommand ForCurrentExecutable() =>
-        new(System.Environment.ProcessPath ?? throw new InvalidOperationException("Caminho do executável desconhecido."), [AppSwitch]);
+        new(System.Environment.ProcessPath ?? throw new InvalidOperationException("Unknown executable path."), [AppSwitch]);
 
     /// <summary>
     /// Call first thing in <c>Main</c>. Returns an exit code when this process was started as the helper.

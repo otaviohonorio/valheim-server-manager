@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Management;
 using System.Runtime.Versioning;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Profiles;
 
@@ -163,7 +164,7 @@ public sealed class HiddenConsoleLauncher : IServerProcessLauncher
         lock (LaunchLock)
         {
             NativeMethods.SetConsoleCtrlHandler(IntPtr.Zero, false);
-            return Process.Start(info) ?? throw new InvalidOperationException("O Windows não iniciou o processo do servidor.");
+            return Process.Start(info) ?? throw new InvalidOperationException(Strings.Process_WindowsDidNotStart);
         }
     }
 }

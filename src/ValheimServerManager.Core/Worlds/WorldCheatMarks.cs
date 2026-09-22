@@ -1,4 +1,6 @@
 using System.Buffers.Binary;
+using System.Globalization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -108,7 +110,7 @@ public static class WorldCheatMarks
         var after = ScanDirectory(worldDirectory, worldName);
         if (after.SaveNumber != next || after.NeedsCleaning)
         {
-            throw new InvalidDataException("A conferência do mundo limpo falhou.");
+            throw new InvalidDataException(Strings.CheatMarks_VerificationFailed);
         }
 
         return new CheatMarkCleanResult(save.Number, next, objects, items);
@@ -145,7 +147,7 @@ public static class WorldCheatMarks
         var report = WorldInspector.InspectDirectory(worldDirectory, worldName);
         if (!report.IsHealthy || report.LatestSave is not { } save || report.Index is not { } index)
         {
-            throw new InvalidOperationException("O mundo precisa estar íntegro: " +
+            throw new InvalidOperationException(Strings.CheatMarks_WorldMustBeIntact + " " +
                 string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message)));
         }
 
@@ -230,7 +232,7 @@ internal static class WorldSaveWriter
     {
         if (File.Exists(path))
         {
-            throw new IOException($"O arquivo {Path.GetFileName(path)} já existe; nada foi alterado.");
+            throw new IOException(string.Format(CultureInfo.CurrentCulture, Strings.World_FileAlreadyExists, Path.GetFileName(path)));
         }
 
         var temp = path + ".novo";

@@ -1,5 +1,7 @@
 using System.Buffers.Binary;
+using System.Globalization;
 using System.IO.Compression;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -104,7 +106,7 @@ public sealed class ChunkObjects
             var count = BinaryPrimitives.ReadInt32LittleEndian(span[2..]);
             if (count < 0)
             {
-                throw new InvalidDataException($"Quantidade de objetos inválida no chunk: {count}.");
+                throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Localization.Strings.Objects_BadObjectCount, count));
             }
 
             var objects = new List<WorldObject>(count);
@@ -116,14 +118,14 @@ public sealed class ChunkObjects
 
             if (o != data.Length)
             {
-                throw new InvalidDataException($"O chunk tem {data.Length - o} bytes sobrando depois de {count} objetos.");
+                throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Localization.Strings.Objects_TrailingBytes, data.Length - o, count));
             }
 
             return new ChunkObjects(version, data, objects);
         }
         catch (Exception ex) when (ex is ArgumentOutOfRangeException or IndexOutOfRangeException)
         {
-            throw new InvalidDataException("O chunk terminou antes do esperado.", ex);
+            throw new InvalidDataException(Localization.Strings.Objects_ChunkTruncated, ex);
         }
     }
 
@@ -220,7 +222,7 @@ public sealed class ChunkObjects
 
         if (o > d.Length)
         {
-            throw new InvalidDataException("O chunk terminou no meio de um objeto.");
+            throw new InvalidDataException(Localization.Strings.Objects_ChunkEndedMidObject);
         }
 
         return new WorldObject(prefab, x, y, z, rotation, start, o - start, headerLength)
@@ -388,7 +390,7 @@ public sealed class WorldDatabase
         }
         catch (Exception ex) when (ex is ArgumentOutOfRangeException or IndexOutOfRangeException or ArgumentException)
         {
-            throw new InvalidDataException("O bloco de zonas do .db2 não pôde ser lido.", ex);
+            throw new InvalidDataException(Localization.Strings.Objects_ZoneBlockUnreadable, ex);
         }
     }
 
@@ -396,13 +398,13 @@ public sealed class WorldDatabase
     {
         if (data.Length < 16)
         {
-            throw new InvalidDataException("Arquivo .db2 muito curto.");
+            throw new InvalidDataException(Localization.Strings.Objects_Db2TooShort);
         }
 
         var size = BinaryPrimitives.ReadInt32LittleEndian(data.AsSpan(12));
         if (size < 0 || 16 + size > data.Length)
         {
-            throw new InvalidDataException($"Tamanho do bloco de zonas inválido no .db2: {size}.");
+            throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Localization.Strings.Objects_BadZoneBlockSize, size));
         }
 
         byte[] payload;
@@ -416,7 +418,7 @@ public sealed class WorldDatabase
         var count = BinaryPrimitives.ReadInt32LittleEndian(payload);
         if (count < 0 || 4 + ((long)count * 4) > payload.Length)
         {
-            throw new InvalidDataException($"Quantidade de zonas inválida no .db2: {count}.");
+            throw new InvalidDataException(string.Format(CultureInfo.CurrentCulture, Localization.Strings.Objects_BadZoneCount, count));
         }
 
         var zones = new List<(short, short)>(count);

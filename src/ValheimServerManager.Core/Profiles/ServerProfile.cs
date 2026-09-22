@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Profiles;
 
@@ -8,7 +9,7 @@ public sealed class ServerProfile
     public const int DefaultPort = 2456;
 
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string DisplayName { get; set; } = "Meu servidor";
+    public string DisplayName { get; set; } = Strings.Profile_DefaultDisplayName;
 
     // Locations
     public string ServerDirectory { get; set; } = string.Empty;

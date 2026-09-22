@@ -64,7 +64,7 @@ public class WorldInspectorTests
         var issue = Assert.Single(report.Issues, i => i.Code == "INCOMPLETE_LATEST_SAVE");
         Assert.Equal(IssueSeverity.Error, issue.Severity);
         Assert.Contains("_main.17.db2", issue.Message);
-        Assert.Contains("save 11 completo", issue.Message);
+        Assert.Contains("Save 11 is complete", issue.Message);
     }
 
     [Fact]

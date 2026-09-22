@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.Net.NetworkInformation;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using ValheimServerManager.Core.Backups;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Logs;
 using ValheimServerManager.Core.Processes;
 using ValheimServerManager.Core.Profiles;
@@ -141,7 +143,7 @@ public sealed class ServerController : IAsyncDisposable
         {
             if (profile.Id != _profile.Id)
             {
-                throw new ArgumentException("Perfil diferente do controlado.", nameof(profile));
+                throw new ArgumentException("Profile differs from the controlled one.", nameof(profile));
             }
 
             _profile = profile.Clone();
@@ -182,7 +184,7 @@ public sealed class ServerController : IAsyncDisposable
             }
             catch (Exception ex) when (ex is System.Management.ManagementException or UnauthorizedAccessException or InvalidOperationException)
             {
-                _logger.LogWarning(ex, "Não consegui ler a linha de comando do servidor");
+                _logger.LogWarning(ex, "Could not read the server command line");
                 return;
             }
 
@@ -211,12 +213,12 @@ public sealed class ServerController : IAsyncDisposable
         SetStatus(s => s with { ConfigDifferences = differences, ConfigCheckedCount = checkedCount, ConfigCheckedAt = _time.GetLocalNow() });
         if (differences.Count == 0 && previous is not { Count: 0 })
         {
-            AddActivity(ActivityKind.Lifecycle, $"Configuração conferida: o servidor usa exatamente o perfil ({checkedCount} opções).");
+            AddActivity(ActivityKind.Lifecycle, Format(Strings.Controller_ConfigVerified, checkedCount));
         }
         else if (differences.Count > 0 && (previous is null || previous.Count != differences.Count))
         {
             AddActivity(ActivityKind.Warning,
-                "O servidor não está usando a configuração salva: " + string.Join("; ", differences.Select(d => $"{d.Setting} ({d.Actual} → {d.Expected})")));
+                Strings.Controller_ConfigMismatch + " " + string.Join("; ", differences.Select(d => $"{d.Setting} ({d.Actual} → {d.Expected})")));
         }
     }
 
@@ -237,7 +239,7 @@ public sealed class ServerController : IAsyncDisposable
 
         if (Status.IsActive)
         {
-            checks.Add(new(CheckLevel.Blocker, "ALREADY_RUNNING", "Este servidor já está em execução."));
+            checks.Add(new(CheckLevel.Blocker, "ALREADY_RUNNING", Strings.Controller_AlreadyRunning));
             return checks;
         }
 
@@ -248,24 +250,24 @@ public sealed class ServerController : IAsyncDisposable
                 if (running.Matches(profile))
                 {
                     checks.Add(new(CheckLevel.Blocker, "WORLD_IN_USE",
-                        $"Já existe um valheim_server (PID {running.ProcessId}) usando este mundo e esta pasta de saves."));
+                        Format(Strings.Controller_WorldInUse, running.ProcessId)));
                 }
                 else if (running.Port == profile.Port)
                 {
                     checks.Add(new(CheckLevel.Blocker, "PORT_IN_USE",
-                        $"A porta {profile.Port} já está em uso pelo servidor \"{running.ServerName}\" (PID {running.ProcessId})."));
+                        Format(Strings.Controller_PortInUse, profile.Port, running.ServerName, running.ProcessId)));
                 }
             }
         }
         catch (Exception ex) when (ex is System.Management.ManagementException or UnauthorizedAccessException or InvalidOperationException)
         {
-            checks.Add(new(CheckLevel.Info, "SCAN_FAILED", $"Não foi possível listar servidores em execução: {ex.Message}"));
+            checks.Add(new(CheckLevel.Info, "SCAN_FAILED", Format(Strings.Controller_ScanFailed, ex.Message)));
         }
 
         if (checks.All(c => c.Code is not ("PORT_IN_USE" or "WORLD_IN_USE")) && IsUdpPortBusy(profile.Port))
         {
             checks.Add(new(CheckLevel.Blocker, "PORT_BUSY",
-                $"Outro programa já usa a porta UDP {profile.Port} ou {profile.Port + 1}."));
+                Format(Strings.Controller_PortBusy, profile.Port, profile.Port + 1)));
         }
 
         if (checks.Any(c => c.Level == CheckLevel.Blocker && c.Code.StartsWith("CONFIG_SAVEDIRECTORY", StringComparison.Ordinal)))
@@ -304,14 +306,12 @@ public sealed class ServerController : IAsyncDisposable
             if (scan.NeedsRepair)
             {
                 checks.Add(new(CheckLevel.Confirm, "WORLD_DUPLICATES",
-                    $"O mundo tem {scan.ExtraCopies:N0} objetos duplicados e {scan.ZonesToMark} zonas que o jogo vai gerar de novo " +
-                    $"por cima ({scan.Summary}). Isso causa itens que \"voltam\", minério que quebra duas vezes e inimigos em dobro. " +
-                    "Use \"Reparar mundo\" no Painel antes de iniciar."));
+                    Format(Strings.Controller_WorldDuplicates, scan.ExtraCopies, scan.ZonesToMark, scan.Summary)));
             }
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
-            _logger.LogWarning(ex, "Não consegui procurar objetos duplicados");
+            _logger.LogWarning(ex, "Could not look for duplicate objects");
         }
     }
 
@@ -341,14 +341,14 @@ public sealed class ServerController : IAsyncDisposable
 
             if (checks.Any(c => c.Level == CheckLevel.Blocker))
             {
-                return OperationResult.Fail("O servidor não pode iniciar.", checks);
+                return OperationResult.Fail(Strings.Controller_CannotStart, checks);
             }
 
             var unconfirmed = checks.Where(c => c.Level == CheckLevel.Confirm &&
                 (c.Code == "WORLD_NEW_WORLD" ? !options.AllowNewWorld : !options.AcceptWarnings)).ToArray();
             if (unconfirmed.Length > 0)
             {
-                return OperationResult.Fail("Confirme os avisos antes de iniciar.", checks);
+                return OperationResult.Fail(Strings.Controller_ConfirmWarnings, checks);
             }
 
             SetStatus(s => new ServerStatus
@@ -359,7 +359,7 @@ public sealed class ServerController : IAsyncDisposable
                 LastBackupAt = s.LastBackupAt,
                 LastBackupName = s.LastBackupName,
             });
-            AddActivity(ActivityKind.Lifecycle, profile.IsCreativeEffective ? "Iniciando em modo criativo…" : "Iniciando…");
+            AddActivity(ActivityKind.Lifecycle, profile.IsCreativeEffective ? Strings.Controller_StartingCreative : Strings.Controller_Starting);
 
             var report = WorldInspector.Inspect(profile.SaveDirectory, profile.WorldName);
             var alreadyBackedUp = report.LatestSave is { } latest && _backups.List(profile, includeGameAutoBackups: false)
@@ -368,11 +368,11 @@ public sealed class ServerController : IAsyncDisposable
                           b.Kind != BackupKind.Quarantine);
             if (profile.BackupBeforeStart && report.IsHealthy && alreadyBackedUp)
             {
-                AddActivity(ActivityKind.Backup, $"O save {report.LatestSave!.Number} já tem backup verificado; pulando a cópia.");
+                AddActivity(ActivityKind.Backup, Format(Strings.Controller_SaveAlreadyBackedUp, report.LatestSave!.Number));
             }
             else if (profile.BackupBeforeStart && report.IsHealthy)
             {
-                AddActivity(ActivityKind.Backup, "Fazendo backup antes de iniciar…");
+                AddActivity(ActivityKind.Backup, Strings.Controller_BackingUpBeforeStart);
                 try
                 {
                     var backup = await _backups.CreateAsync(profile, BackupKind.PreStart, ct: ct).ConfigureAwait(false);
@@ -380,10 +380,10 @@ public sealed class ServerController : IAsyncDisposable
                 }
                 catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
                 {
-                    _logger.LogError(ex, "Backup antes de iniciar falhou");
+                    _logger.LogError(ex, "Backup before starting failed");
                     SetStatus(s => s with { State = ServerRunState.Stopped });
-                    Raise(AlertLevel.Error, "Backup falhou", $"O servidor não foi iniciado porque o backup falhou: {ex.Message}");
-                    return OperationResult.Fail($"Backup antes de iniciar falhou: {ex.Message}");
+                    Raise(AlertLevel.Error, Strings.Controller_BackupFailedTitle, Format(Strings.Controller_NotStartedBackupFailed, ex.Message));
+                    return OperationResult.Fail(Format(Strings.Controller_BackupBeforeStartFailed, ex.Message));
                 }
             }
 
@@ -394,7 +394,7 @@ public sealed class ServerController : IAsyncDisposable
             }
             catch (IOException ex)
             {
-                _logger.LogWarning(ex, "Não consegui arquivar o log anterior");
+                _logger.LogWarning(ex, "Could not archive the previous log");
             }
 
             Process process;
@@ -405,8 +405,8 @@ public sealed class ServerController : IAsyncDisposable
             catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException or IOException)
             {
                 SetStatus(s => s with { State = ServerRunState.Stopped });
-                Raise(AlertLevel.Error, "Falha ao iniciar", ex.Message);
-                return OperationResult.Fail($"O Windows não conseguiu iniciar o servidor: {ex.Message}");
+                Raise(AlertLevel.Error, Strings.Controller_StartFailedTitle, ex.Message);
+                return OperationResult.Fail(Format(Strings.Controller_WindowsCouldNotStart, ex.Message));
             }
 
             lock (_gate)
@@ -415,9 +415,9 @@ public sealed class ServerController : IAsyncDisposable
             }
 
             await BeginTrackingAsync(process, profile.LogFilePath, attached: false, creative: profile.IsCreativeEffective).ConfigureAwait(false);
-            _logger.LogInformation("Servidor {Name} iniciado (PID {Pid})", profile.ServerName, process.Id);
-            AddActivity(ActivityKind.Lifecycle, $"Processo iniciado (PID {process.Id}). Carregando o mundo…");
-            return new OperationResult(true, "Servidor iniciando.", checks);
+            _logger.LogInformation("Server {Name} started (PID {Pid})", profile.ServerName, process.Id);
+            AddActivity(ActivityKind.Lifecycle, Format(Strings.Controller_ProcessStarted, process.Id));
+            return new OperationResult(true, Strings.Controller_ServerStarting, checks);
         }
         finally
         {
@@ -463,7 +463,7 @@ public sealed class ServerController : IAsyncDisposable
                 _launchedProfile = null;
             }
 
-            AddActivity(ActivityKind.Lifecycle, $"Servidor já estava rodando (PID {running.ProcessId}); acompanhando.");
+            AddActivity(ActivityKind.Lifecycle, Format(Strings.Controller_AlreadyRunningAttached, running.ProcessId));
             lock (_gate)
             {
                 _knownCommandLine = running.CommandLine;
@@ -471,9 +471,7 @@ public sealed class ServerController : IAsyncDisposable
 
             if (running.LogFile is null)
             {
-                Raise(AlertLevel.Warning, "Servidor sem log",
-                    "Este servidor foi iniciado sem -logFile, então não dá para acompanhar saves e jogadores. " +
-                    "Pare com segurança e inicie pelo gerenciador para ter tudo.");
+                Raise(AlertLevel.Warning, Strings.Controller_NoLogTitle, Strings.Controller_NoLogMessage);
             }
 
             await BeginTrackingAsync(process, running.LogFile, attached: true, creative: running.CreativeMode).ConfigureAwait(false);
@@ -534,7 +532,7 @@ public sealed class ServerController : IAsyncDisposable
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            _logger.LogWarning(ex, "Sem permissão para acompanhar o processo {Pid}", process.Id);
+            _logger.LogWarning(ex, "No permission to follow process {Pid}", process.Id);
         }
 
         if (logFile is null)
@@ -582,7 +580,7 @@ public sealed class ServerController : IAsyncDisposable
                 }
                 catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException)
                 {
-                    _logger.LogWarning(ex, "Falha ao tratar evento {Kind}", evt.Kind);
+                    _logger.LogWarning(ex, "Failed to handle event {Kind}", evt.Kind);
                 }
             }
         }
@@ -616,9 +614,8 @@ public sealed class ServerController : IAsyncDisposable
             case ServerLogEventKind.MissingWorldData when evt.Number > 0:
                 if (_replaying)
                 {
-                    Raise(AlertLevel.Critical, "Mundo regenerado nesta sessão",
-                        $"O log mostra que o servidor não achou {Path.GetFileName(evt.Text)} ao iniciar e gerou um mundo novo. " +
-                        "Pare o servidor e restaure um backup.");
+                    Raise(AlertLevel.Critical, Strings.Controller_RegeneratedTitle,
+                        Format(Strings.Controller_RegeneratedMessage, Path.GetFileName(evt.Text)));
                 }
                 else
                 {
@@ -631,7 +628,7 @@ public sealed class ServerController : IAsyncDisposable
                 SetStatus(s => s with { LoadedZdos = evt.Count });
                 if (!_replaying)
                 {
-                    AddActivity(ActivityKind.Lifecycle, $"Carregando {evt.Count:N0} objetos de {evt.Number} chunks…");
+                    AddActivity(ActivityKind.Lifecycle, Format(Strings.Controller_LoadingObjects, evt.Count, evt.Number));
                 }
 
                 break;
@@ -649,8 +646,8 @@ public sealed class ServerController : IAsyncDisposable
                 if (!_replaying)
                 {
                     _ = VerifyConfigurationAsync();
-                    AddActivity(ActivityKind.Lifecycle, "Servidor online.");
-                    Raise(AlertLevel.Success, "Servidor online", $"\"{Profile.ServerName}\" está aceitando conexões.");
+                    AddActivity(ActivityKind.Lifecycle, Strings.Controller_ServerOnline);
+                    Raise(AlertLevel.Success, Strings.Controller_ServerOnlineTitle, Format(Strings.Controller_AcceptingConnections, Profile.ServerName));
                 }
 
                 break;
@@ -675,7 +672,7 @@ public sealed class ServerController : IAsyncDisposable
 
                 if (!_replaying && evt.Number is { } count && count > previous)
                 {
-                    AddActivity(ActivityKind.Player, $"Alguém está conectando — {count} online.");
+                    AddActivity(ActivityKind.Player, Format(Strings.Controller_SomeoneConnecting, count));
                 }
 
                 break;
@@ -696,7 +693,7 @@ public sealed class ServerController : IAsyncDisposable
                 break;
 
             case ServerLogEventKind.PlayerDied when !_replaying:
-                AddActivity(ActivityKind.Player, $"{evt.Text} morreu.");
+                AddActivity(ActivityKind.Player, Format(Strings.Controller_PlayerDied, evt.Text));
                 break;
 
             case ServerLogEventKind.PlayerLeft:
@@ -767,8 +764,8 @@ public sealed class ServerController : IAsyncDisposable
         PublishPlayers();
         if (isNew && !_replaying)
         {
-            AddActivity(ActivityKind.Player, $"{name} entrou no mundo.");
-            Raise(AlertLevel.Info, "Jogador entrou", $"{name} entrou em \"{Profile.ServerName}\".");
+            AddActivity(ActivityKind.Player, Format(Strings.Controller_PlayerJoinedWorld, name));
+            Raise(AlertLevel.Info, Strings.Controller_PlayerJoinedTitle, Format(Strings.Controller_PlayerJoinedServer, name, Profile.ServerName));
         }
     }
 
@@ -794,8 +791,8 @@ public sealed class ServerController : IAsyncDisposable
         {
             foreach (var player in gone)
             {
-                AddActivity(ActivityKind.Player, $"{player.Name} saiu.");
-                Raise(AlertLevel.Info, "Jogador saiu", $"{player.Name} saiu de \"{Profile.ServerName}\".");
+                AddActivity(ActivityKind.Player, Format(Strings.Controller_PlayerLeft, player.Name));
+                Raise(AlertLevel.Info, Strings.Controller_PlayerLeftTitle, Format(Strings.Controller_PlayerLeftServer, player.Name, Profile.ServerName));
             }
         }
     }
@@ -838,7 +835,7 @@ public sealed class ServerController : IAsyncDisposable
             return;
         }
 
-        AddActivity(ActivityKind.Save, number is null ? "Mundo salvo." : $"Mundo salvo (save {number}, {evt.Count} ms).");
+        AddActivity(ActivityKind.Save, number is null ? Strings.Controller_WorldSaved : Format(Strings.Controller_WorldSavedDetails, number, evt.Count));
 
         // Confirm that creative mode on/off actually reached the world file.
         var profile = Profile;
@@ -850,10 +847,10 @@ public sealed class ServerController : IAsyncDisposable
             SetStatus(s => s with { ModeVerified = ok });
             if (!ok)
             {
-                Raise(AlertLevel.Error, "Modo do mundo não confere",
+                Raise(AlertLevel.Error, Strings.Controller_ModeMismatchTitle,
                     expected
-                        ? "O servidor foi iniciado em modo criativo, mas o mundo salvo não tem a chave nobuildcost."
-                        : "O servidor está em modo normal, mas o mundo salvo ainda tem nobuildcost: construção continua de graça.");
+                        ? Strings.Controller_ModeMismatchCreative
+                        : Strings.Controller_ModeMismatchNormal);
             }
         }
     }
@@ -867,13 +864,11 @@ public sealed class ServerController : IAsyncDisposable
             _emergencyKill = true;
         }
 
-        var message =
-            $"O servidor não encontrou {Path.GetFileName(evt.Text)} e começou a gerar um mundo NOVO por cima do seu. " +
-            "Ele foi encerrado imediatamente, sem salvar, para preservar os arquivos existentes. Restaure um backup antes de iniciar de novo.";
-        _logger.LogCritical("Emergência: {Line}", evt.Line);
+        var message = Format(Strings.Controller_EmergencyMessage, Path.GetFileName(evt.Text));
+        _logger.LogCritical("Emergency: {Line}", evt.Line);
         SetStatus(s => s with { Emergency = message });
-        AddActivity(ActivityKind.Error, "EMERGÊNCIA: mundo sendo regenerado — servidor encerrado sem salvar.");
-        Raise(AlertLevel.Critical, "Servidor encerrado para proteger o mundo", message);
+        AddActivity(ActivityKind.Error, Strings.Controller_EmergencyActivity);
+        Raise(AlertLevel.Critical, Strings.Controller_EmergencyTitle, message);
 
         try
         {
@@ -881,7 +876,7 @@ public sealed class ServerController : IAsyncDisposable
         }
         catch (Exception ex) when (ex is InvalidOperationException or System.ComponentModel.Win32Exception)
         {
-            _logger.LogError(ex, "Falha ao encerrar na emergência");
+            _logger.LogError(ex, "Failed to kill the server in the emergency");
         }
     }
 
@@ -902,18 +897,18 @@ public sealed class ServerController : IAsyncDisposable
 
             if (process is null || exit is null || !Status.IsActive)
             {
-                return OperationResult.Fail("O servidor não está em execução.");
+                return OperationResult.Fail(Strings.Controller_NotRunning);
             }
 
             SetStatus(s => s with { State = ServerRunState.Stopping, StopRequestedAt = _time.GetLocalNow(), StopTimedOut = false });
-            AddActivity(ActivityKind.Lifecycle, "Desligando com segurança (Ctrl+C)… aguardando o save.");
+            AddActivity(ActivityKind.Lifecycle, Strings.Controller_StoppingSafely);
 
             var result = await _signals.SendCtrlCAsync(process.Id, ct).ConfigureAwait(false);
             if (result != SignalResult.Sent && result != SignalResult.ProcessNotFound)
             {
                 SetStatus(s => s with { State = ServerRunState.Running, StopRequestedAt = null });
-                Raise(AlertLevel.Error, "Não foi possível desligar", $"O sinal de desligamento falhou ({result}).");
-                return OperationResult.Fail($"O sinal de desligamento falhou ({result}). O servidor continua rodando.");
+                Raise(AlertLevel.Error, Strings.Controller_CouldNotStopTitle, Format(Strings.Controller_StopSignalFailed, result));
+                return OperationResult.Fail(Format(Strings.Controller_StopSignalFailedStillRunning, result));
             }
         }
         finally
@@ -935,23 +930,21 @@ public sealed class ServerController : IAsyncDisposable
 
         if (exit is null)
         {
-            return OperationResult.Ok("O servidor já está parado.");
+            return OperationResult.Ok(Strings.Controller_AlreadyStopped);
         }
 
         try
         {
             var info = await exit.Task.WaitAsync(timeout, _time, ct).ConfigureAwait(false);
             return info.Clean
-                ? OperationResult.Ok("Servidor desligado com o mundo salvo.")
+                ? OperationResult.Ok(Strings.Controller_StoppedWorldSaved)
                 : OperationResult.Fail(info.Reason);
         }
         catch (TimeoutException)
         {
             SetStatus(s => s with { StopTimedOut = true });
-            Raise(AlertLevel.Warning, "O servidor está demorando para desligar",
-                $"Já se passaram {timeout.TotalSeconds:N0} s. Você pode continuar esperando ou forçar o encerramento " +
-                "(forçar perde o que não foi salvo).");
-            return OperationResult.Fail("O servidor ainda não desligou.");
+            Raise(AlertLevel.Warning, Strings.Controller_SlowStopTitle, Format(Strings.Controller_SlowStopMessage, timeout.TotalSeconds));
+            return OperationResult.Fail(Strings.Controller_NotStoppedYet);
         }
     }
 
@@ -973,7 +966,7 @@ public sealed class ServerController : IAsyncDisposable
                 return;
             }
 
-            AddActivity(ActivityKind.Warning, "Encerramento forçado pelo usuário (sem salvar).");
+            AddActivity(ActivityKind.Warning, Strings.Controller_ForcedByUser);
             try
             {
                 process.Kill();
@@ -1105,23 +1098,23 @@ public sealed class ServerController : IAsyncDisposable
         ExitInfo info;
         if (emergency)
         {
-            info = new ExitInfo(_time.GetLocalNow(), code, false, "Encerrado na emergência para proteger o mundo.");
+            info = new ExitInfo(_time.GetLocalNow(), code, false, Strings.Controller_ExitEmergency);
         }
         else if (forced)
         {
-            info = new ExitInfo(_time.GetLocalNow(), code, false, "Encerramento forçado: o progresso desde o último save foi perdido.");
+            info = new ExitInfo(_time.GetLocalNow(), code, false, Strings.Controller_ExitForced);
         }
         else if (stopRequested && (sawSave || !hasLog) && (sawShutdown || code == 0 || !hasLog))
         {
-            info = new ExitInfo(_time.GetLocalNow(), code, true, "Desligado com segurança.");
+            info = new ExitInfo(_time.GetLocalNow(), code, true, Strings.Controller_ExitClean);
         }
         else if (stopRequested)
         {
-            info = new ExitInfo(_time.GetLocalNow(), code, false, "O servidor saiu sem confirmar o save final no log.");
+            info = new ExitInfo(_time.GetLocalNow(), code, false, Strings.Controller_ExitNoFinalSave);
         }
         else
         {
-            info = new ExitInfo(_time.GetLocalNow(), code, false, "O servidor parou sozinho (queda ou fechado fora do gerenciador).");
+            info = new ExitInfo(_time.GetLocalNow(), code, false, Strings.Controller_ExitUnexpected);
         }
 
         var state = info.Clean || stopRequested || emergency || forced ? ServerRunState.Stopped : ServerRunState.Crashed;
@@ -1149,14 +1142,14 @@ public sealed class ServerController : IAsyncDisposable
         AddActivity(info.Clean ? ActivityKind.Lifecycle : ActivityKind.Error, info.Reason);
         if (!info.Clean && !emergency)
         {
-            Raise(stopRequested ? AlertLevel.Warning : AlertLevel.Error, "Servidor parou", info.Reason);
+            Raise(stopRequested ? AlertLevel.Warning : AlertLevel.Error, Strings.Controller_ServerStoppedTitle, info.Reason);
         }
 
         await AfterStopAsync(emergency).ConfigureAwait(false);
         exit.TrySetResult(info);
         if (info.Clean)
         {
-            Raise(AlertLevel.Success, "Servidor desligado", "O mundo foi salvo antes de desligar.");
+            Raise(AlertLevel.Success, Strings.Controller_ServerShutDownTitle, Strings.Controller_WorldSavedBeforeShutdown);
         }
     }
 
@@ -1166,7 +1159,7 @@ public sealed class ServerController : IAsyncDisposable
         var report = WorldInspector.Inspect(profile.SaveDirectory, profile.WorldName);
         if (report.HasErrors)
         {
-            Raise(AlertLevel.Critical, "Mundo com problema depois de parar",
+            Raise(AlertLevel.Critical, Strings.Controller_WorldProblemAfterStopTitle,
                 string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message)));
             return;
         }
@@ -1178,14 +1171,14 @@ public sealed class ServerController : IAsyncDisposable
 
         try
         {
-            AddActivity(ActivityKind.Backup, "Fazendo backup depois de parar…");
+            AddActivity(ActivityKind.Backup, Strings.Controller_BackingUpAfterStop);
             var backup = await _backups.CreateAsync(profile, BackupKind.PostStop).ConfigureAwait(false);
             RecordBackup(backup);
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
-            _logger.LogError(ex, "Backup depois de parar falhou");
-            Raise(AlertLevel.Error, "Backup depois de parar falhou", ex.Message);
+            _logger.LogError(ex, "Backup after stopping failed");
+            Raise(AlertLevel.Error, Strings.Controller_BackupAfterStopFailedTitle, ex.Message);
             return;
         }
 
@@ -1210,9 +1203,9 @@ public sealed class ServerController : IAsyncDisposable
                 : null).ConfigureAwait(false);
             if (repaired is { } r)
             {
-                var message = $"Manutenção: {r.RemovedObjects:N0} objetos duplicados removidos e {r.ZonesMarked} regiões protegidas.";
+                var message = Format(Strings.Controller_MaintenanceRepaired, r.RemovedObjects, r.ZonesMarked);
                 AddActivity(ActivityKind.Save, message);
-                Raise(AlertLevel.Info, "Mundo corrigido depois de parar", message);
+                Raise(AlertLevel.Info, Strings.Controller_WorldFixedAfterStopTitle, message);
             }
 
             var cleaned = await Task.Run(() => WorldCheatMarks.Scan(profile.SaveDirectory, profile.WorldName) is { NeedsCleaning: true }
@@ -1220,16 +1213,16 @@ public sealed class ServerController : IAsyncDisposable
                 : null).ConfigureAwait(false);
             if (cleaned is { } c)
             {
-                var message = $"Manutenção: marca de trapaça removida de {c.ClearedObjects:N0} objetos e {c.ClearedItems:N0} itens.";
+                var message = Format(Strings.Controller_MaintenanceCleaned, c.ClearedObjects, c.ClearedItems);
                 AddActivity(ActivityKind.Save, message);
-                Raise(AlertLevel.Info, "Marcas removidas depois de parar", message);
+                Raise(AlertLevel.Info, Strings.Controller_MarksRemovedAfterStopTitle, message);
             }
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
-            _logger.LogError(ex, "Manutenção do mundo depois de parar falhou");
-            Raise(AlertLevel.Warning, "Manutenção do mundo não foi feita",
-                "O mundo continua como estava; use \"Reparar mundo\" no Painel. " + ex.Message);
+            _logger.LogError(ex, "World maintenance after stopping failed");
+            Raise(AlertLevel.Warning, Strings.Controller_MaintenanceNotDoneTitle,
+                Strings.Controller_MaintenanceNotDoneMessage + " " + ex.Message);
         }
     }
 
@@ -1245,37 +1238,37 @@ public sealed class ServerController : IAsyncDisposable
             var profile = Profile;
             if (Status.IsActive)
             {
-                return OperationResult.Fail("Pare o servidor antes de reparar o mundo.");
+                return OperationResult.Fail(Strings.Controller_StopBeforeRepair);
             }
 
             var inUse = Preflight(profile).Where(c => c.Code is "WORLD_IN_USE" or "ALREADY_RUNNING").ToArray();
             if (inUse.Length > 0)
             {
-                return OperationResult.Fail("O mundo está em uso por outro servidor.", inUse);
+                return OperationResult.Fail(Strings.Controller_WorldInUseByOther, inUse);
             }
 
             var scan = await Task.Run(() => WorldRepair.Scan(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
             if (!scan.NeedsRepair)
             {
-                return OperationResult.Ok("O mundo não tem objetos duplicados nem zonas por marcar.");
+                return OperationResult.Ok(Strings.Controller_NothingToRepair);
             }
 
-            AddActivity(ActivityKind.Backup, "Fazendo backup antes de reparar o mundo…");
-            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, "antes de reparar duplicados", ct).ConfigureAwait(false);
+            AddActivity(ActivityKind.Backup, Strings.Controller_BackingUpBeforeRepair);
+            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, Strings.Controller_NoteBeforeRepair, ct).ConfigureAwait(false);
             RecordBackup(backup);
 
             var result = await Task.Run(() => WorldRepair.Repair(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
-            var message = $"Mundo reparado: {result.RemovedObjects:N0} cópias removidas e {result.ZonesMarked} regiões protegidas " +
-                          $"contra nova geração (save {result.OldSaveNumber} → {result.NewSaveNumber}). Backup: {backup.Name}.";
-            _logger.LogInformation("{Message}", message);
+            var message = Format(Strings.Controller_WorldRepaired, result.RemovedObjects, result.ZonesMarked, result.OldSaveNumber, result.NewSaveNumber, backup.Name);
+            _logger.LogInformation("World repaired: {Removed} copies removed, {Zones} zones marked (save {Old} -> {New}), backup {Backup}",
+                result.RemovedObjects, result.ZonesMarked, result.OldSaveNumber, result.NewSaveNumber, backup.Name);
             AddActivity(ActivityKind.Save, message);
-            Raise(AlertLevel.Success, "Mundo reparado", message);
+            Raise(AlertLevel.Success, Strings.Controller_WorldRepairedTitle, message);
             return OperationResult.Ok(message);
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
-            _logger.LogError(ex, "Reparo do mundo falhou");
-            return OperationResult.Fail("O reparo não foi feito; o mundo continua como estava. " + ex.Message);
+            _logger.LogError(ex, "World repair failed");
+            return OperationResult.Fail(Strings.Controller_RepairNotDone + " " + ex.Message);
         }
         finally
         {
@@ -1295,37 +1288,37 @@ public sealed class ServerController : IAsyncDisposable
             var profile = Profile;
             if (Status.IsActive)
             {
-                return OperationResult.Fail("Pare o servidor antes de limpar as marcas.");
+                return OperationResult.Fail(Strings.Controller_StopBeforeCleaning);
             }
 
             var inUse = Preflight(profile).Where(c => c.Code is "WORLD_IN_USE" or "ALREADY_RUNNING").ToArray();
             if (inUse.Length > 0)
             {
-                return OperationResult.Fail("O mundo está em uso por outro servidor.", inUse);
+                return OperationResult.Fail(Strings.Controller_WorldInUseByOther, inUse);
             }
 
             var scan = await Task.Run(() => WorldCheatMarks.Scan(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
             if (!scan.NeedsCleaning)
             {
-                return OperationResult.Ok("O mundo não tem itens nem objetos marcados.");
+                return OperationResult.Ok(Strings.Controller_NothingToClean);
             }
 
-            AddActivity(ActivityKind.Backup, "Fazendo backup antes de limpar as marcas…");
-            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, "antes de limpar marcas de trapaça", ct).ConfigureAwait(false);
+            AddActivity(ActivityKind.Backup, Strings.Controller_BackingUpBeforeCleaning);
+            var backup = await _backups.CreateAsync(profile, BackupKind.Manual, Strings.Controller_NoteBeforeCleaning, ct).ConfigureAwait(false);
             RecordBackup(backup);
 
             var result = await Task.Run(() => WorldCheatMarks.Clean(profile.SaveDirectory, profile.WorldName), ct).ConfigureAwait(false);
-            var message = $"Marcas removidas de {result.ClearedObjects:N0} objetos e {result.ClearedItems:N0} itens " +
-                          $"(save {result.OldSaveNumber} → {result.NewSaveNumber}). Backup: {backup.Name}.";
-            _logger.LogInformation("{Message}", message);
+            var message = Format(Strings.Controller_MarksRemoved, result.ClearedObjects, result.ClearedItems, result.OldSaveNumber, result.NewSaveNumber, backup.Name);
+            _logger.LogInformation("Cheat marks cleared from {Objects} objects and {Items} items (save {Old} -> {New}), backup {Backup}",
+                result.ClearedObjects, result.ClearedItems, result.OldSaveNumber, result.NewSaveNumber, backup.Name);
             AddActivity(ActivityKind.Save, message);
-            Raise(AlertLevel.Success, "Marcas removidas", message);
+            Raise(AlertLevel.Success, Strings.Controller_MarksRemovedTitle, message);
             return OperationResult.Ok(message);
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
-            _logger.LogError(ex, "Limpeza das marcas falhou");
-            return OperationResult.Fail("A limpeza não foi feita; o mundo continua como estava. " + ex.Message);
+            _logger.LogError(ex, "Clearing the cheat marks failed");
+            return OperationResult.Fail(Strings.Controller_CleaningNotDone + " " + ex.Message);
         }
         finally
         {
@@ -1337,7 +1330,7 @@ public sealed class ServerController : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(backup);
         SetStatus(s => s with { LastBackupAt = backup.CreatedAt, LastBackupName = backup.Name });
-        AddActivity(ActivityKind.Backup, $"Backup verificado: {backup.Name}");
+        AddActivity(ActivityKind.Backup, Format(Strings.Controller_BackupVerified, backup.Name));
     }
 
     // ------------------------------------------------------------------ plumbing
@@ -1387,6 +1380,9 @@ public sealed class ServerController : IAsyncDisposable
 
     private void Raise(AlertLevel level, string title, string message) =>
         AlertRaised?.Invoke(this, new ServerAlert(level, title, message, _time.GetLocalNow()));
+
+    private static string Format(string format, params object?[] args) =>
+        string.Format(CultureInfo.CurrentCulture, format, args);
 
     public async ValueTask DisposeAsync()
     {

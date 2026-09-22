@@ -18,22 +18,22 @@ public class ProfileSummaryTests
 
         var lines = ProfileSummary.Describe(p).ToDictionary(l => l.Label);
 
-        Assert.Equal("Penalidade de morte: Casual · Recursos: Mais (1,5x) · Portais: Casual", lines["Modificadores"].Value);
-        Assert.True(lines["Modificadores"].IsCustomized);
+        Assert.Equal("Death penalty: Casual · Resources: More (1.5x) · Portals: Casual", lines["Modifiers"].Value);
+        Assert.True(lines["Modifiers"].IsCustomized);
         Assert.Equal("Normal", lines["Preset"].Value);
-        Assert.Equal("nenhuma", lines["Opções do mundo"].Value);
-        Assert.Equal("Público · porta 2456 · crossplay", lines["Acesso"].Value);
-        Assert.Equal("a cada 30 min · backup antes de iniciar e depois de parar", lines["Saves"].Value);
-        Assert.Equal(ProfileSummary.WorldSection, lines["Modificadores"].Section);
+        Assert.Equal("none", lines["World options"].Value);
+        Assert.Equal("Public · port 2456 · crossplay", lines["Access"].Value);
+        Assert.Equal("every 30 min · backup before starting and after stopping", lines["Saves"].Value);
+        Assert.Equal(ProfileSummary.WorldSection, lines["Modifiers"].Section);
     }
 
     [Fact]
     public void Default_profile_says_nothing_was_changed()
     {
         var lines = ProfileSummary.Describe(new ServerProfile()).ToDictionary(l => l.Label);
-        Assert.Equal("nenhum (tudo no padrão)", lines["Modificadores"].Value);
-        Assert.False(lines["Modificadores"].IsCustomized);
-        Assert.DoesNotContain("Argumentos extras", lines.Keys);
+        Assert.Equal("none (all default)", lines["Modifiers"].Value);
+        Assert.False(lines["Modifiers"].IsCustomized);
+        Assert.DoesNotContain("Extra arguments", lines.Keys);
     }
 
     [Fact]
@@ -42,16 +42,16 @@ public class ProfileSummaryTests
         var p = new ServerProfile { CreativeMode = true, PlayerEvents = true, NoMap = true, ExtraArguments = "-instanceid 2" };
         var lines = ProfileSummary.Describe(p).ToDictionary(l => l.Label);
 
-        Assert.Equal("Modo criativo — construção e craft sem custo · Eventos por jogador · Sem mapa", lines["Opções do mundo"].Value);
-        Assert.Equal("-instanceid 2", lines["Argumentos extras"].Value);
+        Assert.Equal("Creative mode — free building and crafting · Player-based events · No map", lines["World options"].Value);
+        Assert.Equal("-instanceid 2", lines["Extra arguments"].Value);
     }
 
     [Fact]
     public void Hammer_preset_explains_creative_origin()
     {
         var lines = ProfileSummary.Describe(new ServerProfile { Preset = WorldPreset.Hammer }).ToDictionary(l => l.Label);
-        Assert.StartsWith("Martelo (criativo) — ", lines["Preset"].Value);
-        Assert.Equal("Modo criativo (pelo preset Martelo)", lines["Opções do mundo"].Value);
-        Assert.Equal("nenhum além do preset Martelo (criativo)", lines["Modificadores"].Value);
+        Assert.StartsWith("Hammer (creative) — ", lines["Preset"].Value);
+        Assert.Equal("Creative mode (from the Hammer preset)", lines["World options"].Value);
+        Assert.Equal("none beyond the Hammer (creative) preset", lines["Modifiers"].Value);
     }
 }

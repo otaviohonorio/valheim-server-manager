@@ -1,6 +1,8 @@
+using System.Globalization;
 using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 using ValheimServerManager.Core.Backups;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Processes;
 using ValheimServerManager.Core.Profiles;
@@ -103,7 +105,7 @@ public sealed class ServerManager : IAsyncDisposable
         {
             return _controllers.TryGetValue(profileId, out var controller)
                 ? controller
-                : throw new KeyNotFoundException($"Perfil {profileId} não existe.");
+                : throw new KeyNotFoundException(string.Format(CultureInfo.CurrentCulture, Strings.Manager_ProfileDoesNotExist, profileId));
         }
     }
 
@@ -141,14 +143,14 @@ public sealed class ServerManager : IAsyncDisposable
             var index = Settings.Profiles.FindIndex(p => p.Id == profile.Id);
             if (index < 0)
             {
-                throw new KeyNotFoundException("Perfil não encontrado.");
+                throw new KeyNotFoundException(Strings.Manager_ProfileNotFound);
             }
 
             var passwordChanged = Settings.Profiles[index].Password != profile.Password;
             Settings.Profiles[index] = profile.Clone();
             _controllers[profile.Id].UpdateProfile(profile);
             Persist();
-            _logger.LogInformation("Perfil {Name} salvo{Password}", profile.DisplayName, passwordChanged ? " (senha alterada)" : string.Empty);
+            _logger.LogInformation("Profile {Name} saved{Password}", profile.DisplayName, passwordChanged ? " (password changed)" : string.Empty);
         }
 
         ProfilesChanged?.Invoke(this, EventArgs.Empty);
@@ -162,7 +164,7 @@ public sealed class ServerManager : IAsyncDisposable
             controller = _controllers[profileId];
             if (controller.Status.IsActive)
             {
-                throw new InvalidOperationException("Pare o servidor antes de excluir o perfil.");
+                throw new InvalidOperationException(Strings.Manager_StopBeforeDeletingProfile);
             }
 
             _controllers.Remove(profileId);
@@ -198,7 +200,7 @@ public sealed class ServerManager : IAsyncDisposable
         }
         catch (Exception ex) when (ex is System.Management.ManagementException or UnauthorizedAccessException or InvalidOperationException)
         {
-            _logger.LogWarning(ex, "Falha ao listar processos do servidor");
+            _logger.LogWarning(ex, "Failed to list server processes");
             return;
         }
 
@@ -240,7 +242,7 @@ public sealed class ServerManager : IAsyncDisposable
     {
         ArgumentNullException.ThrowIfNull(server);
         var profile = BatchFileImporter.FromCommandLine(server.CommandLine, out _);
-        profile.DisplayName = server.ServerName ?? "Servidor importado";
+        profile.DisplayName = server.ServerName ?? Strings.Manager_ImportedServerName;
         profile.ServerDirectory = Path.GetDirectoryName(server.ExecutablePath) ?? string.Empty;
         if (server.SaveDirectoryIsDefault)
         {
@@ -271,7 +273,7 @@ public sealed class ServerManager : IAsyncDisposable
     {
         var controller = new ServerController(
             profile, _backups, _launcher, _signals, _locator, _time,
-            _loggers.CreateLogger($"Servidor.{profile.DisplayName}"));
+            _loggers.CreateLogger($"Server.{profile.DisplayName}"));
         controller.AlertRaised += ForwardAlert;
         _controllers[profile.Id] = controller;
     }

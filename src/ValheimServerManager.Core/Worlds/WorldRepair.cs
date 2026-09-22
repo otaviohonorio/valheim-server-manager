@@ -1,4 +1,5 @@
 using System.Globalization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -13,7 +14,7 @@ public sealed record WorldDuplicateReport(
 {
     public bool NeedsRepair => ExtraCopies > 0 || ZonesToMark > 0;
 
-    /// <summary>One line for alerts, e.g. "2.681 coletáveis, 135 cogumelos…".</summary>
+    /// <summary>One line for alerts, e.g. "2,681 pickables, 135 mushrooms…".</summary>
     public string Summary =>
         string.Join(", ", ByCategory.Take(5).Select(c => c.Count.ToString("N0", CultureInfo.CurrentCulture) + " " + c.Category));
 }
@@ -42,20 +43,20 @@ public static class WorldRepair
 
     private static readonly (string Category, string[] Prefabs)[] Categories =
     [
-        ("cogumelos", ["Pickable_Mushroom", "Pickable_Mushroom_yellow", "Pickable_Mushroom_blue"]),
-        ("veios de cobre e estanho", ["rock4_copper", "rock4_copper_frac", "MineRock_Tin"]),
-        ("geradores de inimigos", ["Spawner_Skeleton", "Spawner_GreydwarfNest", "Spawner_Greydwarf", "Spawner_Ghost",
+        (Strings.Repair_CategoryMushrooms, ["Pickable_Mushroom", "Pickable_Mushroom_yellow", "Pickable_Mushroom_blue"]),
+        (Strings.Repair_CategoryCopperTin, ["rock4_copper", "rock4_copper_frac", "MineRock_Tin"]),
+        (Strings.Repair_CategorySpawners, ["Spawner_Skeleton", "Spawner_GreydwarfNest", "Spawner_Greydwarf", "Spawner_Ghost",
             "Spawner_DraugrPile", "Spawner_Draugr", "BonePileSpawner", "Spawner_Blob", "Spawner_Wolf"]),
-        ("controles de spawn de zona", ["_ZoneCtrl"]),
-        ("baús de tesouro", ["TreasureChest_forestcrypt", "TreasureChest_blackforest", "TreasureChest_meadows",
+        (Strings.Repair_CategoryZoneControls, ["_ZoneCtrl"]),
+        (Strings.Repair_CategoryTreasureChests, ["TreasureChest_forestcrypt", "TreasureChest_blackforest", "TreasureChest_meadows",
             "TreasureChest_trollcave", "TreasureChest_mountains", "TreasureChest_swamp"]),
-        ("entradas e estruturas", ["LocationProxy", "dungeon_forestcrypt_door"]),
-        ("coletáveis (pedras, galhos, sílex, flores, frutas)", ["Pickable_Stone", "Pickable_Branch", "Pickable_Flint",
+        (Strings.Repair_CategoryEntrances, ["LocationProxy", "dungeon_forestcrypt_door"]),
+        (Strings.Repair_CategoryPickables, ["Pickable_Stone", "Pickable_Branch", "Pickable_Flint",
             "Pickable_Dandelion", "Pickable_Thistle", "RaspberryBush", "BlueberryBush", "CloudberryBush"]),
-        ("árvores e troncos", ["Beech1", "Beech_small1", "Beech_small2", "FirTree", "FirTree_small", "Pinetree_01",
+        (Strings.Repair_CategoryTrees, ["Beech1", "Beech_small1", "Beech_small2", "FirTree", "FirTree_small", "Pinetree_01",
             "Birch1", "Birch2", "Oak1", "FirTree_oldLog", "stubbe", "SwampTree1"]),
-        ("rochas", ["Rock_3", "Rock_4", "rock4_coast", "rock4_forest", "rock4_forest_frac", "rock1_mountain"]),
-        ("arbustos", ["shrub_2", "shrub_2_heath", "Bush01", "Bush02_en", "Bush01_heath"]),
+        (Strings.Repair_CategoryRocks, ["Rock_3", "Rock_4", "rock4_coast", "rock4_forest", "rock4_forest_frac", "rock1_mountain"]),
+        (Strings.Repair_CategoryBushes, ["shrub_2", "shrub_2_heath", "Bush01", "Bush02_en", "Bush01_heath"]),
     ];
 
     private static readonly int Tombstone = StableHash.Compute("Player_tombstone");
@@ -122,7 +123,7 @@ public static class WorldRepair
             if (after.Save.Number != next || after.Report.ExtraCopies != 0 || after.Report.ZonesToMark != 0 ||
                 after.Report.Objects != world.Report.Objects - world.Report.ExtraCopies)
             {
-                throw new InvalidDataException("A conferência do mundo reparado falhou.");
+                throw new InvalidDataException(Strings.Repair_VerificationFailed);
             }
 
             return new WorldRepairResult(world.Save.Number, next, world.Report.ExtraCopies, world.Report.ZonesToMark, after.Report.Objects);
@@ -144,7 +145,7 @@ public static class WorldRepair
         var report = WorldInspector.InspectDirectory(worldDirectory, worldName);
         if (!report.IsHealthy || report.LatestSave is not { } save || report.Index is not { } index)
         {
-            throw new InvalidOperationException("O mundo precisa estar íntegro para ser analisado: " +
+            throw new InvalidOperationException(Strings.Repair_WorldMustBeIntact + " " +
                 string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message)));
         }
 
@@ -169,7 +170,7 @@ public static class WorldRepair
             if (!seen.Add((r.Obj.Prefab, r.Obj.X, r.Obj.Y, r.Obj.Z, r.Obj.Rotation, identity)))
             {
                 removed.Add((r.Chunk, r.Index));
-                Count(extras, CategoryByPrefab.GetValueOrDefault(r.Obj.Prefab, "outros objetos da natureza"));
+                Count(extras, CategoryByPrefab.GetValueOrDefault(r.Obj.Prefab, Strings.Repair_CategoryOtherNature));
             }
         }
 
@@ -180,7 +181,7 @@ public static class WorldRepair
         {
             if (removed.Add((r.Chunk, r.Index)))
             {
-                Count(extras, r.Obj.Prefab == LocationProxyPrefab ? "entradas e estruturas" : "conteúdo de ruínas e locais repetidos");
+                Count(extras, r.Obj.Prefab == LocationProxyPrefab ? Strings.Repair_CategoryEntrances : Strings.Repair_CategoryLocationContent);
             }
         }
 
@@ -198,7 +199,7 @@ public static class WorldRepair
             if (stacked.TryGetValue(key, out var first) && first != r.Index)
             {
                 removed.Add((r.Chunk, r.Index));
-                Count(extras, "objetos empilhados no mesmo ponto");
+                Count(extras, Strings.Repair_CategoryStacked);
             }
             else
             {
@@ -350,7 +351,7 @@ public static class WorldRepair
     {
         if (File.Exists(path))
         {
-            throw new IOException($"O arquivo {Path.GetFileName(path)} já existe; nada foi alterado.");
+            throw new IOException(string.Format(CultureInfo.CurrentCulture, Strings.World_FileAlreadyExists, Path.GetFileName(path)));
         }
 
         var temp = path + ".reparo";

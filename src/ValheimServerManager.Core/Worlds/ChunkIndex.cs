@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Globalization;
+using ValheimServerManager.Core.Localization;
 
 namespace ValheimServerManager.Core.Worlds;
 
@@ -48,7 +49,7 @@ public sealed class ChunkIndex
         if (data.Length < HeaderSize)
         {
             throw new InvalidDataException(
-                $"Índice de chunks muito curto ({data.Length} bytes; mínimo {HeaderSize}).");
+                string.Format(CultureInfo.CurrentCulture, Strings.Chunks_IndexTooShort, data.Length, HeaderSize));
         }
 
         var version = BinaryPrimitives.ReadUInt16LittleEndian(data);
@@ -59,7 +60,7 @@ public sealed class ChunkIndex
         if (data.Length != expectedLength)
         {
             throw new InvalidDataException(
-                $"Índice de chunks declara {count} entradas ({expectedLength} bytes), mas tem {data.Length} bytes.");
+                string.Format(CultureInfo.CurrentCulture, Strings.Chunks_IndexLengthMismatch, count, expectedLength, data.Length));
         }
 
         var entries = new List<ChunkIndexEntry>((int)count);
@@ -78,7 +79,7 @@ public sealed class ChunkIndex
         if (index.TotalZdos != declaredTotal)
         {
             throw new InvalidDataException(
-                $"Índice de chunks declara {declaredTotal} objetos no total, mas as entradas somam {index.TotalZdos}.");
+                string.Format(CultureInfo.CurrentCulture, Strings.Chunks_IndexTotalMismatch, declaredTotal, index.TotalZdos));
         }
 
         return index;
@@ -175,7 +176,7 @@ public readonly record struct ChunkFileHeader(ushort Version, int ZdoCount)
     {
         if (head.Length < Size)
         {
-            throw new InvalidDataException("Arquivo de chunk sem cabeçalho.");
+            throw new InvalidDataException(Strings.Chunks_NoHeader);
         }
 
         return new ChunkFileHeader(

@@ -1,7 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Profiles;
@@ -132,25 +134,30 @@ public abstract partial class ProfileEditorViewModel : ProfilePageViewModel
         Manager.SaveProfile(draft);
         IsDirty = false;
         SavedMessage = Status.IsActive
-            ? "Salvo. As mudanças valem no próximo início do servidor."
-            : "Salvo.";
+            ? SettingsStrings.Settings_SavedPendingRestart
+            : SettingsStrings.Settings_Saved;
 
         if (Status.IsActive && Controller is { HasPendingChanges: true } controller &&
-            await Dialogs.ConfirmAsync("Aplicar agora?",
-                "O servidor está rodando com a configuração anterior. Reiniciar agora para aplicar? O mundo é salvo antes." +
-                (Status.PlayerCount > 0 ? $"\n\n{Status.PlayerCount} jogador(es) serão desconectados por alguns segundos." : string.Empty),
-                "Reiniciar agora", "Depois"))
+            await Dialogs.ConfirmAsync(SettingsStrings.Settings_ApplyNow_Title,
+                SettingsStrings.Settings_ApplyNow_Message +
+                (Status.PlayerCount > 0
+                    ? "\n\n" + string.Format(
+                        CultureInfo.CurrentCulture,
+                        Status.PlayerCount == 1 ? SettingsStrings.Settings_ApplyNow_PlayersOne : SettingsStrings.Settings_ApplyNow_PlayersMany,
+                        Status.PlayerCount)
+                    : string.Empty),
+                SettingsStrings.Settings_RestartNow, SettingsStrings.Settings_Later))
         {
-            await RunBusyAsync("Reiniciando…", async () =>
+            await RunBusyAsync(SettingsStrings.Settings_Restarting, async () =>
             {
                 var result = await controller.RestartAsync(StartOptions.Default);
                 if (!result.Success)
                 {
-                    await Dialogs.ShowChecksAsync("Reinício não concluído", result.Message, result.Checks, false, string.Empty);
+                    await Dialogs.ShowChecksAsync(SettingsStrings.Settings_RestartFailed_Title, result.Message, result.Checks, false, string.Empty);
                 }
                 else
                 {
-                    SavedMessage = "Salvo e aplicado.";
+                    SavedMessage = SettingsStrings.Settings_SavedAndApplied;
                 }
             });
         }
@@ -321,12 +328,12 @@ public sealed partial class ServerSettingsViewModel : ProfileEditorViewModel
         {
             ServerDirectory = found[0];
             DetectedInstallations = found.Count == 1
-                ? "Instalação encontrada pela Steam."
-                : $"{found.Count} instalações encontradas; usando a primeira.";
+                ? SettingsStrings.Settings_InstallFoundOne
+                : string.Format(CultureInfo.CurrentCulture, SettingsStrings.Settings_InstallFoundMany, found.Count);
         }
         else
         {
-            DetectedInstallations = "Nenhuma instalação encontrada. Na Steam, ative \"Ferramentas\" na biblioteca e instale \"Valheim Dedicated Server\".";
+            DetectedInstallations = SettingsStrings.Settings_InstallNotFound;
         }
     }
 

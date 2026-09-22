@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Processes;
@@ -154,13 +156,19 @@ public sealed partial class NewServerViewModel : ObservableObject
             {
                 GameWorlds.Add(new WorldChoice(
                     world.Name,
-                    $"seed {world.SeedName} · save {world.SaveNumber} · {Helpers.Ui.Size(world.Bytes)} · jogado {Helpers.Ui.When(new DateTimeOffset(world.LastSavedUtc))}",
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        SettingsStrings.NewServer_WorldDetail,
+                        world.SeedName,
+                        world.SaveNumber,
+                        Helpers.Ui.Size(world.Bytes),
+                        Helpers.Ui.When(new DateTimeOffset(world.LastSavedUtc))),
                     world.Directory));
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            _logger.LogWarning(ex, "Não consegui listar os mundos do jogo");
+            _logger.LogWarning(ex, "Could not list the game's worlds");
         }
 
         OnPropertyChanged(nameof(HasGameWorlds));
@@ -210,7 +218,7 @@ public sealed partial class NewServerViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(draft.ServerName))
         {
-            errors.Add("Dê um nome ao servidor.");
+            errors.Add(SettingsStrings.NewServer_ErrorNoName);
         }
 
         foreach (var issue in ProfileValidator.Validate(draft).Where(i => i.Field != nameof(ServerProfile.ServerName) &&
@@ -227,7 +235,7 @@ public sealed partial class NewServerViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(WorldName) || WorldName.Length > MaxWorldNameLength ||
                 !WorldName.All(c => char.IsAsciiLetterOrDigit(c) || c is ' ' or '-' or '_'))
             {
-                errors.Add($"Nome do mundo: até {MaxWorldNameLength} letras sem acento, números, espaço, - ou _.");
+                errors.Add(string.Format(CultureInfo.CurrentCulture, SettingsStrings.NewServer_ErrorWorldName, MaxWorldNameLength));
             }
 
             if (WorldSeed.Validate(Seed) is { } seedProblem)
@@ -237,7 +245,7 @@ public sealed partial class NewServerViewModel : ObservableObject
         }
         else if (SelectedWorld is null)
         {
-            errors.Add("Escolha qual mundo copiar para o servidor.");
+            errors.Add(SettingsStrings.NewServer_ErrorChooseWorld);
         }
 
         if (!string.IsNullOrWhiteSpace(draft.SaveDirectory) && !string.IsNullOrWhiteSpace(draft.WorldName) &&
@@ -246,20 +254,20 @@ public sealed partial class NewServerViewModel : ObservableObject
             var target = WorldFolder.WorldDirectory(draft.SaveDirectory, draft.WorldName);
             if (Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target).Any())
             {
-                errors.Add($"Já existe um mundo \"{draft.WorldName}\" nessa pasta de saves.");
+                errors.Add(string.Format(CultureInfo.CurrentCulture, SettingsStrings.NewServer_ErrorWorldExists, draft.WorldName));
             }
 
             if (_manager.Profiles.Any(p => p.WorldName.Equals(draft.WorldName, StringComparison.OrdinalIgnoreCase) &&
                                            !string.IsNullOrWhiteSpace(p.SaveDirectory) &&
                                            ValheimPaths.SameDirectory(p.SaveDirectory, draft.SaveDirectory)))
             {
-                errors.Add("Outro servidor já usa esse mundo nessa pasta. Dois servidores no mesmo mundo corrompem o save.");
+                errors.Add(SettingsStrings.NewServer_ErrorWorldInUse);
             }
         }
 
         if (_manager.Profiles.Any(p => p.Port == draft.Port || p.Port == draft.Port + 1 || p.Port + 1 == draft.Port))
         {
-            errors.Add($"A porta {draft.Port} (ou a seguinte) já é usada por outro servidor. Sugestão: {NextFreePort()}.");
+            errors.Add(string.Format(CultureInfo.CurrentCulture, SettingsStrings.NewServer_ErrorPortInUse, draft.Port, NextFreePort()));
         }
 
         foreach (var error in errors.Distinct())
@@ -284,13 +292,19 @@ public sealed partial class NewServerViewModel : ObservableObject
         var report = WorldInspector.InspectDirectory(folder);
         if (!report.IsHealthy || report.Metadata is null)
         {
-            await _dialogs.AlertAsync("Pasta sem mundo válido",
-                "Escolha a pasta de um mundo (a que contém os arquivos _main.N.*), com o save mais recente completo.");
+            await _dialogs.AlertAsync(SettingsStrings.NewServer_InvalidWorldFolder_Title,
+                SettingsStrings.NewServer_InvalidWorldFolder_Message);
             return;
         }
 
         var choice = new WorldChoice(report.Metadata.Name,
-            $"seed {report.Metadata.SeedName} · save {report.LatestSave!.Number} · {Helpers.Ui.Size(report.SaveSetBytes)} · {folder}",
+            string.Format(
+                CultureInfo.CurrentCulture,
+                SettingsStrings.NewServer_BrowsedWorldDetail,
+                report.Metadata.SeedName,
+                report.LatestSave!.Number,
+                Helpers.Ui.Size(report.SaveSetBytes),
+                folder),
             folder);
         GameWorlds.Insert(0, choice);
         OnPropertyChanged(nameof(HasGameWorlds));
@@ -333,10 +347,9 @@ public sealed partial class NewServerViewModel : ObservableObject
         }
 
         if (!IsNewWorld && _locator.IsGameRunning() && !await _dialogs.ConfirmAsync(
-                "O Valheim está aberto",
-                "O servidor recebe uma cópia do último save do mundo. O que você jogou depois dele não vai junto. " +
-                "Para levar tudo, saia do mundo no jogo (ele salva ao sair) e depois crie o servidor.",
-                "Copiar mesmo assim", "Voltar"))
+                SettingsStrings.NewServer_GameRunning_Title,
+                SettingsStrings.NewServer_GameRunning_Message,
+                SettingsStrings.NewServer_CopyAnyway, SettingsStrings.NewServer_GoBack))
         {
             return;
         }
@@ -346,7 +359,7 @@ public sealed partial class NewServerViewModel : ObservableObject
         CanCreate = false;
         try
         {
-            BusyText = IsNewWorld ? "Preparando o mundo novo…" : "Copiando e conferindo o mundo…";
+            BusyText = IsNewWorld ? SettingsStrings.NewServer_BusyNewWorld : SettingsStrings.NewServer_BusyCopying;
             Directory.CreateDirectory(profile.SaveDirectory);
             if (IsNewWorld)
             {
@@ -362,18 +375,16 @@ public sealed partial class NewServerViewModel : ObservableObject
 
             _manager.AddProfile(profile);
             _context.SelectedProfileId = profile.Id;
-            _logger.LogInformation("Servidor {Name} criado (mundo {World})", profile.DisplayName, profile.WorldName);
+            _logger.LogInformation("Server {Name} created (world {World})", profile.DisplayName, profile.WorldName);
             NavigateRequested?.Invoke(this, "dashboard");
 
             if (!IsNewWorld)
             {
                 await _dialogs.AlertAsync(
-                    "Agora são dois mundos separados",
-                    $"O servidor tem a própria cópia de \"{profile.WorldName}\". O mundo que aparece no jogo em \"Iniciar jogo\" " +
-                    "continua sendo o antigo e não recebe nada do que for feito no servidor (nem o contrário).\n\n" +
-                    "Para jogar no mundo do servidor, entre por \"Entrar no jogo\" (IP ou código de entrada), mesmo jogando sozinho. " +
-                    "Nunca copie arquivos entre as duas pastas com o servidor ligado.",
-                    "Entendi");
+                    SettingsStrings.NewServer_TwoWorlds_Title,
+                    string.Format(CultureInfo.CurrentCulture, SettingsStrings.NewServer_TwoWorlds_Message1, profile.WorldName) +
+                    "\n\n" + SettingsStrings.NewServer_TwoWorlds_Message2,
+                    SettingsStrings.NewServer_GotIt);
             }
 
             if (start)
@@ -381,14 +392,14 @@ public sealed partial class NewServerViewModel : ObservableObject
                 var result = await _manager.GetController(profile.Id).StartAsync(StartOptions.Default);
                 if (!result.Success)
                 {
-                    await _dialogs.ShowChecksAsync("O servidor foi criado, mas não iniciou", result.Message, result.Checks, false, string.Empty);
+                    await _dialogs.ShowChecksAsync(SettingsStrings.NewServer_CreatedNotStarted_Title, result.Message, result.Checks, false, string.Empty);
                 }
             }
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException or ArgumentException)
         {
-            _logger.LogError(ex, "Falha ao criar servidor");
-            await _dialogs.AlertAsync("Não foi possível criar o servidor", ex.Message);
+            _logger.LogError(ex, "Failed to create server");
+            await _dialogs.AlertAsync(SettingsStrings.NewServer_CreateFailed_Title, ex.Message);
         }
         finally
         {

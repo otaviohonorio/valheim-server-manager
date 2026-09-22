@@ -12,4 +12,403 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Server</value>
+  </data>
+  <data name="Settings_Subtitle" xml:space="preserve">
+    <value>Identity, folders and save routine. Changes take effect the next time the server starts.</value>
+  </data>
+  <data name="Settings_SectionIdentity" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Settings_ProfileName_Header" xml:space="preserve">
+    <value>Profile name</value>
+  </data>
+  <data name="Settings_ProfileName_Description" xml:space="preserve">
+    <value>Only shown here in the manager.</value>
+  </data>
+  <data name="Settings_ServerName_Header" xml:space="preserve">
+    <value>Server name</value>
+  </data>
+  <data name="Settings_ServerName_Description" xml:space="preserve">
+    <value>The name players see in the server list.</value>
+  </data>
+  <data name="Settings_Password_Header" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Settings_Password_Description" xml:space="preserve">
+    <value>Required. At least 5 characters, and it can't be contained in the server name. Stored encrypted under your Windows user.</value>
+  </data>
+  <data name="Settings_ShowPassword" xml:space="preserve">
+    <value>Show password</value>
+  </data>
+  <data name="Settings_ShowHidePasswordTooltip" xml:space="preserve">
+    <value>Show/hide password</value>
+  </data>
+  <data name="Settings_Port_Header" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Settings_Port_Description" xml:space="preserve">
+    <value>The server uses this port and the next one (UDP). Without crossplay, forward both on your router.</value>
+  </data>
+  <data name="Settings_Public_Header" xml:space="preserve">
+    <value>Public server</value>
+  </data>
+  <data name="Settings_Public_Description" xml:space="preserve">
+    <value>Show in the game's public server list.</value>
+  </data>
+  <data name="Settings_Crossplay_Header" xml:space="preserve">
+    <value>Crossplay</value>
+  </data>
+  <data name="Settings_Crossplay_Description" xml:space="preserve">
+    <value>Allows Xbox/Game Pass and joining by invite code, without port forwarding. Adds a relay (slightly more latency).</value>
+  </data>
+  <data name="Settings_SectionFolders" xml:space="preserve">
+    <value>Folders</value>
+  </data>
+  <data name="Settings_ServerInstall_Header" xml:space="preserve">
+    <value>Server installation</value>
+  </data>
+  <data name="Settings_ServerInstall_Description" xml:space="preserve">
+    <value>The Valheim Dedicated Server folder (the Steam tool).</value>
+  </data>
+  <data name="Settings_ServerInstall_Placeholder" xml:space="preserve">
+    <value>e.g. D:\SteamLibrary\steamapps\common\Valheim dedicated server</value>
+  </data>
+  <data name="Settings_Browse" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_DetectSteam" xml:space="preserve">
+    <value>Detect via Steam</value>
+  </data>
+  <data name="Settings_SaveFolder_Header" xml:space="preserve">
+    <value>Server save folder</value>
+  </data>
+  <data name="Settings_SaveFolder_Description" xml:space="preserve">
+    <value>Where THIS server's worlds (worlds_local), log and player lists live. Never use the game's folder.</value>
+  </data>
+  <data name="Settings_SaveFolder_Placeholder" xml:space="preserve">
+    <value>e.g. D:\Valheim\ServerSave</value>
+  </data>
+  <data name="Settings_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Settings_GameFolderForbidden" xml:space="preserve">
+    <value>Game folder (not allowed here):</value>
+  </data>
+  <data name="Settings_BackupFolder_Header" xml:space="preserve">
+    <value>Backup folder</value>
+  </data>
+  <data name="Settings_BackupFolder_Description" xml:space="preserve">
+    <value>Where the manager keeps verified backups. Leave blank to use a 'backups' folder next to the save folder.</value>
+  </data>
+  <data name="Settings_BackupFolder_Placeholder" xml:space="preserve">
+    <value>(automatic)</value>
+  </data>
+  <data name="Settings_InUse" xml:space="preserve">
+    <value>In use:</value>
+  </data>
+  <data name="Settings_SectionSavesBackups" xml:space="preserve">
+    <value>Saves and backups</value>
+  </data>
+  <data name="Settings_SaveInterval_Header" xml:space="preserve">
+    <value>Save the world every (minutes)</value>
+  </data>
+  <data name="Settings_SaveInterval_Description" xml:space="preserve">
+    <value>How long between Valheim's automatic saves. Shorter = less progress lost in a power outage.</value>
+  </data>
+  <data name="Settings_BackupBeforeStart_Header" xml:space="preserve">
+    <value>Back up before starting</value>
+  </data>
+  <data name="Settings_BackupBeforeStart_Description" xml:space="preserve">
+    <value>Copies and verifies the world before the server opens. If anything is wrong, the server doesn't even start.</value>
+  </data>
+  <data name="Settings_BackupAfterStop_Header" xml:space="preserve">
+    <value>Back up after stopping</value>
+  </data>
+  <data name="Settings_BackupAfterStop_Description" xml:space="preserve">
+    <value>Copies and verifies the world right after the server shuts down.</value>
+  </data>
+  <data name="Settings_FixWorld_Header" xml:space="preserve">
+    <value>Fix the world on stop</value>
+  </data>
+  <data name="Settings_FixWorld_Description" xml:space="preserve">
+    <value>After stopping, removes objects the game spawned twice and the "made with cheats" mark on items. The backup taken before that stays on the Backups page.</value>
+  </data>
+  <data name="Settings_Retention_Header" xml:space="preserve">
+    <value>Keep automatic backups</value>
+  </data>
+  <data name="Settings_Retention_Description" xml:space="preserve">
+    <value>How many automatic backups to keep per world. Manual backups are never deleted automatically.</value>
+  </data>
+  <data name="Settings_GameBackups_Header" xml:space="preserve">
+    <value>Valheim's built-in backups</value>
+  </data>
+  <data name="Settings_GameBackups_Description" xml:space="preserve">
+    <value>The backups Valheim itself makes inside worlds_local.</value>
+  </data>
+  <data name="Settings_GameBackupCount" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="Settings_GameBackupFirst" xml:space="preserve">
+    <value>First backup after (hours)</value>
+  </data>
+  <data name="Settings_GameBackupEvery" xml:space="preserve">
+    <value>Then, every (hours)</value>
+  </data>
+  <data name="Settings_StopTimeout_Header" xml:space="preserve">
+    <value>Maximum shutdown time (seconds)</value>
+  </data>
+  <data name="Settings_StopTimeout_Description" xml:space="preserve">
+    <value>How long to wait for the server to save and close before asking what to do.</value>
+  </data>
+  <data name="Settings_SectionAdvanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Settings_ExtraArgs_Header" xml:space="preserve">
+    <value>Extra arguments</value>
+  </data>
+  <data name="Settings_ExtraArgs_Description" xml:space="preserve">
+    <value>Passed as-is to valheim_server. Arguments the manager controls are rejected.</value>
+  </data>
+  <data name="Settings_ExtraArgs_Placeholder" xml:space="preserve">
+    <value>e.g. -instanceid 2</value>
+  </data>
+  <data name="Settings_CommandLine_Header" xml:space="preserve">
+    <value>Command line</value>
+  </data>
+  <data name="Settings_CommandLine_Description" xml:space="preserve">
+    <value>Exactly what will run (password hidden).</value>
+  </data>
+  <data name="Settings_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Settings_UnsavedChanges" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="Settings_Discard" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="Settings_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Settings_SavedPendingRestart" xml:space="preserve">
+    <value>Saved. Changes take effect the next time the server starts.</value>
+  </data>
+  <data name="Settings_Saved" xml:space="preserve">
+    <value>Saved.</value>
+  </data>
+  <data name="Settings_ApplyNow_Title" xml:space="preserve">
+    <value>Apply now?</value>
+  </data>
+  <data name="Settings_ApplyNow_Message" xml:space="preserve">
+    <value>The server is running with the previous settings. Restart now to apply them? The world is saved first.</value>
+  </data>
+  <data name="Settings_ApplyNow_PlayersOne" xml:space="preserve">
+    <value>{0} player will be disconnected for a few seconds.</value>
+  </data>
+  <data name="Settings_ApplyNow_PlayersMany" xml:space="preserve">
+    <value>{0} players will be disconnected for a few seconds.</value>
+  </data>
+  <data name="Settings_RestartNow" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="Settings_Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="Settings_Restarting" xml:space="preserve">
+    <value>Restarting…</value>
+  </data>
+  <data name="Settings_RestartFailed_Title" xml:space="preserve">
+    <value>Restart not completed</value>
+  </data>
+  <data name="Settings_SavedAndApplied" xml:space="preserve">
+    <value>Saved and applied.</value>
+  </data>
+  <data name="Settings_InstallFoundOne" xml:space="preserve">
+    <value>Installation found via Steam.</value>
+  </data>
+  <data name="Settings_InstallFoundMany" xml:space="preserve">
+    <value>{0} installations found; using the first one.</value>
+  </data>
+  <data name="Settings_InstallNotFound" xml:space="preserve">
+    <value>No installation found. In Steam, enable "Tools" in the library and install "Valheim Dedicated Server".</value>
+  </data>
+  <data name="NewServer_Title" xml:space="preserve">
+    <value>New server</value>
+  </data>
+  <data name="NewServer_Subtitle" xml:space="preserve">
+    <value>Creates the server and its world in a folder of its own. Fine-tuned modifiers and player lists can be adjusted later.</value>
+  </data>
+  <data name="NewServer_ServerName_Description" xml:space="preserve">
+    <value>The name shown to players and here in the manager.</value>
+  </data>
+  <data name="NewServer_ServerName_Placeholder" xml:space="preserve">
+    <value>e.g. Village Vikings</value>
+  </data>
+  <data name="NewServer_Password_Description" xml:space="preserve">
+    <value>At least 5 characters, and it can't be contained in the server name.</value>
+  </data>
+  <data name="NewServer_SectionWorld" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="NewServer_WorldSource_Header" xml:space="preserve">
+    <value>Where the world comes from</value>
+  </data>
+  <data name="NewServer_WorldSourceNew" xml:space="preserve">
+    <value>Create a new world</value>
+  </data>
+  <data name="NewServer_WorldSourceExisting" xml:space="preserve">
+    <value>Use a world I already have</value>
+  </data>
+  <data name="NewServer_WorldName_Header" xml:space="preserve">
+    <value>World name</value>
+  </data>
+  <data name="NewServer_WorldName_Description" xml:space="preserve">
+    <value>Name of the world's folder. Unaccented letters, numbers, space, - or _.</value>
+  </data>
+  <data name="NewServer_Seed_Header" xml:space="preserve">
+    <value>Seed</value>
+  </data>
+  <data name="NewServer_Seed_Description" xml:space="preserve">
+    <value>The same seed always generates the same map. Up to 10 letters or numbers — use one from a map you like or generate a random one.</value>
+  </data>
+  <data name="NewServer_NewSeed" xml:space="preserve">
+    <value>Generate another seed</value>
+  </data>
+  <data name="NewServer_NewSeedTooltip" xml:space="preserve">
+    <value>Generate another random seed</value>
+  </data>
+  <data name="NewServer_ExistingWorldInfo" xml:space="preserve">
+    <value>The original world isn't changed: the manager checks the latest save and copies it to the server's folder. After that, play this world through the server.</value>
+  </data>
+  <data name="NewServer_NoGameWorlds" xml:space="preserve">
+    <value>No local worlds found in the game. Use the button below to choose a folder.</value>
+  </data>
+  <data name="NewServer_AvailableWorlds" xml:space="preserve">
+    <value>Available worlds</value>
+  </data>
+  <data name="NewServer_ChooseOtherFolder" xml:space="preserve">
+    <value>Choose another folder</value>
+  </data>
+  <data name="NewServer_ChooseOtherWorldFolder" xml:space="preserve">
+    <value>Choose another world folder…</value>
+  </data>
+  <data name="NewServer_SectionRules" xml:space="preserve">
+    <value>Rules</value>
+  </data>
+  <data name="NewServer_Preset_Header" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="NewServer_Preset_Description" xml:space="preserve">
+    <value>Fine-tuned modifiers are on the World page after creating.</value>
+  </data>
+  <data name="NewServer_Creative_Header" xml:space="preserve">
+    <value>Start in creative mode</value>
+  </data>
+  <data name="NewServer_Creative_Description" xml:space="preserve">
+    <value>Free building and crafting for everyone; achievements are blocked while it's on. You can switch it any time on the Dashboard.</value>
+  </data>
+  <data name="NewServer_SectionAccess" xml:space="preserve">
+    <value>Access</value>
+  </data>
+  <data name="NewServer_Port_Description" xml:space="preserve">
+    <value>A free port is already suggested. The server uses it and the next one.</value>
+  </data>
+  <data name="NewServer_Public_Description" xml:space="preserve">
+    <value>Appear in the game's public server list.</value>
+  </data>
+  <data name="NewServer_Crossplay_Description" xml:space="preserve">
+    <value>Invite code and Xbox/Game Pass, without port forwarding on the router.</value>
+  </data>
+  <data name="NewServer_Folders_Header" xml:space="preserve">
+    <value>Where to install and save</value>
+  </data>
+  <data name="NewServer_Folders_Description" xml:space="preserve">
+    <value>Filled in automatically; change them only if you want.</value>
+  </data>
+  <data name="NewServer_ServerInstall_Header" xml:space="preserve">
+    <value>Valheim Dedicated Server installation</value>
+  </data>
+  <data name="NewServer_SaveFolder_Header" xml:space="preserve">
+    <value>This server's save folder</value>
+  </data>
+  <data name="NewServer_SaveFolder_Name" xml:space="preserve">
+    <value>Save folder</value>
+  </data>
+  <data name="NewServer_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="NewServer_Create" xml:space="preserve">
+    <value>Create server</value>
+  </data>
+  <data name="NewServer_CreateAndStart" xml:space="preserve">
+    <value>Create and start</value>
+  </data>
+  <data name="NewServer_WorldDetail" xml:space="preserve">
+    <value>seed {0} · save {1} · {2} · played {3}</value>
+  </data>
+  <data name="NewServer_BrowsedWorldDetail" xml:space="preserve">
+    <value>seed {0} · save {1} · {2} · {3}</value>
+  </data>
+  <data name="NewServer_ErrorNoName" xml:space="preserve">
+    <value>Give the server a name.</value>
+  </data>
+  <data name="NewServer_ErrorWorldName" xml:space="preserve">
+    <value>World name: up to {0} unaccented letters, numbers, space, - or _.</value>
+  </data>
+  <data name="NewServer_ErrorChooseWorld" xml:space="preserve">
+    <value>Choose which world to copy to the server.</value>
+  </data>
+  <data name="NewServer_ErrorWorldExists" xml:space="preserve">
+    <value>A world "{0}" already exists in that save folder.</value>
+  </data>
+  <data name="NewServer_ErrorWorldInUse" xml:space="preserve">
+    <value>Another server already uses that world in that folder. Two servers on the same world corrupt the save.</value>
+  </data>
+  <data name="NewServer_ErrorPortInUse" xml:space="preserve">
+    <value>Port {0} (or the next one) is already used by another server. Suggestion: {1}.</value>
+  </data>
+  <data name="NewServer_InvalidWorldFolder_Title" xml:space="preserve">
+    <value>No valid world in this folder</value>
+  </data>
+  <data name="NewServer_InvalidWorldFolder_Message" xml:space="preserve">
+    <value>Choose a world's folder (the one containing the _main.N.* files), with a complete latest save.</value>
+  </data>
+  <data name="NewServer_GameRunning_Title" xml:space="preserve">
+    <value>Valheim is open</value>
+  </data>
+  <data name="NewServer_GameRunning_Message" xml:space="preserve">
+    <value>The server gets a copy of the world's last save. Anything you played after it won't come along. To bring everything, leave the world in the game (it saves on exit) and then create the server.</value>
+  </data>
+  <data name="NewServer_CopyAnyway" xml:space="preserve">
+    <value>Copy anyway</value>
+  </data>
+  <data name="NewServer_GoBack" xml:space="preserve">
+    <value>Go back</value>
+  </data>
+  <data name="NewServer_BusyNewWorld" xml:space="preserve">
+    <value>Preparing the new world…</value>
+  </data>
+  <data name="NewServer_BusyCopying" xml:space="preserve">
+    <value>Copying and checking the world…</value>
+  </data>
+  <data name="NewServer_TwoWorlds_Title" xml:space="preserve">
+    <value>They are now two separate worlds</value>
+  </data>
+  <data name="NewServer_TwoWorlds_Message1" xml:space="preserve">
+    <value>The server has its own copy of "{0}". The world listed in the game under "Start Game" is still the old one and gets nothing of what is done on the server (nor the other way around).</value>
+  </data>
+  <data name="NewServer_TwoWorlds_Message2" xml:space="preserve">
+    <value>To play on the server's world, go through "Join Game" (IP or join code), even when playing alone. Never copy files between the two folders while the server is running.</value>
+  </data>
+  <data name="NewServer_GotIt" xml:space="preserve">
+    <value>Got it</value>
+  </data>
+  <data name="NewServer_CreatedNotStarted_Title" xml:space="preserve">
+    <value>The server was created but didn't start</value>
+  </data>
+  <data name="NewServer_CreateFailed_Title" xml:space="preserve">
+    <value>Couldn't create the server</value>
+  </data>
 </root>

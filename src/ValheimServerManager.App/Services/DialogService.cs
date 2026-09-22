@@ -2,20 +2,23 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.Storage.Pickers;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.Core.Servers;
 
 namespace ValheimServerManager.App.Services;
 
 public interface IDialogService
 {
-    Task<bool> ConfirmAsync(string title, string message, string primaryText = "Confirmar", string closeText = "Cancelar", bool destructive = false);
+    /// <summary>Asks for confirmation. Null button texts mean "Confirm" and "Cancel" in the UI language.</summary>
+    Task<bool> ConfirmAsync(string title, string message, string? primaryText = null, string? closeText = null, bool destructive = false);
 
-    Task AlertAsync(string title, string message, string closeText = "OK");
+    /// <summary>Shows a message. A null button text means "OK" in the UI language.</summary>
+    Task AlertAsync(string title, string message, string? closeText = null);
 
     Task<string?> PromptAsync(string title, string message, string placeholder, string initialValue = "");
 
-    /// <summary>Three-way choice. Returns 1 (primary), 2 (secondary) or 0 (cancel).</summary>
-    Task<int> ChooseAsync(string title, string message, string primaryText, string secondaryText, string closeText = "Cancelar");
+    /// <summary>Three-way choice. Returns 1 (primary), 2 (secondary) or 0 (cancel). A null close text means "Cancel".</summary>
+    Task<int> ChooseAsync(string title, string message, string primaryText, string secondaryText, string? closeText = null);
 
     Task<bool> ShowChecksAsync(string title, string intro, IReadOnlyList<StartCheckItem> checks, bool canProceed, string proceedText);
 }
@@ -25,13 +28,13 @@ public sealed class DialogService : IDialogService
     private readonly SemaphoreSlim _gate = new(1, 1);
 
     private static XamlRoot Root =>
-        App.GetService<MainWindow>().Content?.XamlRoot ?? throw new InvalidOperationException("Janela ainda não carregada.");
+        App.GetService<MainWindow>().Content?.XamlRoot ?? throw new InvalidOperationException("Window not loaded yet.");
 
-    public async Task<bool> ConfirmAsync(string title, string message, string primaryText = "Confirmar", string closeText = "Cancelar", bool destructive = false)
+    public async Task<bool> ConfirmAsync(string title, string message, string? primaryText = null, string? closeText = null, bool destructive = false)
     {
         var dialog = Create(title, Text(message));
-        dialog.PrimaryButtonText = primaryText;
-        dialog.CloseButtonText = closeText;
+        dialog.PrimaryButtonText = primaryText ?? ShellStrings.Dialog_Confirm;
+        dialog.CloseButtonText = closeText ?? ShellStrings.Dialog_Cancel;
         dialog.DefaultButton = destructive ? ContentDialogButton.Close : ContentDialogButton.Primary;
         if (destructive)
         {
@@ -41,10 +44,10 @@ public sealed class DialogService : IDialogService
         return await ShowAsync(dialog) == ContentDialogResult.Primary;
     }
 
-    public async Task AlertAsync(string title, string message, string closeText = "OK")
+    public async Task AlertAsync(string title, string message, string? closeText = null)
     {
         var dialog = Create(title, Text(message));
-        dialog.CloseButtonText = closeText;
+        dialog.CloseButtonText = closeText ?? ShellStrings.Dialog_Ok;
         dialog.DefaultButton = ContentDialogButton.Close;
         await ShowAsync(dialog);
     }
@@ -56,18 +59,18 @@ public sealed class DialogService : IDialogService
         panel.Children.Add(Text(message));
         panel.Children.Add(box);
         var dialog = Create(title, panel);
-        dialog.PrimaryButtonText = "OK";
-        dialog.CloseButtonText = "Cancelar";
+        dialog.PrimaryButtonText = ShellStrings.Dialog_Ok;
+        dialog.CloseButtonText = ShellStrings.Dialog_Cancel;
         dialog.DefaultButton = ContentDialogButton.Primary;
         return await ShowAsync(dialog) == ContentDialogResult.Primary ? box.Text.Trim() : null;
     }
 
-    public async Task<int> ChooseAsync(string title, string message, string primaryText, string secondaryText, string closeText = "Cancelar")
+    public async Task<int> ChooseAsync(string title, string message, string primaryText, string secondaryText, string? closeText = null)
     {
         var dialog = Create(title, Text(message));
         dialog.PrimaryButtonText = primaryText;
         dialog.SecondaryButtonText = secondaryText;
-        dialog.CloseButtonText = closeText;
+        dialog.CloseButtonText = closeText ?? ShellStrings.Dialog_Cancel;
         dialog.DefaultButton = ContentDialogButton.Primary;
         return await ShowAsync(dialog) switch
         {
@@ -93,7 +96,7 @@ public sealed class DialogService : IDialogService
         }
 
         var dialog = Create(title, new ScrollViewer { Content = panel, MaxHeight = 420 });
-        dialog.CloseButtonText = canProceed ? "Cancelar" : "Fechar";
+        dialog.CloseButtonText = canProceed ? ShellStrings.Dialog_Cancel : ShellStrings.Dialog_Close;
         if (canProceed)
         {
             dialog.PrimaryButtonText = proceedText;

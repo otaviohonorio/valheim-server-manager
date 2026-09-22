@@ -25,7 +25,7 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Valheim Server Manager" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                        <Run Text="Versão" />
+                        <Run Text="{x:Bind loc:ShellStrings.About_Version}" />
                         <Run Text="{x:Bind ViewModel.Version}" />
                         <Run Text="· .NET" />
                         <Run Text="{x:Bind ViewModel.DotNetVersion}" />
@@ -34,57 +34,55 @@
                 </StackPanel>
             </Grid>
 
-            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Proteções ativas" />
-            <TextBlock Margin="0,0,0,8" Style="{StaticResource GuardText}">
-                Nasceram do incidente de 16/09/2026, quando servidor e jogo abriram o mesmo mundo, um save ficou pela metade e o Valheim gerou um mundo novo por cima — apagando as construções.
-            </TextBlock>
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:ShellStrings.About_ProtectionsHeader}" />
+            <TextBlock Margin="0,0,0,8" Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_ProtectionsIntro}" />
 
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel Spacing="16">
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Pasta de saves separada do jogo" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor sempre recebe -savedir. Um perfil que aponte para a pasta do jogo (LocalLow\IronGate\Valheim) é recusado, então servidor e jogo nunca disputam os mesmos arquivos." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardSaveFolderTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardSaveFolderText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Desligar sempre salvando" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor roda sem janela (não há um X para fechar sem querer). Parar envia Ctrl+C e espera o log confirmar o save. Encerrar à força só com confirmação explícita." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardStopTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardStopText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Verificação antes de iniciar" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="Se o save mais recente estiver incompleto (por exemplo, sem o .db2) ou faltar algum chunk, o servidor nem sobe. Um mundo inexistente só é criado depois de você confirmar." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardCheckTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardCheckText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Freio de emergência" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="Se mesmo assim o log mostrar que o Valheim não encontrou os dados do mundo e começou a gerar outro, o servidor é encerrado na hora, antes de gravar qualquer coisa por cima." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardBrakeTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardBrakeText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Backups verificados" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="Antes de iniciar e depois de parar, o save completo é copiado e conferido por SHA-256. Restaurar copia o mundo atual antes, move a pasta antiga para _substituidos e nunca mistura arquivos." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardBackupsTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardBackupsText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Modo criativo que desliga de verdade" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="O preset sempre vai na linha de comando, então as chaves do mundo são refeitas a cada início. Depois do primeiro save, o app confere no arquivo do mundo se nobuildcost está como deveria." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardCreativeTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardCreativeText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Log sempre guardado" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="O servidor sempre grava -logFile, e o log de cada sessão é arquivado antes do próximo início. Se algo der errado, dá para saber o que aconteceu." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardLogTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardLogText}" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Style="{StaticResource GuardTitle}" Text="🛡 Um servidor por mundo e por porta" />
-                        <TextBlock Style="{StaticResource GuardText}" Text="O app procura valheim_server em execução e recusa iniciar outro no mesmo mundo ou na mesma porta. Servidores abertos fora do app são detectados e podem ser adotados." />
+                        <TextBlock Style="{StaticResource GuardTitle}" Text="{x:Bind loc:ShellStrings.About_GuardOneServerTitle}" />
+                        <TextBlock Style="{StaticResource GuardText}" Text="{x:Bind loc:ShellStrings.About_GuardOneServerText}" />
                     </StackPanel>
                 </StackPanel>
             </Border>
 
-            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Preferências" />
-            <toolkit:SettingsCard Description="Mostra uma notificação (pela bandeja do sistema) quando alguém aparece no mundo." Header="Avisar quando um jogador entrar">
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:ShellStrings.About_PreferencesHeader}" />
+            <toolkit:SettingsCard Description="{x:Bind loc:ShellStrings.About_NotifyJoinsDescription}" Header="{x:Bind loc:ShellStrings.About_NotifyJoinsHeader}">
                 <toolkit:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE7E7;" />
                 </toolkit:SettingsCard.HeaderIcon>
                 <ToggleSwitch IsOn="{x:Bind ViewModel.NotifyPlayerJoins, Mode=TwoWay}" />
             </toolkit:SettingsCard>
 
-            <toolkit:SettingsCard Description="Com servidores rodando, fechar a janela deixa o gerenciador na bandeja do sistema (perto do relógio). Desligado, fechar pergunta se deve parar os servidores." Header="Manter na bandeja ao fechar">
+            <toolkit:SettingsCard Description="{x:Bind loc:ShellStrings.About_TrayDescription}" Header="{x:Bind loc:ShellStrings.About_TrayHeader}">
                 <toolkit:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8A7;" />
                 </toolkit:SettingsCard.HeaderIcon>
@@ -108,16 +106,28 @@
                 Severity="Informational"
                 Visibility="{x:Bind ViewModel.LanguageChanged, Mode=OneWay}" />
 
-            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Dados do aplicativo" />
-            <toolkit:SettingsCard Description="{x:Bind ViewModel.DataDirectory}" Header="Configurações e log do gerenciador">
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:ShellStrings.About_DataHeader}" />
+            <toolkit:SettingsCard Description="{x:Bind ViewModel.DataDirectory}" Header="{x:Bind loc:ShellStrings.About_DataCardHeader}">
                 <toolkit:SettingsCard.HeaderIcon>
                     <FontIcon Glyph="&#xE8B7;" />
                 </toolkit:SettingsCard.HeaderIcon>
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Command="{x:Bind ViewModel.OpenDataDirectoryCommand}" Content="Abrir pasta" />
-                    <Button Command="{x:Bind ViewModel.OpenAppLogsCommand}" Content="Logs do app" />
+                    <Button Command="{x:Bind ViewModel.OpenDataDirectoryCommand}" Content="{x:Bind loc:ShellStrings.About_OpenFolder}" />
+                    <Button Command="{x:Bind ViewModel.OpenAppLogsCommand}" Content="{x:Bind loc:ShellStrings.About_AppLogs}" />
                 </StackPanel>
             </toolkit:SettingsCard>
+
+            <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:ShellStrings.About_SupportHeader}" />
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock Style="{StaticResource BodyTextBlockStyle}" Text="{x:Bind loc:ShellStrings.About_SupportText}" TextWrapping="Wrap" />
+                    <StackPanel Margin="-12,0,0,0" Orientation="Horizontal" Spacing="4">
+                        <HyperlinkButton Content="{x:Bind loc:ShellStrings.About_SupportKofi}" NavigateUri="https://ko-fi.com/ottorocket" />
+                        <HyperlinkButton Content="{x:Bind loc:ShellStrings.About_SupportGitHubSponsors}" NavigateUri="https://github.com/sponsors/otaviohonorio" />
+                    </StackPanel>
+                    <HyperlinkButton Margin="-12,0,0,0" Content="{x:Bind loc:ShellStrings.About_ProjectPage}" NavigateUri="https://github.com/otaviohonorio/valheim-server-manager" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

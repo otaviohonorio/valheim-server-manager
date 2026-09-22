@@ -89,8 +89,8 @@ public sealed partial class LogViewModel : ProfilePageViewModel
     private void UpdateEmpty() => EmptyText = Lines.Count > 0
         ? string.Empty
         : Status.IsActive
-            ? (Status.HasLog ? "Aguardando mensagens do servidor…" : "Este servidor foi iniciado sem arquivo de log.")
-            : "O log aparece aqui enquanto o servidor estiver rodando. Logs de sessões anteriores ficam na lista ao lado.";
+            ? (Status.HasLog ? ShellStrings.Log_Waiting : ShellStrings.Log_NoLogFile)
+            : ShellStrings.Log_Empty;
 
     private static LogLineItem ToItem(ServerLogLine line) =>
         new(line.ReceivedAt.ToLocalTime().ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture), line.Text, line.Important);

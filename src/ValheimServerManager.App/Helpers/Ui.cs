@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.Core.Backups;
 using ValheimServerManager.Core.Servers;
 
@@ -9,8 +10,6 @@ namespace ValheimServerManager.App.Helpers;
 /// <summary>Small pure functions used from x:Bind.</summary>
 public static class Ui
 {
-    private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
-
     public static Visibility Visible(bool value) => value ? Visibility.Visible : Visibility.Collapsed;
 
     public static Visibility Collapsed(bool value) => value ? Visibility.Collapsed : Visibility.Visible;
@@ -44,11 +43,11 @@ public static class Ui
 
     public static string StateText(ServerRunState state) => state switch
     {
-        ServerRunState.Running => "Online",
-        ServerRunState.Starting => "Iniciando",
-        ServerRunState.Stopping => "Desligando",
-        ServerRunState.Crashed => "Parou inesperadamente",
-        _ => "Parado",
+        ServerRunState.Running => ShellStrings.State_Online,
+        ServerRunState.Starting => ShellStrings.State_Starting,
+        ServerRunState.Stopping => ShellStrings.State_Stopping,
+        ServerRunState.Crashed => ShellStrings.State_Crashed,
+        _ => ShellStrings.State_Stopped,
     };
 
     public static string StateGlyph(ServerRunState state) => state switch
@@ -61,13 +60,13 @@ public static class Ui
 
     public static string KindText(BackupKind kind) => kind switch
     {
-        BackupKind.Manual => "Manual",
-        BackupKind.PreStart => "Antes de iniciar",
-        BackupKind.PostStop => "Depois de parar",
-        BackupKind.PreRestore => "Antes de restaurar",
-        BackupKind.Quarantine => "Quarentena (mundo com defeito)",
-        BackupKind.GameAuto => "Automático do Valheim",
-        _ => "Importado",
+        BackupKind.Manual => ShellStrings.BackupKind_Manual,
+        BackupKind.PreStart => ShellStrings.BackupKind_PreStart,
+        BackupKind.PostStop => ShellStrings.BackupKind_PostStop,
+        BackupKind.PreRestore => ShellStrings.BackupKind_PreRestore,
+        BackupKind.Quarantine => ShellStrings.BackupKind_Quarantine,
+        BackupKind.GameAuto => ShellStrings.BackupKind_GameAuto,
+        _ => ShellStrings.BackupKind_Imported,
     };
 
     public static string KindGlyph(BackupKind kind) => kind switch
@@ -84,13 +83,14 @@ public static class Ui
     public static string Size(long bytes) => bytes switch
     {
         < 1024 => $"{bytes} B",
-        < 1024 * 1024 => string.Format(PtBr, "{0:N0} KB", bytes / 1024.0),
-        < 1024L * 1024 * 1024 => string.Format(PtBr, "{0:N1} MB", bytes / (1024.0 * 1024)),
-        _ => string.Format(PtBr, "{0:N2} GB", bytes / (1024.0 * 1024 * 1024)),
+        < 1024 * 1024 => string.Format(CultureInfo.CurrentCulture, "{0:N0} KB", bytes / 1024.0),
+        < 1024L * 1024 * 1024 => string.Format(CultureInfo.CurrentCulture, "{0:N1} MB", bytes / (1024.0 * 1024)),
+        _ => string.Format(CultureInfo.CurrentCulture, "{0:N2} GB", bytes / (1024.0 * 1024 * 1024)),
     };
 
-    public static string Number(long value) => value.ToString("N0", PtBr);
+    public static string Number(long value) => value.ToString("N0", CultureInfo.CurrentCulture);
 
+    /// <summary>Text comes in the UI language; numbers and dates follow the user's regional settings.</summary>
     public static string When(DateTimeOffset? at)
     {
         if (at is not { } value)
@@ -101,26 +101,27 @@ public static class Ui
         var local = value.ToLocalTime();
         var today = DateTimeOffset.Now.Date;
         return local.Date == today
-            ? $"hoje, {local:HH:mm:ss}"
+            ? string.Format(CultureInfo.CurrentCulture, ShellStrings.Time_Today, local)
             : local.Date == today.AddDays(-1)
-                ? $"ontem, {local:HH:mm}"
-                : local.ToString("dd/MM/yyyy HH:mm", PtBr);
+                ? string.Format(CultureInfo.CurrentCulture, ShellStrings.Time_Yesterday, local)
+                : local.ToString("g", CultureInfo.CurrentCulture);
     }
 
     public static string Ago(DateTimeOffset? at)
     {
         if (at is not { } value)
         {
-            return "nunca";
+            return ShellStrings.Time_Never;
         }
 
         var span = DateTimeOffset.Now - value;
         return span.TotalSeconds switch
         {
-            < 60 => "agora há pouco",
-            < 3600 => $"há {(int)span.TotalMinutes} min",
-            < 86400 => $"há {(int)span.TotalHours} h {span.Minutes} min",
-            _ => $"há {(int)span.TotalDays} dia(s)",
+            < 60 => ShellStrings.Time_JustNow,
+            < 3600 => string.Format(CultureInfo.CurrentCulture, ShellStrings.Time_MinutesAgo, (int)span.TotalMinutes),
+            < 86400 => string.Format(CultureInfo.CurrentCulture, ShellStrings.Time_HoursAgo, (int)span.TotalHours, span.Minutes),
+            _ => string.Format(CultureInfo.CurrentCulture,
+                (int)span.TotalDays == 1 ? ShellStrings.Time_DayAgo : ShellStrings.Time_DaysAgo, (int)span.TotalDays),
         };
     }
 

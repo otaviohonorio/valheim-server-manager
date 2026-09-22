@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Platform;
 using ValheimServerManager.Core.Processes;
@@ -43,7 +45,7 @@ public sealed partial class ProfileItemViewModel : ObservableObject
         DisplayName = profile.DisplayName;
         State = status.State;
         IsCreative = status.IsActive ? status.CreativeActive : profile.IsCreativeEffective;
-        Detail = $"{profile.WorldName} · porta {profile.Port}";
+        Detail = string.Format(CultureInfo.CurrentCulture, ShellStrings.Shell_ProfileDetail, profile.WorldName, profile.Port);
     }
 }
 
@@ -174,7 +176,7 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex) when (ex is InvalidOperationException or IOException)
         {
-            _logger.LogWarning(ex, "Falha ao procurar servidores em execução");
+            _logger.LogWarning(ex, "Failed to scan for running servers");
         }
     }
 
@@ -185,17 +187,15 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         {
             0 => string.Empty,
             1 => DescribeUnmanaged(servers[0]),
-            _ => $"{servers.Count} servidores Valheim estão rodando fora do gerenciador.",
+            _ => string.Format(CultureInfo.CurrentCulture, ShellStrings.Unmanaged_Many, servers.Count),
         };
     }
 
     private static string DescribeUnmanaged(RunningServer s)
     {
-        var name = s.ServerName ?? "sem nome";
-        var shared = s.SaveDirectoryIsDefault
-            ? " Ele grava na MESMA pasta do jogo — não abra esse mundo no jogo enquanto ele roda."
-            : string.Empty;
-        return $"O servidor \"{name}\" (mundo {s.WorldName}, PID {s.ProcessId}) está rodando fora do gerenciador.{shared}";
+        var name = s.ServerName ?? ShellStrings.Unmanaged_NoName;
+        var text = string.Format(CultureInfo.CurrentCulture, ShellStrings.Unmanaged_One, name, s.WorldName, s.ProcessId);
+        return s.SaveDirectoryIsDefault ? text + " " + ShellStrings.Unmanaged_SharedFolder : text;
     }
 
     [RelayCommand]
@@ -208,10 +208,9 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         }
 
         var ok = await _dialogs.ConfirmAsync(
-            "Gerenciar este servidor",
-            $"Criar um perfil a partir do servidor \"{server.ServerName}\" que já está rodando? " +
-            "O gerenciador passa a acompanhar e pode desligá-lo com segurança.",
-            "Criar perfil");
+            ShellStrings.Unmanaged_Adopt,
+            string.Format(CultureInfo.CurrentCulture, ShellStrings.Unmanaged_AdoptMessage, server.ServerName),
+            ShellStrings.Unmanaged_AdoptConfirm);
         if (!ok)
         {
             return;
@@ -223,9 +222,8 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         if (server.SaveDirectoryIsDefault)
         {
             await _dialogs.AlertAsync(
-                "Atenção à pasta de saves",
-                "Este servidor usa a pasta de saves do próprio jogo. O perfil foi criado para acompanhá-lo, mas o gerenciador " +
-                "não vai deixar iniciá-lo assim: pare com segurança, escolha uma pasta só do servidor em \"Servidor\" e mova o mundo para lá.");
+                ShellStrings.Unmanaged_SaveFolderTitle,
+                ShellStrings.Unmanaged_SaveFolderMessage);
         }
     }
 
@@ -253,7 +251,11 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var name = await _dialogs.PromptAsync("Duplicar perfil", "Nome do novo perfil:", "Nome", current.DisplayName + " (cópia)");
+        var name = await _dialogs.PromptAsync(
+            ShellStrings.Profile_DuplicateTitle,
+            ShellStrings.Profile_DuplicatePrompt,
+            ShellStrings.Profile_DuplicatePlaceholder,
+            string.Format(CultureInfo.CurrentCulture, ShellStrings.Profile_CopyName, current.DisplayName));
         if (string.IsNullOrWhiteSpace(name))
         {
             return;
@@ -263,9 +265,8 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
         copy.Port = NextFreePort(current.Port);
         _manager.AddProfile(copy);
         _context.SelectedProfileId = copy.Id;
-        await _dialogs.AlertAsync("Perfil duplicado",
-            $"A porta foi trocada para {copy.Port} para os dois poderem rodar juntos. " +
-            "Se for usar outro mundo, troque o nome do mundo em \"Mundo\".");
+        await _dialogs.AlertAsync(ShellStrings.Profile_DuplicatedTitle,
+            string.Format(CultureInfo.CurrentCulture, ShellStrings.Profile_DuplicatedMessage, copy.Port));
     }
 
     [RelayCommand]
@@ -279,14 +280,14 @@ public sealed partial class ShellViewModel : ObservableObject, IDisposable
 
         if (controller.Status.IsActive)
         {
-            await _dialogs.AlertAsync("Servidor em execução", "Pare o servidor antes de excluir o perfil.");
+            await _dialogs.AlertAsync(ShellStrings.Profile_DeleteRunningTitle, ShellStrings.Profile_DeleteRunningMessage);
             return;
         }
 
         var ok = await _dialogs.ConfirmAsync(
-            "Excluir perfil",
-            $"Excluir o perfil \"{controller.Profile.DisplayName}\"? Mundos e backups no disco NÃO são apagados.",
-            "Excluir", destructive: true);
+            ShellStrings.Profile_DeleteTitle,
+            string.Format(CultureInfo.CurrentCulture, ShellStrings.Profile_DeleteMessage, controller.Profile.DisplayName),
+            ShellStrings.Profile_DeleteConfirm, destructive: true);
         if (ok)
         {
             await _manager.RemoveProfileAsync(controller.ProfileId);

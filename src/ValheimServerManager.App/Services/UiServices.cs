@@ -29,7 +29,7 @@ public sealed class UiDispatcher
 
     public DispatcherQueueTimer CreateTimer(TimeSpan interval, Action tick)
     {
-        var queue = _queue ?? throw new InvalidOperationException("Dispatcher não inicializado.");
+        var queue = _queue ?? throw new InvalidOperationException("Dispatcher not initialized.");
         var timer = queue.CreateTimer();
         timer.Interval = interval;
         timer.IsRepeating = true;
@@ -95,7 +95,7 @@ public sealed class ShellService(ILogger<ShellService> logger) : IShellService
         }
         catch (Exception ex) when (ex is System.ComponentModel.Win32Exception or InvalidOperationException)
         {
-            logger.LogWarning(ex, "Falha ao abrir {File} {Args}", file, args);
+            logger.LogWarning(ex, "Failed to open {File} {Args}", file, args);
         }
     }
 }

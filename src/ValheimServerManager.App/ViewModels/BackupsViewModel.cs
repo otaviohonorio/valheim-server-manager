@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Backups;
 using ValheimServerManager.Core.Servers;
@@ -20,8 +22,8 @@ public sealed partial class BackupItemViewModel : ObservableObject
     public bool MatchesWorld { get; }
 
     public string Title => Entry.Kind == BackupKind.Quarantine
-        ? $"{Entry.WorldName} — cópia do mundo com defeito"
-        : $"{Entry.WorldName} — save {Entry.SaveNumber?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"}";
+        ? string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_ItemQuarantineTitle, Entry.WorldName)
+        : string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_ItemSaveTitle, Entry.WorldName, Entry.SaveNumber?.ToString(CultureInfo.InvariantCulture) ?? "?");
 
     public string KindText => Helpers.Ui.KindText(Entry.Kind);
 
@@ -38,20 +40,20 @@ public sealed partial class BackupItemViewModel : ObservableObject
             var parts = new List<string> { KindText, SizeText };
             if (Entry.Manifest is { } m)
             {
-                parts.Add($"{Helpers.Ui.Number(m.TotalZdos)} objetos");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_ItemObjects, Helpers.Ui.Number(m.TotalZdos)));
                 if (m.CreativeKey)
                 {
-                    parts.Add("modo criativo");
+                    parts.Add(WorldStrings.Backups_ItemCreativeMode);
                 }
             }
             else if (Entry.Kind != BackupKind.GameAuto)
             {
-                parts.Add("sem manifesto");
+                parts.Add(WorldStrings.Backups_ItemNoManifest);
             }
 
             if (!MatchesWorld)
             {
-                parts.Add("outro mundo");
+                parts.Add(WorldStrings.Backups_ItemOtherWorld);
             }
 
             return string.Join(" · ", parts);
@@ -109,7 +111,7 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
         Items.Clear();
         if (Profile is not { } profile || string.IsNullOrWhiteSpace(profile.SaveDirectory))
         {
-            Summary = "Configure a pasta de saves para ver os backups.";
+            Summary = WorldStrings.Backups_ConfigureSaveFolder;
             return;
         }
 
@@ -121,7 +123,7 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            Summary = $"Não foi possível listar os backups: {ex.Message}";
+            Summary = string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_ListFailed, ex.Message);
             return;
         }
 
@@ -136,8 +138,9 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
 
         var mine = entries.Where(e => e.WorldName.Equals(profile.WorldName, StringComparison.OrdinalIgnoreCase)).ToArray();
         Summary = mine.Length == 0
-            ? $"Nenhum backup do mundo \"{profile.WorldName}\" ainda."
-            : $"{mine.Length} backup(s) de \"{profile.WorldName}\", {Helpers.Ui.Size(mine.Sum(e => e.TotalBytes))} no total. Mais recente: {Helpers.Ui.When(mine[0].CreatedAt)}.";
+            ? string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_SummaryNone, profile.WorldName)
+            : string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_Summary,
+                mine.Length, profile.WorldName, Helpers.Ui.Size(mine.Sum(e => e.TotalBytes)), Helpers.Ui.When(mine[0].CreatedAt));
     }
 
     [RelayCommand]
@@ -148,13 +151,13 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
             return;
         }
 
-        var note = await _dialogs.PromptAsync("Backup manual", "Quer anotar algo sobre este backup? (opcional)", "Ex.: antes de enfrentar a Moder");
+        var note = await _dialogs.PromptAsync(WorldStrings.Backups_ManualTitle, WorldStrings.Backups_ManualPrompt, WorldStrings.Backups_ManualPlaceholder);
         if (note is null)
         {
             return;
         }
 
-        await RunBusyAsync("Copiando e verificando…", async () =>
+        await RunBusyAsync(WorldStrings.Backups_CopyingAndVerifying, async () =>
         {
             try
             {
@@ -163,7 +166,7 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
             }
             catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
             {
-                await _dialogs.AlertAsync("Backup não realizado", ex.Message);
+                await _dialogs.AlertAsync(WorldStrings.Backups_BackupFailedTitle, ex.Message);
             }
         });
         Refresh();
@@ -179,49 +182,50 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
 
         var profile = controller.Profile;
         var message =
-            $"Restaurar \"{item.Title}\" ({item.When}) no mundo \"{profile.WorldName}\"?\n\n" +
-            "• O mundo atual é copiado antes (ou guardado em quarentena, se estiver com defeito).\n" +
-            "• A pasta atual é movida para \"backups\\_substituidos\" — nada é apagado.\n" +
-            "• O backup é verificado antes e depois da cópia.";
+            string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_RestoreQuestion, item.Title, item.When, profile.WorldName) + "\n\n" +
+            WorldStrings.Backups_RestoreBulletSafetyCopy + "\n" +
+            WorldStrings.Backups_RestoreBulletMoved + "\n" +
+            WorldStrings.Backups_RestoreBulletVerified;
 
         if (controller.Status.IsActive)
         {
-            message += controller.Status.PlayerCount > 0
-                ? $"\n\nO servidor está rodando com {controller.Status.PlayerCount} jogador(es). Ele será desligado com segurança primeiro."
-                : "\n\nO servidor está rodando e será desligado com segurança primeiro.";
+            message += "\n\n" + (controller.Status.PlayerCount > 0
+                ? string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_RestoreServerRunningWithPlayers, controller.Status.PlayerCount)
+                : WorldStrings.Backups_RestoreServerRunning);
         }
 
-        if (!await _dialogs.ConfirmAsync("Restaurar backup", message, "Restaurar"))
+        if (!await _dialogs.ConfirmAsync(WorldStrings.Backups_RestoreTitle, message, WorldStrings.Backups_Restore))
         {
             return;
         }
 
-        await RunBusyAsync("Restaurando…", async () =>
+        await RunBusyAsync(WorldStrings.Backups_Restoring, async () =>
         {
             if (controller.Status.IsActive)
             {
-                BusyText = "Desligando o servidor com segurança…";
+                BusyText = WorldStrings.Backups_StoppingServer;
                 var stop = await controller.StopAsync();
                 if (!stop.Success && controller.Status.IsActive)
                 {
-                    await _dialogs.AlertAsync("Restauração cancelada", "O servidor não desligou. Pare-o pelo Painel e tente de novo.");
+                    await _dialogs.AlertAsync(WorldStrings.Backups_RestoreCancelledTitle, WorldStrings.Backups_RestoreCancelledMessage);
                     return;
                 }
             }
 
-            BusyText = "Verificando e copiando o backup…";
+            BusyText = WorldStrings.Backups_VerifyingAndCopying;
             try
             {
                 var result = await Manager.Backups.RestoreAsync(controller.Profile, item.Entry);
                 var safety = result.SafetyCopy is null
                     ? string.Empty
-                    : $"\n\nO mundo anterior foi guardado em \"{result.SafetyCopy.Name}\".";
-                await _dialogs.AlertAsync("Mundo restaurado",
-                    $"O mundo \"{profile.WorldName}\" agora é o save {item.Entry.SaveNumber} de {item.When}.{safety}\n\nInicie o servidor pelo Painel quando quiser.");
+                    : "\n\n" + string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_RestoredSafetyCopy, result.SafetyCopy.Name);
+                await _dialogs.AlertAsync(WorldStrings.Backups_RestoredTitle,
+                    string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_RestoredMessage, profile.WorldName, item.Entry.SaveNumber, item.When) +
+                    safety + "\n\n" + WorldStrings.Backups_RestoredStartHint);
             }
             catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
             {
-                await _dialogs.AlertAsync("Não foi possível restaurar", ex.Message);
+                await _dialogs.AlertAsync(WorldStrings.Backups_RestoreFailedTitle, ex.Message);
             }
         });
         Refresh();
@@ -235,9 +239,9 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
             return;
         }
 
-        item.VerifyText = "Verificando…";
+        item.VerifyText = WorldStrings.Backups_Verifying;
         var result = await Manager.Backups.VerifyAsync(item.Entry);
-        item.VerifyText = result.Ok ? "✓ Íntegro" : "✗ " + string.Join(" ", result.Problems);
+        item.VerifyText = result.Ok ? WorldStrings.Backups_VerifyOk : "✗ " + string.Join(" ", result.Problems);
     }
 
     [RelayCommand]
@@ -248,7 +252,8 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
             return;
         }
 
-        if (!await _dialogs.ConfirmAsync("Excluir backup", $"Apagar definitivamente \"{item.Entry.Name}\"?", "Excluir", destructive: true))
+        if (!await _dialogs.ConfirmAsync(WorldStrings.Backups_DeleteTitle,
+                string.Format(CultureInfo.CurrentCulture, WorldStrings.Backups_DeleteMessage, item.Entry.Name), WorldStrings.Backups_Delete, destructive: true))
         {
             return;
         }
@@ -260,7 +265,7 @@ public sealed partial class BackupsViewModel : ProfilePageViewModel
         }
         catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
         {
-            await _dialogs.AlertAsync("Não foi possível excluir", ex.Message);
+            await _dialogs.AlertAsync(WorldStrings.Backups_DeleteFailedTitle, ex.Message);
         }
     }
 

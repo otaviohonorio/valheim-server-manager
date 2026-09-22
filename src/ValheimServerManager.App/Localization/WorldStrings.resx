@@ -12,4 +12,481 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="World_Title" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="World_Subtitle" xml:space="preserve">
+    <value>Which world the server loads, its rules and the state of its files.</value>
+  </data>
+  <data name="World_LoadedWorldHeader" xml:space="preserve">
+    <value>Loaded world</value>
+  </data>
+  <data name="World_LoadedWorldDescription" xml:space="preserve">
+    <value>Folder name inside worlds_local (case matters). A name that doesn't exist creates a new world — the app asks for confirmation first.</value>
+  </data>
+  <data name="World_WorldNamePlaceholder" xml:space="preserve">
+    <value>World name</value>
+  </data>
+  <data name="World_OpenWorldsFolder" xml:space="preserve">
+    <value>Open worlds folder</value>
+  </data>
+  <data name="World_OpenWorldsLocalTooltip" xml:space="preserve">
+    <value>Open worlds_local</value>
+  </data>
+  <data name="World_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="World_FilesStateHeader" xml:space="preserve">
+    <value>State of the files</value>
+  </data>
+  <data name="World_RulesHeader" xml:space="preserve">
+    <value>World rules</value>
+  </data>
+  <data name="World_PresetHeader" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="World_FineTuningHeader" xml:space="preserve">
+    <value>Fine tuning</value>
+  </data>
+  <data name="World_CombatHeader" xml:space="preserve">
+    <value>Combat</value>
+  </data>
+  <data name="World_CombatDescription" xml:space="preserve">
+    <value>Damage dealt by enemies.</value>
+  </data>
+  <data name="World_DeathPenaltyHeader" xml:space="preserve">
+    <value>Death penalty</value>
+  </data>
+  <data name="World_DeathPenaltyDescription" xml:space="preserve">
+    <value>What happens to items and skills when you die. Hover over the options for details.</value>
+  </data>
+  <data name="World_ResourcesHeader" xml:space="preserve">
+    <value>Resources</value>
+  </data>
+  <data name="World_ResourcesDescription" xml:space="preserve">
+    <value>Gathering multiplier (rounds up).</value>
+  </data>
+  <data name="World_RaidsHeader" xml:space="preserve">
+    <value>Raids</value>
+  </data>
+  <data name="World_RaidsDescription" xml:space="preserve">
+    <value>How often the base is attacked.</value>
+  </data>
+  <data name="World_PortalsHeader" xml:space="preserve">
+    <value>Portals</value>
+  </data>
+  <data name="World_PortalsDescription" xml:space="preserve">
+    <value>What can go through portals.</value>
+  </data>
+  <data name="World_PlayerEventsHeader" xml:space="preserve">
+    <value>Per-player events</value>
+  </data>
+  <data name="World_PlayerEventsDescription" xml:space="preserve">
+    <value>Raids and events follow each player's progress, not the world's.</value>
+  </data>
+  <data name="World_PassiveMobsHeader" xml:space="preserve">
+    <value>Passive enemies</value>
+  </data>
+  <data name="World_PassiveMobsDescription" xml:space="preserve">
+    <value>Enemies only attack when provoked.</value>
+  </data>
+  <data name="World_NoMapHeader" xml:space="preserve">
+    <value>No map</value>
+  </data>
+  <data name="World_NoMapDescription" xml:space="preserve">
+    <value>Disables the map and the minimap.</value>
+  </data>
+  <data name="World_CreativeModeHeader" xml:space="preserve">
+    <value>Creative mode</value>
+  </data>
+  <data name="World_HammerIsCreative" xml:space="preserve">
+    <value>The Hammer preset is already creative; this switch doesn't turn it off.</value>
+  </data>
+  <data name="World_NoCostHeader" xml:space="preserve">
+    <value>Building and crafting at no cost</value>
+  </data>
+  <data name="World_NoCostDescription" xml:space="preserve">
+    <value>Applies to everyone on the server and blocks achievements while it's on. Because the preset is always on the command line, turning it off removes the key from the world on the next start — the app checks this on the first save.</value>
+  </data>
+  <data name="World_CreativeOff" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="World_CreativeOn" xml:space="preserve">
+    <value>Creative</value>
+  </data>
+  <data name="World_MaintenanceHeader" xml:space="preserve">
+    <value>World maintenance</value>
+  </data>
+  <data name="World_CheckAndFixHeader" xml:space="preserve">
+    <value>Check and fix now</value>
+  </data>
+  <data name="World_CheckAndFixDescription" xml:space="preserve">
+    <value>Removes objects the game generated twice (the ones you have to break twice) and the "made with cheats" mark on items, which stops them from stacking. Makes a backup first. The manager also does this on its own at every stop; use it here after someone stores items in the chests.</value>
+  </data>
+  <data name="World_FixWorldNowName" xml:space="preserve">
+    <value>Fix the world now</value>
+  </data>
+  <data name="World_FixNow" xml:space="preserve">
+    <value>Fix now</value>
+  </data>
+  <data name="World_CheckAgain" xml:space="preserve">
+    <value>Check again</value>
+  </data>
+  <data name="World_DiagnosticsHeader" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="World_BuildingsHeader" xml:space="preserve">
+    <value>Buildings found</value>
+  </data>
+  <data name="World_BuildingsDescription" xml:space="preserve">
+    <value>Searches the chunks for pieces only players build (workbenches, chests, portals, smelters…). Useful to confirm that a restored world is yours.</value>
+  </data>
+  <data name="World_Analyze" xml:space="preserve">
+    <value>Analyze</value>
+  </data>
+  <data name="World_UnsavedChanges" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="World_Discard" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="World_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="World_StopServerToCheck" xml:space="preserve">
+    <value>Stop the server to check and fix the world.</value>
+  </data>
+  <data name="World_OverrideHintNormal" xml:space="preserve">
+    <value>The settings below only change what differs from "Default".</value>
+  </data>
+  <data name="World_OverrideHintPreset" xml:space="preserve">
+    <value>"Default" below means "whatever the {0} preset sets". Any other choice overrides the preset.</value>
+  </data>
+  <data name="World_SaveHealthy" xml:space="preserve">
+    <value>Save {0} is complete and consistent.</value>
+  </data>
+  <data name="World_DetailFolder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="World_DetailCurrentSave" xml:space="preserve">
+    <value>Current save</value>
+  </data>
+  <data name="World_DetailSavedAt" xml:space="preserve">
+    <value>Saved at</value>
+  </data>
+  <data name="World_DetailChunksObjects" xml:space="preserve">
+    <value>Chunks / objects</value>
+  </data>
+  <data name="World_DetailSaveSize" xml:space="preserve">
+    <value>Save size</value>
+  </data>
+  <data name="World_DetailInternalName" xml:space="preserve">
+    <value>Internal name</value>
+  </data>
+  <data name="World_DetailSeed" xml:space="preserve">
+    <value>Seed</value>
+  </data>
+  <data name="World_DetailStoredKeys" xml:space="preserve">
+    <value>Stored keys</value>
+  </data>
+  <data name="World_DetailNoKeys" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="World_DetailRegisteredPlayers" xml:space="preserve">
+    <value>Registered players</value>
+  </data>
+  <data name="World_DetailNoPlayers" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="World_ConfigureSaveFolderAndWorld" xml:space="preserve">
+    <value>Set up the saves folder and the world.</value>
+  </data>
+  <data name="World_MaintenanceDuplicates" xml:space="preserve">
+    <value>{0} duplicate objects</value>
+  </data>
+  <data name="World_MaintenanceZones" xml:space="preserve">
+    <value>{0} regions the game would generate again</value>
+  </data>
+  <data name="World_MaintenanceCheatMarks" xml:space="preserve">
+    <value>{0} items and {1} objects with a cheat mark</value>
+  </data>
+  <data name="World_MaintenanceNothingToFix" xml:space="preserve">
+    <value>Nothing to fix: no duplicates and no marked items.</value>
+  </data>
+  <data name="World_MaintenanceToFix" xml:space="preserve">
+    <value>To fix: {0}.</value>
+  </data>
+  <data name="World_MaintenanceCheckFailed" xml:space="preserve">
+    <value>Couldn't check the world: {0}</value>
+  </data>
+  <data name="World_FixingWorld" xml:space="preserve">
+    <value>Fixing the world…</value>
+  </data>
+  <data name="World_FixDoneTitle" xml:space="preserve">
+    <value>World checked</value>
+  </data>
+  <data name="World_FixIncompleteTitle" xml:space="preserve">
+    <value>Fix incomplete</value>
+  </data>
+  <data name="World_ScanningBuildings" xml:space="preserve">
+    <value>Searching the chunks for buildings…</value>
+  </data>
+  <data name="World_BuildingsNeedsHealthyWorld" xml:space="preserve">
+    <value>The world must be intact to be analyzed.</value>
+  </data>
+  <data name="World_BuildingsNoneFound" xml:space="preserve">
+    <value>No pieces that only players build (workbenches, chests, portals…) were found.</value>
+  </data>
+  <data name="World_BuildingsFound" xml:space="preserve">
+    <value>{0} player-built pieces found.</value>
+  </data>
+  <data name="Backups_Title" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Backups_BackupNow" xml:space="preserve">
+    <value>Back up now</value>
+  </data>
+  <data name="Backups_OpenBackupsFolder" xml:space="preserve">
+    <value>Open backups folder</value>
+  </data>
+  <data name="Backups_OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+  <data name="Backups_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Backups_ThisWorldOnly" xml:space="preserve">
+    <value>This world only</value>
+  </data>
+  <data name="Backups_AllWorlds" xml:space="preserve">
+    <value>All worlds</value>
+  </data>
+  <data name="Backups_InfoMessage" xml:space="preserve">
+    <value>Each backup holds a complete save and is checked byte by byte (SHA-256). Restoring never mixes files from different saves and never deletes the current world: it is copied first and moved to _substituidos.</value>
+  </data>
+  <data name="Backups_Empty" xml:space="preserve">
+    <value>No backups to show.</value>
+  </data>
+  <data name="Backups_Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="Backups_Verify" xml:space="preserve">
+    <value>Verify</value>
+  </data>
+  <data name="Backups_MoreOptions" xml:space="preserve">
+    <value>More options</value>
+  </data>
+  <data name="Backups_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Backups_ItemQuarantineTitle" xml:space="preserve">
+    <value>{0} — copy of the damaged world</value>
+  </data>
+  <data name="Backups_ItemSaveTitle" xml:space="preserve">
+    <value>{0} — save {1}</value>
+  </data>
+  <data name="Backups_ItemObjects" xml:space="preserve">
+    <value>{0} objects</value>
+  </data>
+  <data name="Backups_ItemCreativeMode" xml:space="preserve">
+    <value>creative mode</value>
+  </data>
+  <data name="Backups_ItemNoManifest" xml:space="preserve">
+    <value>no manifest</value>
+  </data>
+  <data name="Backups_ItemOtherWorld" xml:space="preserve">
+    <value>other world</value>
+  </data>
+  <data name="Backups_ConfigureSaveFolder" xml:space="preserve">
+    <value>Set up the saves folder to see the backups.</value>
+  </data>
+  <data name="Backups_ListFailed" xml:space="preserve">
+    <value>Couldn't list the backups: {0}</value>
+  </data>
+  <data name="Backups_SummaryNone" xml:space="preserve">
+    <value>No backups of the world "{0}" yet.</value>
+  </data>
+  <data name="Backups_Summary" xml:space="preserve">
+    <value>{0} backup(s) of "{1}", {2} in total. Latest: {3}.</value>
+  </data>
+  <data name="Backups_ManualTitle" xml:space="preserve">
+    <value>Manual backup</value>
+  </data>
+  <data name="Backups_ManualPrompt" xml:space="preserve">
+    <value>Want to jot down something about this backup? (optional)</value>
+  </data>
+  <data name="Backups_ManualPlaceholder" xml:space="preserve">
+    <value>E.g.: before facing Moder</value>
+  </data>
+  <data name="Backups_CopyingAndVerifying" xml:space="preserve">
+    <value>Copying and verifying…</value>
+  </data>
+  <data name="Backups_BackupFailedTitle" xml:space="preserve">
+    <value>Backup not made</value>
+  </data>
+  <data name="Backups_RestoreQuestion" xml:space="preserve">
+    <value>Restore "{0}" ({1}) into the world "{2}"?</value>
+  </data>
+  <data name="Backups_RestoreBulletSafetyCopy" xml:space="preserve">
+    <value>• The current world is copied first (or kept in quarantine, if it's damaged).</value>
+  </data>
+  <data name="Backups_RestoreBulletMoved" xml:space="preserve">
+    <value>• The current folder is moved to "backups\_substituidos" — nothing is deleted.</value>
+  </data>
+  <data name="Backups_RestoreBulletVerified" xml:space="preserve">
+    <value>• The backup is verified before and after the copy.</value>
+  </data>
+  <data name="Backups_RestoreServerRunningWithPlayers" xml:space="preserve">
+    <value>The server is running with {0} player(s). It will be shut down safely first.</value>
+  </data>
+  <data name="Backups_RestoreServerRunning" xml:space="preserve">
+    <value>The server is running and will be shut down safely first.</value>
+  </data>
+  <data name="Backups_RestoreTitle" xml:space="preserve">
+    <value>Restore backup</value>
+  </data>
+  <data name="Backups_Restoring" xml:space="preserve">
+    <value>Restoring…</value>
+  </data>
+  <data name="Backups_StoppingServer" xml:space="preserve">
+    <value>Shutting the server down safely…</value>
+  </data>
+  <data name="Backups_RestoreCancelledTitle" xml:space="preserve">
+    <value>Restore cancelled</value>
+  </data>
+  <data name="Backups_RestoreCancelledMessage" xml:space="preserve">
+    <value>The server didn't shut down. Stop it from the Dashboard and try again.</value>
+  </data>
+  <data name="Backups_VerifyingAndCopying" xml:space="preserve">
+    <value>Verifying and copying the backup…</value>
+  </data>
+  <data name="Backups_RestoredSafetyCopy" xml:space="preserve">
+    <value>The previous world was kept in "{0}".</value>
+  </data>
+  <data name="Backups_RestoredTitle" xml:space="preserve">
+    <value>World restored</value>
+  </data>
+  <data name="Backups_RestoredMessage" xml:space="preserve">
+    <value>The world "{0}" is now save {1} from {2}.</value>
+  </data>
+  <data name="Backups_RestoredStartHint" xml:space="preserve">
+    <value>Start the server from the Dashboard whenever you like.</value>
+  </data>
+  <data name="Backups_RestoreFailedTitle" xml:space="preserve">
+    <value>Couldn't restore</value>
+  </data>
+  <data name="Backups_Verifying" xml:space="preserve">
+    <value>Verifying…</value>
+  </data>
+  <data name="Backups_VerifyOk" xml:space="preserve">
+    <value>✓ Intact</value>
+  </data>
+  <data name="Backups_DeleteTitle" xml:space="preserve">
+    <value>Delete backup</value>
+  </data>
+  <data name="Backups_DeleteMessage" xml:space="preserve">
+    <value>Permanently delete "{0}"?</value>
+  </data>
+  <data name="Backups_DeleteFailedTitle" xml:space="preserve">
+    <value>Couldn't delete</value>
+  </data>
+  <data name="Players_Title" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="Players_RestartToApply" xml:space="preserve">
+    <value>The server reads these lists when it starts. Restart it from the Dashboard to apply.</value>
+  </data>
+  <data name="Players_AllowListActiveTitle" xml:space="preserve">
+    <value>Allow list active</value>
+  </data>
+  <data name="Players_AllowListActiveMessage" xml:space="preserve">
+    <value>Only those marked as Permitted can join.</value>
+  </data>
+  <data name="Players_OnlineNowHeader" xml:space="preserve">
+    <value>Online now</value>
+  </data>
+  <data name="Players_OnlineNowName" xml:space="preserve">
+    <value>Players online now</value>
+  </data>
+  <data name="Players_EveryoneHeader" xml:space="preserve">
+    <value>Everyone who has joined this world</value>
+  </data>
+  <data name="Players_ColumnPlayer" xml:space="preserve">
+    <value>PLAYER</value>
+  </data>
+  <data name="Players_ColumnAdmin" xml:space="preserve">
+    <value>ADMIN</value>
+  </data>
+  <data name="Players_ColumnAdminTooltip" xml:space="preserve">
+    <value>Unlocks the F5 console on the server</value>
+  </data>
+  <data name="Players_ColumnBanned" xml:space="preserve">
+    <value>BANNED</value>
+  </data>
+  <data name="Players_ColumnPermitted" xml:space="preserve">
+    <value>PERMITTED</value>
+  </data>
+  <data name="Players_NoneRegistered" xml:space="preserve">
+    <value>Nobody registered in this world yet. Players show up here after they join the server (the world keeps the history).</value>
+  </data>
+  <data name="Players_OnlineBadge" xml:space="preserve">
+    <value>● online</value>
+  </data>
+  <data name="Players_Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Players_Banned" xml:space="preserve">
+    <value>Banned</value>
+  </data>
+  <data name="Players_Permitted" xml:space="preserve">
+    <value>Permitted</value>
+  </data>
+  <data name="Players_AddByIdHeader" xml:space="preserve">
+    <value>Add by ID</value>
+  </data>
+  <data name="Players_AddByIdHelp" xml:space="preserve">
+    <value>Use the SteamID64 (17 digits). In the game it shows in the F2 panel; in the server log, on the player's connection line.</value>
+  </data>
+  <data name="Players_IdPlaceholder" xml:space="preserve">
+    <value>E.g.: 76561198000000000</value>
+  </data>
+  <data name="Players_MakeAdmin" xml:space="preserve">
+    <value>Make admin</value>
+  </data>
+  <data name="Players_Ban" xml:space="preserve">
+    <value>Ban</value>
+  </data>
+  <data name="Players_RefreshList" xml:space="preserve">
+    <value>Refresh list</value>
+  </data>
+  <data name="Players_OpenFilesFolder" xml:space="preserve">
+    <value>Open the files folder</value>
+  </data>
+  <data name="Players_OnlineCount" xml:space="preserve">
+    <value>{0} player(s) online now.</value>
+  </data>
+  <data name="Players_ServerStopped" xml:space="preserve">
+    <value>Server stopped.</value>
+  </data>
+  <data name="Players_InWorldSince" xml:space="preserve">
+    <value>in the world since {0:HH:mm}</value>
+  </data>
+  <data name="Players_AdminTag" xml:space="preserve">
+    <value>admin</value>
+  </data>
+  <data name="Players_UnnamedId" xml:space="preserve">
+    <value>Unnamed ID</value>
+  </data>
+  <data name="Players_EnableAllowListTitle" xml:space="preserve">
+    <value>Turn on the allow list?</value>
+  </data>
+  <data name="Players_EnableAllowListMessage" xml:space="preserve">
+    <value>As soon as anyone is on the allow list, ONLY the people on it can join. Add all your friends.</value>
+  </data>
+  <data name="Players_EnableAllowListConfirm" xml:space="preserve">
+    <value>Turn on</value>
+  </data>
+  <data name="Players_SaveFailedTitle" xml:space="preserve">
+    <value>Couldn't save</value>
+  </data>
 </root>

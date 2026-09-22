@@ -12,4 +12,481 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="World_Title" xml:space="preserve">
+    <value>Mundo</value>
+  </data>
+  <data name="World_Subtitle" xml:space="preserve">
+    <value>Qué mundo carga el servidor, sus reglas y el estado de sus archivos.</value>
+  </data>
+  <data name="World_LoadedWorldHeader" xml:space="preserve">
+    <value>Mundo cargado</value>
+  </data>
+  <data name="World_LoadedWorldDescription" xml:space="preserve">
+    <value>Nombre de la carpeta dentro de worlds_local (las mayúsculas cuentan). Un nombre que no existe crea un mundo nuevo — la app pide confirmación antes.</value>
+  </data>
+  <data name="World_WorldNamePlaceholder" xml:space="preserve">
+    <value>Nombre del mundo</value>
+  </data>
+  <data name="World_OpenWorldsFolder" xml:space="preserve">
+    <value>Abrir carpeta de mundos</value>
+  </data>
+  <data name="World_OpenWorldsLocalTooltip" xml:space="preserve">
+    <value>Abrir worlds_local</value>
+  </data>
+  <data name="World_Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="World_FilesStateHeader" xml:space="preserve">
+    <value>Estado de los archivos</value>
+  </data>
+  <data name="World_RulesHeader" xml:space="preserve">
+    <value>Reglas del mundo</value>
+  </data>
+  <data name="World_PresetHeader" xml:space="preserve">
+    <value>Preset</value>
+  </data>
+  <data name="World_FineTuningHeader" xml:space="preserve">
+    <value>Ajustes finos</value>
+  </data>
+  <data name="World_CombatHeader" xml:space="preserve">
+    <value>Combate</value>
+  </data>
+  <data name="World_CombatDescription" xml:space="preserve">
+    <value>Daño causado por los enemigos.</value>
+  </data>
+  <data name="World_DeathPenaltyHeader" xml:space="preserve">
+    <value>Penalización por muerte</value>
+  </data>
+  <data name="World_DeathPenaltyDescription" xml:space="preserve">
+    <value>Qué pasa con los objetos y las habilidades al morir. Pasa el ratón sobre las opciones para ver detalles.</value>
+  </data>
+  <data name="World_ResourcesHeader" xml:space="preserve">
+    <value>Recursos</value>
+  </data>
+  <data name="World_ResourcesDescription" xml:space="preserve">
+    <value>Multiplicador de recolección (redondea hacia arriba).</value>
+  </data>
+  <data name="World_RaidsHeader" xml:space="preserve">
+    <value>Asaltos</value>
+  </data>
+  <data name="World_RaidsDescription" xml:space="preserve">
+    <value>Frecuencia de los ataques a la base.</value>
+  </data>
+  <data name="World_PortalsHeader" xml:space="preserve">
+    <value>Portales</value>
+  </data>
+  <data name="World_PortalsDescription" xml:space="preserve">
+    <value>Qué puede pasar por los portales.</value>
+  </data>
+  <data name="World_PlayerEventsHeader" xml:space="preserve">
+    <value>Eventos por jugador</value>
+  </data>
+  <data name="World_PlayerEventsDescription" xml:space="preserve">
+    <value>Los asaltos y eventos siguen el progreso de cada jugador, no el del mundo.</value>
+  </data>
+  <data name="World_PassiveMobsHeader" xml:space="preserve">
+    <value>Enemigos pasivos</value>
+  </data>
+  <data name="World_PassiveMobsDescription" xml:space="preserve">
+    <value>Los enemigos solo atacan si se les provoca.</value>
+  </data>
+  <data name="World_NoMapHeader" xml:space="preserve">
+    <value>Sin mapa</value>
+  </data>
+  <data name="World_NoMapDescription" xml:space="preserve">
+    <value>Desactiva el mapa y el minimapa.</value>
+  </data>
+  <data name="World_CreativeModeHeader" xml:space="preserve">
+    <value>Modo creativo</value>
+  </data>
+  <data name="World_HammerIsCreative" xml:space="preserve">
+    <value>El preset Martillo ya es creativo; este interruptor no lo desactiva.</value>
+  </data>
+  <data name="World_NoCostHeader" xml:space="preserve">
+    <value>Construcción y fabricación sin coste</value>
+  </data>
+  <data name="World_NoCostDescription" xml:space="preserve">
+    <value>Se aplica a todos los que estén en el servidor y bloquea los logros mientras esté activado. Como el preset siempre está en la línea de comandos, al desactivarlo se quita la clave del mundo en el próximo inicio — la app lo comprueba en el primer guardado.</value>
+  </data>
+  <data name="World_CreativeOff" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="World_CreativeOn" xml:space="preserve">
+    <value>Creativo</value>
+  </data>
+  <data name="World_MaintenanceHeader" xml:space="preserve">
+    <value>Mantenimiento del mundo</value>
+  </data>
+  <data name="World_CheckAndFixHeader" xml:space="preserve">
+    <value>Revisar y corregir ahora</value>
+  </data>
+  <data name="World_CheckAndFixDescription" xml:space="preserve">
+    <value>Quita los objetos que el juego generó dos veces (los que hay que romper dos veces) y la marca de "hecho con trampas" de los objetos, que impide apilarlos. Hace una copia de seguridad antes. El gestor también lo hace solo en cada detención; úsalo aquí después de que alguien guarde objetos en los cofres.</value>
+  </data>
+  <data name="World_FixWorldNowName" xml:space="preserve">
+    <value>Corregir el mundo ahora</value>
+  </data>
+  <data name="World_FixNow" xml:space="preserve">
+    <value>Corregir ahora</value>
+  </data>
+  <data name="World_CheckAgain" xml:space="preserve">
+    <value>Revisar de nuevo</value>
+  </data>
+  <data name="World_DiagnosticsHeader" xml:space="preserve">
+    <value>Diagnóstico</value>
+  </data>
+  <data name="World_BuildingsHeader" xml:space="preserve">
+    <value>Construcciones encontradas</value>
+  </data>
+  <data name="World_BuildingsDescription" xml:space="preserve">
+    <value>Busca en los chunks piezas que solo construyen los jugadores (bancos de trabajo, cofres, portales, fundiciones…). Útil para confirmar que un mundo restaurado es el tuyo.</value>
+  </data>
+  <data name="World_Analyze" xml:space="preserve">
+    <value>Analizar</value>
+  </data>
+  <data name="World_UnsavedChanges" xml:space="preserve">
+    <value>Cambios sin guardar</value>
+  </data>
+  <data name="World_Discard" xml:space="preserve">
+    <value>Descartar</value>
+  </data>
+  <data name="World_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="World_StopServerToCheck" xml:space="preserve">
+    <value>Detén el servidor para revisar y corregir el mundo.</value>
+  </data>
+  <data name="World_OverrideHintNormal" xml:space="preserve">
+    <value>Los ajustes de abajo solo cambian lo que sea distinto de "Predeterminado".</value>
+  </data>
+  <data name="World_OverrideHintPreset" xml:space="preserve">
+    <value>"Predeterminado" abajo significa "lo que defina el preset {0}". Cualquier otra opción reemplaza el preset.</value>
+  </data>
+  <data name="World_SaveHealthy" xml:space="preserve">
+    <value>Guardado {0} completo y coherente.</value>
+  </data>
+  <data name="World_DetailFolder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="World_DetailCurrentSave" xml:space="preserve">
+    <value>Guardado actual</value>
+  </data>
+  <data name="World_DetailSavedAt" xml:space="preserve">
+    <value>Guardado el</value>
+  </data>
+  <data name="World_DetailChunksObjects" xml:space="preserve">
+    <value>Chunks / objetos</value>
+  </data>
+  <data name="World_DetailSaveSize" xml:space="preserve">
+    <value>Tamaño del guardado</value>
+  </data>
+  <data name="World_DetailInternalName" xml:space="preserve">
+    <value>Nombre interno</value>
+  </data>
+  <data name="World_DetailSeed" xml:space="preserve">
+    <value>Semilla</value>
+  </data>
+  <data name="World_DetailStoredKeys" xml:space="preserve">
+    <value>Claves guardadas</value>
+  </data>
+  <data name="World_DetailNoKeys" xml:space="preserve">
+    <value>ninguna</value>
+  </data>
+  <data name="World_DetailRegisteredPlayers" xml:space="preserve">
+    <value>Jugadores registrados</value>
+  </data>
+  <data name="World_DetailNoPlayers" xml:space="preserve">
+    <value>ninguno</value>
+  </data>
+  <data name="World_ConfigureSaveFolderAndWorld" xml:space="preserve">
+    <value>Configura la carpeta de guardados y el mundo.</value>
+  </data>
+  <data name="World_MaintenanceDuplicates" xml:space="preserve">
+    <value>{0} objetos duplicados</value>
+  </data>
+  <data name="World_MaintenanceZones" xml:space="preserve">
+    <value>{0} regiones que el juego volvería a generar</value>
+  </data>
+  <data name="World_MaintenanceCheatMarks" xml:space="preserve">
+    <value>{0} ítems y {1} objetos con marca de trampa</value>
+  </data>
+  <data name="World_MaintenanceNothingToFix" xml:space="preserve">
+    <value>Nada que corregir: sin duplicados ni objetos marcados.</value>
+  </data>
+  <data name="World_MaintenanceToFix" xml:space="preserve">
+    <value>Por corregir: {0}.</value>
+  </data>
+  <data name="World_MaintenanceCheckFailed" xml:space="preserve">
+    <value>No se pudo revisar el mundo: {0}</value>
+  </data>
+  <data name="World_FixingWorld" xml:space="preserve">
+    <value>Corrigiendo el mundo…</value>
+  </data>
+  <data name="World_FixDoneTitle" xml:space="preserve">
+    <value>Mundo revisado</value>
+  </data>
+  <data name="World_FixIncompleteTitle" xml:space="preserve">
+    <value>Corrección incompleta</value>
+  </data>
+  <data name="World_ScanningBuildings" xml:space="preserve">
+    <value>Buscando construcciones en los chunks…</value>
+  </data>
+  <data name="World_BuildingsNeedsHealthyWorld" xml:space="preserve">
+    <value>El mundo debe estar íntegro para poder analizarlo.</value>
+  </data>
+  <data name="World_BuildingsNoneFound" xml:space="preserve">
+    <value>No se encontró ninguna pieza que solo construyan los jugadores (bancos de trabajo, cofres, portales…).</value>
+  </data>
+  <data name="World_BuildingsFound" xml:space="preserve">
+    <value>Se encontraron {0} piezas hechas por jugadores.</value>
+  </data>
+  <data name="Backups_Title" xml:space="preserve">
+    <value>Copias de seguridad</value>
+  </data>
+  <data name="Backups_BackupNow" xml:space="preserve">
+    <value>Hacer copia de seguridad ahora</value>
+  </data>
+  <data name="Backups_OpenBackupsFolder" xml:space="preserve">
+    <value>Abrir carpeta de copias de seguridad</value>
+  </data>
+  <data name="Backups_OpenFolder" xml:space="preserve">
+    <value>Abrir carpeta</value>
+  </data>
+  <data name="Backups_Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="Backups_ThisWorldOnly" xml:space="preserve">
+    <value>Solo este mundo</value>
+  </data>
+  <data name="Backups_AllWorlds" xml:space="preserve">
+    <value>Todos los mundos</value>
+  </data>
+  <data name="Backups_InfoMessage" xml:space="preserve">
+    <value>Cada copia de seguridad guarda un guardado completo y se comprueba byte a byte (SHA-256). Restaurar nunca mezcla archivos de guardados distintos y nunca borra el mundo actual: se copia antes y se mueve a _substituidos.</value>
+  </data>
+  <data name="Backups_Empty" xml:space="preserve">
+    <value>No hay copias de seguridad para mostrar.</value>
+  </data>
+  <data name="Backups_Restore" xml:space="preserve">
+    <value>Restaurar</value>
+  </data>
+  <data name="Backups_Verify" xml:space="preserve">
+    <value>Verificar</value>
+  </data>
+  <data name="Backups_MoreOptions" xml:space="preserve">
+    <value>Más opciones</value>
+  </data>
+  <data name="Backups_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Backups_ItemQuarantineTitle" xml:space="preserve">
+    <value>{0} — copia del mundo dañado</value>
+  </data>
+  <data name="Backups_ItemSaveTitle" xml:space="preserve">
+    <value>{0} — guardado {1}</value>
+  </data>
+  <data name="Backups_ItemObjects" xml:space="preserve">
+    <value>{0} objetos</value>
+  </data>
+  <data name="Backups_ItemCreativeMode" xml:space="preserve">
+    <value>modo creativo</value>
+  </data>
+  <data name="Backups_ItemNoManifest" xml:space="preserve">
+    <value>sin manifiesto</value>
+  </data>
+  <data name="Backups_ItemOtherWorld" xml:space="preserve">
+    <value>otro mundo</value>
+  </data>
+  <data name="Backups_ConfigureSaveFolder" xml:space="preserve">
+    <value>Configura la carpeta de guardados para ver las copias de seguridad.</value>
+  </data>
+  <data name="Backups_ListFailed" xml:space="preserve">
+    <value>No se pudieron listar las copias de seguridad: {0}</value>
+  </data>
+  <data name="Backups_SummaryNone" xml:space="preserve">
+    <value>Aún no hay copias de seguridad del mundo "{0}".</value>
+  </data>
+  <data name="Backups_Summary" xml:space="preserve">
+    <value>{0} copia(s) de seguridad de "{1}", {2} en total. La más reciente: {3}.</value>
+  </data>
+  <data name="Backups_ManualTitle" xml:space="preserve">
+    <value>Copia de seguridad manual</value>
+  </data>
+  <data name="Backups_ManualPrompt" xml:space="preserve">
+    <value>¿Quieres anotar algo sobre esta copia de seguridad? (opcional)</value>
+  </data>
+  <data name="Backups_ManualPlaceholder" xml:space="preserve">
+    <value>Ej.: antes de enfrentarse a Moder</value>
+  </data>
+  <data name="Backups_CopyingAndVerifying" xml:space="preserve">
+    <value>Copiando y verificando…</value>
+  </data>
+  <data name="Backups_BackupFailedTitle" xml:space="preserve">
+    <value>Copia de seguridad no realizada</value>
+  </data>
+  <data name="Backups_RestoreQuestion" xml:space="preserve">
+    <value>¿Restaurar "{0}" ({1}) en el mundo "{2}"?</value>
+  </data>
+  <data name="Backups_RestoreBulletSafetyCopy" xml:space="preserve">
+    <value>• El mundo actual se copia antes (o se guarda en cuarentena, si está dañado).</value>
+  </data>
+  <data name="Backups_RestoreBulletMoved" xml:space="preserve">
+    <value>• La carpeta actual se mueve a "backups\_substituidos" — no se borra nada.</value>
+  </data>
+  <data name="Backups_RestoreBulletVerified" xml:space="preserve">
+    <value>• La copia de seguridad se verifica antes y después de copiarla.</value>
+  </data>
+  <data name="Backups_RestoreServerRunningWithPlayers" xml:space="preserve">
+    <value>El servidor está en ejecución con {0} jugador(es). Primero se apagará de forma segura.</value>
+  </data>
+  <data name="Backups_RestoreServerRunning" xml:space="preserve">
+    <value>El servidor está en ejecución y primero se apagará de forma segura.</value>
+  </data>
+  <data name="Backups_RestoreTitle" xml:space="preserve">
+    <value>Restaurar copia de seguridad</value>
+  </data>
+  <data name="Backups_Restoring" xml:space="preserve">
+    <value>Restaurando…</value>
+  </data>
+  <data name="Backups_StoppingServer" xml:space="preserve">
+    <value>Apagando el servidor de forma segura…</value>
+  </data>
+  <data name="Backups_RestoreCancelledTitle" xml:space="preserve">
+    <value>Restauración cancelada</value>
+  </data>
+  <data name="Backups_RestoreCancelledMessage" xml:space="preserve">
+    <value>El servidor no se apagó. Detenlo desde el Panel e inténtalo de nuevo.</value>
+  </data>
+  <data name="Backups_VerifyingAndCopying" xml:space="preserve">
+    <value>Verificando y copiando la copia de seguridad…</value>
+  </data>
+  <data name="Backups_RestoredSafetyCopy" xml:space="preserve">
+    <value>El mundo anterior se guardó en "{0}".</value>
+  </data>
+  <data name="Backups_RestoredTitle" xml:space="preserve">
+    <value>Mundo restaurado</value>
+  </data>
+  <data name="Backups_RestoredMessage" xml:space="preserve">
+    <value>El mundo "{0}" ahora es el guardado {1} de {2}.</value>
+  </data>
+  <data name="Backups_RestoredStartHint" xml:space="preserve">
+    <value>Inicia el servidor desde el Panel cuando quieras.</value>
+  </data>
+  <data name="Backups_RestoreFailedTitle" xml:space="preserve">
+    <value>No se pudo restaurar</value>
+  </data>
+  <data name="Backups_Verifying" xml:space="preserve">
+    <value>Verificando…</value>
+  </data>
+  <data name="Backups_VerifyOk" xml:space="preserve">
+    <value>✓ Íntegra</value>
+  </data>
+  <data name="Backups_DeleteTitle" xml:space="preserve">
+    <value>Eliminar copia de seguridad</value>
+  </data>
+  <data name="Backups_DeleteMessage" xml:space="preserve">
+    <value>¿Borrar definitivamente "{0}"?</value>
+  </data>
+  <data name="Backups_DeleteFailedTitle" xml:space="preserve">
+    <value>No se pudo eliminar</value>
+  </data>
+  <data name="Players_Title" xml:space="preserve">
+    <value>Jugadores</value>
+  </data>
+  <data name="Players_RestartToApply" xml:space="preserve">
+    <value>El servidor lee estas listas al iniciar. Reinícialo desde el Panel para aplicarlas.</value>
+  </data>
+  <data name="Players_AllowListActiveTitle" xml:space="preserve">
+    <value>Lista de permitidos activa</value>
+  </data>
+  <data name="Players_AllowListActiveMessage" xml:space="preserve">
+    <value>Solo quienes estén marcados como Permitido pueden entrar.</value>
+  </data>
+  <data name="Players_OnlineNowHeader" xml:space="preserve">
+    <value>En línea ahora</value>
+  </data>
+  <data name="Players_OnlineNowName" xml:space="preserve">
+    <value>Jugadores en línea ahora</value>
+  </data>
+  <data name="Players_EveryoneHeader" xml:space="preserve">
+    <value>Todos los que han entrado en este mundo</value>
+  </data>
+  <data name="Players_ColumnPlayer" xml:space="preserve">
+    <value>JUGADOR</value>
+  </data>
+  <data name="Players_ColumnAdmin" xml:space="preserve">
+    <value>ADMIN</value>
+  </data>
+  <data name="Players_ColumnAdminTooltip" xml:space="preserve">
+    <value>Habilita la consola F5 en el servidor</value>
+  </data>
+  <data name="Players_ColumnBanned" xml:space="preserve">
+    <value>BLOQUEADO</value>
+  </data>
+  <data name="Players_ColumnPermitted" xml:space="preserve">
+    <value>PERMITIDO</value>
+  </data>
+  <data name="Players_NoneRegistered" xml:space="preserve">
+    <value>Todavía no hay nadie registrado en este mundo. Los jugadores aparecen aquí después de entrar en el servidor (el mundo guarda el historial).</value>
+  </data>
+  <data name="Players_OnlineBadge" xml:space="preserve">
+    <value>● en línea</value>
+  </data>
+  <data name="Players_Admin" xml:space="preserve">
+    <value>Administrador</value>
+  </data>
+  <data name="Players_Banned" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
+  <data name="Players_Permitted" xml:space="preserve">
+    <value>Permitido</value>
+  </data>
+  <data name="Players_AddByIdHeader" xml:space="preserve">
+    <value>Añadir por ID</value>
+  </data>
+  <data name="Players_AddByIdHelp" xml:space="preserve">
+    <value>Usa el SteamID64 (17 dígitos). En el juego aparece en el panel F2; en el log del servidor, en la línea de conexión del jugador.</value>
+  </data>
+  <data name="Players_IdPlaceholder" xml:space="preserve">
+    <value>Ej.: 76561198000000000</value>
+  </data>
+  <data name="Players_MakeAdmin" xml:space="preserve">
+    <value>Hacer administrador</value>
+  </data>
+  <data name="Players_Ban" xml:space="preserve">
+    <value>Bloquear</value>
+  </data>
+  <data name="Players_RefreshList" xml:space="preserve">
+    <value>Actualizar lista</value>
+  </data>
+  <data name="Players_OpenFilesFolder" xml:space="preserve">
+    <value>Abrir carpeta de los archivos</value>
+  </data>
+  <data name="Players_OnlineCount" xml:space="preserve">
+    <value>{0} jugador(es) en línea ahora.</value>
+  </data>
+  <data name="Players_ServerStopped" xml:space="preserve">
+    <value>Servidor detenido.</value>
+  </data>
+  <data name="Players_InWorldSince" xml:space="preserve">
+    <value>en el mundo desde las {0:HH:mm}</value>
+  </data>
+  <data name="Players_AdminTag" xml:space="preserve">
+    <value>administrador</value>
+  </data>
+  <data name="Players_UnnamedId" xml:space="preserve">
+    <value>ID sin nombre</value>
+  </data>
+  <data name="Players_EnableAllowListTitle" xml:space="preserve">
+    <value>¿Activar la lista de permitidos?</value>
+  </data>
+  <data name="Players_EnableAllowListMessage" xml:space="preserve">
+    <value>En cuanto haya alguien en la lista de permitidos, SOLO quienes estén en ella podrán entrar. Añade a todos tus amigos.</value>
+  </data>
+  <data name="Players_EnableAllowListConfirm" xml:space="preserve">
+    <value>Activar</value>
+  </data>
+  <data name="Players_SaveFailedTitle" xml:space="preserve">
+    <value>No se pudo guardar</value>
+  </data>
 </root>

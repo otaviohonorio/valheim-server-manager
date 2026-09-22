@@ -72,8 +72,14 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
 
     protected override IEnumerable<string> RelevantFields => [nameof(ServerProfile.WorldName), nameof(ServerProfile.Preset)];
 
+    /// <summary>
+    /// Only what the user edits counts as a change. Display state filled in the background (the
+    /// maintenance check that runs when the page opens, summaries) must not mark the page unsaved.
+    /// </summary>
     protected override bool IsEditableProperty(string propertyName) =>
-        propertyName is not (nameof(PresetDescription) or nameof(OverrideHint) or nameof(BuildingsSummary) or nameof(IsHammer));
+        propertyName is nameof(WorldName) or nameof(PresetIndex) or nameof(CombatIndex) or nameof(DeathIndex)
+            or nameof(ResourceIndex) or nameof(RaidIndex) or nameof(PortalIndex) or nameof(PlayerEvents)
+            or nameof(PassiveMobs) or nameof(NoMap) or nameof(CreativeMode);
 
     protected override void Load(ServerProfile p)
     {

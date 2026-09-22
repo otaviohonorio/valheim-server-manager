@@ -55,6 +55,17 @@ public static class Program
     private static void ApplyLanguage()
     {
         var culture = AppLanguage.Apply(new ValheimServerManager.Core.Settings.JsonSettingsStore().Load().Language);
+
+        // WinUI's own labels (a ToggleSwitch's On/Off, for example) come from its MUI files, which follow
+        // the process' preferred UI languages rather than .NET's culture.
+        var mui = culture.Name switch
+        {
+            AppLanguage.PortugueseBrazil => "pt-BR",
+            AppLanguage.Spanish => "es-ES\0es-MX",
+            _ => "en-US",
+        };
+        SetProcessPreferredUILanguages(MuiLanguageName, mui + "\0\0", out _);
+
         try
         {
             Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = culture.Name;
@@ -64,6 +75,12 @@ public static class Program
             // Built-in control labels stay in the Windows language; ours are already set.
         }
     }
+
+    private const uint MuiLanguageName = 0x8;
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool SetProcessPreferredUILanguages(uint flags, string languages, out uint count);
 
     /// <summary>Only one manager may run: two would fight over the same servers.</summary>
     private static bool RedirectToExistingInstance()

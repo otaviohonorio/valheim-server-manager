@@ -10,6 +10,9 @@ The app now speaks **English, Brazilian Portuguese and Spanish**.
 - The installer asks nothing new: it opens in your Windows language too.
 - The About page links to Ko-fi (no account needed) and GitHub Sponsors.
 - The repository is now in English, with a Portuguese README next to it.
+- Fixed: opening the World page marked it as having unsaved changes, so leaving it asked
+  to save changes nobody made.
+- Player join/leave notifications no longer depend on the wording of the alert.
 
 ## Valheim Server Manager 1.0.0
 

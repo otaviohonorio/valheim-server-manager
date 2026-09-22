@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Processes;
 
 namespace ValheimServerManager.App;
@@ -32,6 +33,7 @@ public static class Program
         }
 
         WinRT.ComWrappersSupport.InitializeComWrappers();
+        ApplyLanguage();
 
         if (RedirectToExistingInstance())
         {
@@ -47,6 +49,20 @@ public static class Program
             _ = new App();
         });
         return 0;
+    }
+
+    /// <summary>Text comes from Localization\*.resx; WinUI's own controls follow the same language.</summary>
+    private static void ApplyLanguage()
+    {
+        var culture = AppLanguage.Apply(new ValheimServerManager.Core.Settings.JsonSettingsStore().Load().Language);
+        try
+        {
+            Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = culture.Name;
+        }
+        catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or InvalidOperationException)
+        {
+            // Built-in control labels stay in the Windows language; ours are already set.
+        }
     }
 
     /// <summary>Only one manager may run: two would fight over the same servers.</summary>

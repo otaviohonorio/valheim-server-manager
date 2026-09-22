@@ -1,0 +1,21 @@
+<Project>
+  <!--
+    Localization: every Localization\<Name>.resx (English, the key language) becomes a public
+    strongly-typed class ValheimServerManager.<Project>.Localization.<Name>. Translations sit next to
+    it as <Name>.pt-BR.resx and <Name>.es.resx and ship as satellite assemblies. XAML binds to the
+    properties with {x:Bind loc:<Name>.<Key>}.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\*.resx">
+      <StronglyTypedLanguage Condition="!$([System.String]::Copy('%(Filename)').Contains('.'))">CSharp</StronglyTypedLanguage>
+      <StronglyTypedClassName Condition="!$([System.String]::Copy('%(Filename)').Contains('.'))">%(Filename)</StronglyTypedClassName>
+      <StronglyTypedNamespace Condition="!$([System.String]::Copy('%(Filename)').Contains('.'))">$(RootNamespace).Localization</StronglyTypedNamespace>
+      <StronglyTypedFileName Condition="!$([System.String]::Copy('%(Filename)').Contains('.'))">$(IntermediateOutputPath)%(Filename).Designer.cs</StronglyTypedFileName>
+      <PublicClass Condition="!$([System.String]::Copy('%(Filename)').Contains('.'))">true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- WinUI compiles XAML against a temporary assembly before the normal resource step would add
+       the generated classes; generate them first so {x:Bind loc:...} resolves. -->
+  <Target Name="VsmResourcesBeforeXaml" BeforeTargets="MarkupCompilePass1" DependsOnTargets="PrepareResourceNames;ResGen" />
+</Project>

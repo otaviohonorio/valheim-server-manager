@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="About_LanguageHeader" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="About_LanguageDescription" xml:space="preserve">
+    <value>O idioma do aplicativo. A mudança vale na próxima vez que o app abrir.</value>
+  </data>
+  <data name="About_LanguageSystem" xml:space="preserve">
+    <value>Igual ao Windows ({0})</value>
+  </data>
+  <data name="About_LanguageRestart" xml:space="preserve">
+    <value>Feche o app pelo ícone da bandeja (Sair… &gt; "Sair e deixar rodando") e abra de novo para ver o novo idioma. Os servidores continuam ligados.</value>
+  </data>
+</root>

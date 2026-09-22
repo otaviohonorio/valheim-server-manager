@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
+using ValheimServerManager.Core.Localization;
 using ValheimServerManager.Core.Servers;
 
 namespace ValheimServerManager.App.ViewModels;
@@ -125,6 +128,36 @@ public sealed partial class AboutViewModel : ObservableObject
         _shell = shell;
         NotifyPlayerJoins = manager.Settings.NotifyPlayerJoins;
         MinimizeToTray = manager.Settings.MinimizeToTrayOnClose;
+
+        var system = AppLanguage.Supported.First(l => l.Code == AppLanguage.Resolve(null)).NativeName;
+        LanguageOptions = [string.Format(CultureInfo.CurrentCulture, ShellStrings.About_LanguageSystem, system), .. AppLanguage.Supported.Select(l => l.NativeName)];
+        var saved = AppLanguage.Supported.ToList().FindIndex(l => l.Code == manager.Settings.Language);
+        _loadingLanguage = true;
+        LanguageIndex = saved + 1;
+        _loadingLanguage = false;
+    }
+
+    private readonly bool _loadingLanguage;
+
+    /// <summary>"Same as Windows", then each shipped language in its own name.</summary>
+    public IReadOnlyList<string> LanguageOptions { get; }
+
+    [ObservableProperty]
+    public partial int LanguageIndex { get; set; }
+
+    [ObservableProperty]
+    public partial bool LanguageChanged { get; set; }
+
+    partial void OnLanguageIndexChanged(int value)
+    {
+        if (_loadingLanguage || value < 0)
+        {
+            return;
+        }
+
+        _manager.Settings.Language = value == 0 ? null : AppLanguage.Supported[value - 1].Code;
+        _manager.SaveSettings();
+        LanguageChanged = true;
     }
 
     public string Version =>

@@ -18,6 +18,9 @@ public sealed class AppSettings
     public bool NotifyPlayerJoins { get; set; } = true;
     public bool FirstRunCompleted { get; set; }
 
+    /// <summary>UI language code (en, pt-BR, es); null follows the Windows display language.</summary>
+    public string? Language { get; set; }
+
     /// <summary>DPAPI-protected passwords keyed by profile id (never plain text on disk).</summary>
     public Dictionary<Guid, string> ProtectedPasswords { get; set; } = [];
 }

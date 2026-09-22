@@ -3,6 +3,7 @@
     x:Class="ValheimServerManager.App.Views.AboutPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:loc="using:ValheimServerManager.App.Localization"
     xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
 
     <Page.Resources>
@@ -89,6 +90,23 @@
                 </toolkit:SettingsCard.HeaderIcon>
                 <ToggleSwitch IsOn="{x:Bind ViewModel.MinimizeToTray, Mode=TwoWay}" />
             </toolkit:SettingsCard>
+
+            <toolkit:SettingsCard Description="{x:Bind loc:ShellStrings.About_LanguageDescription}" Header="{x:Bind loc:ShellStrings.About_LanguageHeader}">
+                <toolkit:SettingsCard.HeaderIcon>
+                    <FontIcon Glyph="&#xE774;" />
+                </toolkit:SettingsCard.HeaderIcon>
+                <ComboBox
+                    MinWidth="220"
+                    AutomationProperties.Name="{x:Bind loc:ShellStrings.About_LanguageHeader}"
+                    ItemsSource="{x:Bind ViewModel.LanguageOptions}"
+                    SelectedIndex="{x:Bind ViewModel.LanguageIndex, Mode=TwoWay}" />
+            </toolkit:SettingsCard>
+            <InfoBar
+                IsClosable="False"
+                IsOpen="{x:Bind ViewModel.LanguageChanged, Mode=OneWay}"
+                Message="{x:Bind loc:ShellStrings.About_LanguageRestart}"
+                Severity="Informational"
+                Visibility="{x:Bind ViewModel.LanguageChanged, Mode=OneWay}" />
 
             <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Dados do aplicativo" />
             <toolkit:SettingsCard Description="{x:Bind ViewModel.DataDirectory}" Header="Configurações e log do gerenciador">

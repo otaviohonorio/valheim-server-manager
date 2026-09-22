@@ -12,4 +12,352 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Root_Description" xml:space="preserve">
+    <value>Valheim Server Manager — command line</value>
+  </data>
+  <data name="Option_Profile_Description" xml:space="preserve">
+    <value>Profile name (or the start of its id). Default: the profile selected in the app.</value>
+  </data>
+  <data name="Option_DataDir_Description" xml:space="preserve">
+    <value>Settings folder (default: %LOCALAPPDATA%\ValheimServerManager or VSM_DATA_DIR).</value>
+  </data>
+  <data name="Resolve_ProfileRequired" xml:space="preserve">
+    <value>Specify --profile (there is more than one profile or none is selected).</value>
+  </data>
+  <data name="Resolve_ProfileNotFound" xml:space="preserve">
+    <value>Profile "{0}" not found. Run 'vsm profiles'.</value>
+  </data>
+  <data name="Check_Blocker" xml:space="preserve">
+    <value>BLOCKED</value>
+  </data>
+  <data name="Check_Confirm" xml:space="preserve">
+    <value>CONFIRM</value>
+  </data>
+  <data name="Mode_Creative" xml:space="preserve">
+    <value>creative</value>
+  </data>
+  <data name="Mode_Normal" xml:space="preserve">
+    <value>normal</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>yes</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="Common_On" xml:space="preserve">
+    <value>on</value>
+  </data>
+  <data name="Common_Off" xml:space="preserve">
+    <value>off</value>
+  </data>
+  <data name="Common_ErrorLine" xml:space="preserve">
+    <value>[error] {0}</value>
+  </data>
+  <data name="Common_Players" xml:space="preserve">
+    <value>{0} player(s)</value>
+  </data>
+  <data name="Common_State" xml:space="preserve">
+    <value>State: {0}</value>
+  </data>
+  <data name="World_HasProblem" xml:space="preserve">
+    <value>HAS PROBLEMS</value>
+  </data>
+  <data name="Profiles_Description" xml:space="preserve">
+    <value>Lists the configured profiles.</value>
+  </data>
+  <data name="Profiles_None" xml:space="preserve">
+    <value>No profiles. Use 'vsm create' or the app.</value>
+  </data>
+  <data name="Profiles_Line" xml:space="preserve">
+    <value>{0} {1,-24} {2,-9} world={3,-16} port={4} {5}  id={6}</value>
+  </data>
+  <data name="Profiles_Unmanaged" xml:space="preserve">
+    <value>! not managed: "{0}" world={1} PID={2} savedir={3}</value>
+  </data>
+  <data name="Create_Description" xml:space="preserve">
+    <value>Creates a server with a new world (chosen seed) or by copying an existing world.</value>
+  </data>
+  <data name="Create_Name_Description" xml:space="preserve">
+    <value>Server name.</value>
+  </data>
+  <data name="Create_Password_Description" xml:space="preserve">
+    <value>Password (at least 5 characters).</value>
+  </data>
+  <data name="Create_World_Description" xml:space="preserve">
+    <value>Name of the new world (default: derived from the name).</value>
+  </data>
+  <data name="Create_Seed_Description" xml:space="preserve">
+    <value>Seed of the new world (up to 10 letters/digits; default: random).</value>
+  </data>
+  <data name="Create_CopyWorld_Description" xml:space="preserve">
+    <value>Copy this existing world instead of creating a new one.</value>
+  </data>
+  <data name="Create_Port_Description" xml:space="preserve">
+    <value>Port (default: 2456).</value>
+  </data>
+  <data name="Create_Private_Description" xml:space="preserve">
+    <value>Don't show up in the public server list.</value>
+  </data>
+  <data name="Create_NoCrossplay_Description" xml:space="preserve">
+    <value>Turns crossplay off.</value>
+  </data>
+  <data name="Create_SaveDir_Description" xml:space="preserve">
+    <value>Server save folder.</value>
+  </data>
+  <data name="Create_ServerDir_Description" xml:space="preserve">
+    <value>Valheim Dedicated Server installation (default: detected).</value>
+  </data>
+  <data name="Create_Preset_Description" xml:space="preserve">
+    <value>normal, casual, easy, hard, hardcore, immersive or hammer.</value>
+  </data>
+  <data name="Create_Creative_Description" xml:space="preserve">
+    <value>Start in creative mode.</value>
+  </data>
+  <data name="Create_UnknownPreset" xml:space="preserve">
+    <value>Unknown preset: {0}</value>
+  </data>
+  <data name="Create_WorldInUse" xml:space="preserve">
+    <value>Another profile already uses this world in this save folder.</value>
+  </data>
+  <data name="Create_WorldCopied" xml:space="preserve">
+    <value>World {0} copied (save {1}, seed {2}).</value>
+  </data>
+  <data name="Create_WorldNew" xml:space="preserve">
+    <value>New world {0} with seed {1} (generated on the first start).</value>
+  </data>
+  <data name="Create_Created" xml:space="preserve">
+    <value>Server "{0}" created (id {1}, port {2}).</value>
+  </data>
+  <data name="Status_Description" xml:space="preserve">
+    <value>Server and world status.</value>
+  </data>
+  <data name="Status_ProfileLabel" xml:space="preserve">
+    <value>Profile:</value>
+  </data>
+  <data name="Status_ServerLabel" xml:space="preserve">
+    <value>Server:</value>
+  </data>
+  <data name="Status_StateLabel" xml:space="preserve">
+    <value>State:</value>
+  </data>
+  <data name="Status_ModeLabel" xml:space="preserve">
+    <value>Mode:</value>
+  </data>
+  <data name="Status_InviteLabel" xml:space="preserve">
+    <value>Join code:</value>
+  </data>
+  <data name="Status_ConfigLabel" xml:space="preserve">
+    <value>Config:</value>
+  </data>
+  <data name="Status_WorldLabel" xml:space="preserve">
+    <value>World:</value>
+  </data>
+  <data name="Status_ServerValue" xml:space="preserve">
+    <value>{0} (port {1}, {2}{3})</value>
+  </data>
+  <data name="Status_Public" xml:space="preserve">
+    <value>public</value>
+  </data>
+  <data name="Status_Private" xml:space="preserve">
+    <value>private</value>
+  </data>
+  <data name="Status_ConfigMatches" xml:space="preserve">
+    <value>in use matches the profile ({0} options)</value>
+  </data>
+  <data name="Status_ConfigMismatch" xml:space="preserve">
+    <value>THE SERVER IS NOT USING THE SAVED SETTINGS (restart to apply):</value>
+  </data>
+  <data name="Status_ConfigDifference" xml:space="preserve">
+    <value>{0}: in use {1}; saved {2}</value>
+  </data>
+  <data name="Status_WorldHealthy" xml:space="preserve">
+    <value>healthy</value>
+  </data>
+  <data name="Status_WorldMissing" xml:space="preserve">
+    <value>doesn't exist</value>
+  </data>
+  <data name="Status_WorldSave" xml:space="preserve">
+    <value>save {0}, {1} chunks, {2:N0} objects, seed {3}</value>
+  </data>
+  <data name="Set_Description" xml:space="preserve">
+    <value>Changes profile options (the app must be closed so it doesn't overwrite them).</value>
+  </data>
+  <data name="Set_Crossplay_Description" xml:space="preserve">
+    <value>Turns crossplay on or off (true/false).</value>
+  </data>
+  <data name="Set_Public_Description" xml:space="preserve">
+    <value>Show up in the public server list (true/false).</value>
+  </data>
+  <data name="Set_Port_Description" xml:space="preserve">
+    <value>Server port.</value>
+  </data>
+  <data name="Set_Password_Description" xml:space="preserve">
+    <value>New password.</value>
+  </data>
+  <data name="Set_FixWorld_Description" xml:space="preserve">
+    <value>Fix the world when stopping (true/false).</value>
+  </data>
+  <data name="Set_ChangeCrossplay" xml:space="preserve">
+    <value>crossplay: {0}</value>
+  </data>
+  <data name="Set_ChangePublic" xml:space="preserve">
+    <value>public: {0}</value>
+  </data>
+  <data name="Set_ChangePort" xml:space="preserve">
+    <value>port: {0}</value>
+  </data>
+  <data name="Set_ChangePassword" xml:space="preserve">
+    <value>password changed</value>
+  </data>
+  <data name="Set_ChangeFixWorld" xml:space="preserve">
+    <value>fix the world when stopping: {0}</value>
+  </data>
+  <data name="Set_NothingToChange" xml:space="preserve">
+    <value>Nothing to change.</value>
+  </data>
+  <data name="Set_Updated" xml:space="preserve">
+    <value>Profile "{0}" updated: {1}.</value>
+  </data>
+  <data name="Set_RestartToApply" xml:space="preserve">
+    <value>The server is running with the old settings; restart it to apply them.</value>
+  </data>
+  <data name="Start_Description" xml:space="preserve">
+    <value>Starts the server (without a window) with all the checks.</value>
+  </data>
+  <data name="Start_Yes_Description" xml:space="preserve">
+    <value>Accept warnings and the creation of a new world.</value>
+  </data>
+  <data name="Start_Wait_Description" xml:space="preserve">
+    <value>Wait for the server to come online.</value>
+  </data>
+  <data name="Start_Started" xml:space="preserve">
+    <value>Started (PID {0}). It keeps running after this command ends.</value>
+  </data>
+  <data name="Stop_Description" xml:space="preserve">
+    <value>Shuts down safely (Ctrl+C) and waits for the save.</value>
+  </data>
+  <data name="Stop_NotRunning" xml:space="preserve">
+    <value>The server is not running.</value>
+  </data>
+  <data name="Restart_Description" xml:space="preserve">
+    <value>Stops safely, fixes the world and starts again.</value>
+  </data>
+  <data name="Restart_Yes_Description" xml:space="preserve">
+    <value>Accept warnings when starting again.</value>
+  </data>
+  <data name="Backup_Description" xml:space="preserve">
+    <value>Makes a verified backup of the world (the server may be running).</value>
+  </data>
+  <data name="Backup_Note_Description" xml:space="preserve">
+    <value>Note for the backup.</value>
+  </data>
+  <data name="Backup_Done" xml:space="preserve">
+    <value>Verified backup: {0}</value>
+  </data>
+  <data name="Backups_Description" xml:space="preserve">
+    <value>Lists the world's backups.</value>
+  </data>
+  <data name="Backups_Line" xml:space="preserve">
+    <value>{0:dd/MM/yyyy HH:mm:ss}  save {1,-5} {2,-11} {3,8:N0} KB  {4}</value>
+  </data>
+  <data name="Restore_Description" xml:space="preserve">
+    <value>Restores a backup (the server must be stopped).</value>
+  </data>
+  <data name="Restore_Backup_Description" xml:space="preserve">
+    <value>Name of the backup folder (see 'vsm backups').</value>
+  </data>
+  <data name="Restore_StopFirst" xml:space="preserve">
+    <value>Stop the server first ('vsm stop').</value>
+  </data>
+  <data name="Restore_NotFound" xml:space="preserve">
+    <value>Backup not found.</value>
+  </data>
+  <data name="Restore_Done" xml:space="preserve">
+    <value>Restored: save {0} from {1:g}.</value>
+  </data>
+  <data name="Restore_SafetyCopy" xml:space="preserve">
+    <value>Previous world kept in: {0}</value>
+  </data>
+  <data name="Argument_WorldFolder" xml:space="preserve">
+    <value>world-folder</value>
+  </data>
+  <data name="Argument_CharacterFile" xml:space="preserve">
+    <value>character-file</value>
+  </data>
+  <data name="Inspect_Description" xml:space="preserve">
+    <value>Checks the integrity of a world folder.</value>
+  </data>
+  <data name="Inspect_WorldFolder_Description" xml:space="preserve">
+    <value>World folder (the one that contains _main.N.*).</value>
+  </data>
+  <data name="Inspect_Pieces_Description" xml:space="preserve">
+    <value>Look for pieces built by players.</value>
+  </data>
+  <data name="Inspect_Duplicates_Description" xml:space="preserve">
+    <value>Look for duplicate objects and zones the game will generate again.</value>
+  </data>
+  <data name="Inspect_Cheats_Description" xml:space="preserve">
+    <value>Count objects and items with the "made with cheats" mark.</value>
+  </data>
+  <data name="Inspect_Healthy" xml:space="preserve">
+    <value>HEALTHY</value>
+  </data>
+  <data name="Inspect_NoSave" xml:space="preserve">
+    <value>no save</value>
+  </data>
+  <data name="Inspect_Incomplete" xml:space="preserve">
+    <value>INCOMPLETE</value>
+  </data>
+  <data name="Inspect_Save" xml:space="preserve">
+    <value>save {0}{1}, {2} chunks, {3:N0} objects, {4:N0} KB</value>
+  </data>
+  <data name="Inspect_Metadata" xml:space="preserve">
+    <value>internal name {0}, seed {1}, keys [{2}], {3} player(s)</value>
+  </data>
+  <data name="Inspect_CheatMarks" xml:space="preserve">
+    <value>cheat marks: {0:N0} built pieces, {1:N0} other objects, {2:N0} stored items</value>
+  </data>
+  <data name="Duplicates_Summary" xml:space="preserve">
+    <value>duplicates: {0:N0} extra copies across {1:N0} objects; {2} zones with double spawns; {3} zones the game will generate again</value>
+  </data>
+  <data name="RepairWorld_Description" xml:space="preserve">
+    <value>Removes duplicate objects and keeps the game from generating zones that already exist again (server stopped; makes a backup first).</value>
+  </data>
+  <data name="CleanCheatMarks_Description" xml:space="preserve">
+    <value>Removes the "made with cheats" mark from the world so items stack again (server stopped; makes a backup first).</value>
+  </data>
+  <data name="CleanCharacter_Description" xml:space="preserve">
+    <value>Removes the "made with cheats" mark from the items in a character's inventory.</value>
+  </data>
+  <data name="CleanCharacter_File_Description" xml:space="preserve">
+    <value>The character's .fch file (the game must be closed).</value>
+  </data>
+  <data name="CleanCharacter_Apply_Description" xml:space="preserve">
+    <value>Write the cleanup (without it, only shows what would be done).</value>
+  </data>
+  <data name="CleanCharacter_Scan" xml:space="preserve">
+    <value>{0}: {1} items in the inventory, {2} marked.</value>
+  </data>
+  <data name="CleanCharacter_BackupSuffix" xml:space="preserve">
+    <value>before-cleanup</value>
+  </data>
+  <data name="CleanCharacter_Done" xml:space="preserve">
+    <value>Mark removed from {0} items. Copy of the original file: {1}</value>
+  </data>
+  <data name="RebuildIndex_Description" xml:space="preserve">
+    <value>Recovery: rebuilds _main.N.chunks from the chunk headers.</value>
+  </data>
+  <data name="RebuildIndex_SaveNumber_Description" xml:space="preserve">
+    <value>Number of the save to write (_main.N.chunks).</value>
+  </data>
+  <data name="RebuildIndex_Chunks_Description" xml:space="preserve">
+    <value>.chunk files to include (default: all in the folder).</value>
+  </data>
+  <data name="RebuildIndex_TargetExists" xml:space="preserve">
+    <value>{0} already exists; not overwriting it.</value>
+  </data>
+  <data name="RebuildIndex_Written" xml:space="preserve">
+    <value>Wrote {0}: {1} chunks, {2:N0} objects.</value>
+  </data>
 </root>

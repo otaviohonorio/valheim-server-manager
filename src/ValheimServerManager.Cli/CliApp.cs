@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.Globalization;
 using Microsoft.Extensions.Logging.Abstractions;
+using ValheimServerManager.Cli.Localization;
 using ValheimServerManager.Core.Backups;
 using ValheimServerManager.Core.Players;
 using ValheimServerManager.Core.Processes;
@@ -13,20 +14,20 @@ namespace ValheimServerManager.Cli;
 
 internal static class CliApp
 {
-    private static readonly Option<string?> ProfileOption = new("--profile", "-p")
-    {
-        Description = "Nome do perfil (ou início do id). Padrão: o perfil selecionado no app.",
-    };
+    // Descriptions are set in RunAsync, after Program.cs has applied the UI language.
+    private static readonly Option<string?> ProfileOption = new("--profile", "-p");
 
     private static readonly Option<string?> DataDirOption = new("--data-dir")
     {
-        Description = "Pasta de configurações (padrão: %LOCALAPPDATA%\\ValheimServerManager ou VSM_DATA_DIR).",
         Recursive = true,
     };
 
     public static async Task<int> RunAsync(string[] args)
     {
-        var root = new RootCommand("Valheim Server Manager — linha de comando");
+        ProfileOption.Description = CliStrings.Option_Profile_Description;
+        DataDirOption.Description = CliStrings.Option_DataDir_Description;
+
+        var root = new RootCommand(CliStrings.Root_Description);
         root.Options.Add(DataDirOption);
         root.Subcommands.Add(ProfilesCommand());
         root.Subcommands.Add(CreateCommand());
@@ -57,6 +58,14 @@ internal static class CliApp
             TimeProvider.System,
             NullLoggerFactory.Instance);
 
+    private static string F(string format, params object?[] args) =>
+        string.Format(CultureInfo.CurrentCulture, format, args);
+
+    /// <summary>A "Label:    value" row of the status block; labels are padded to a 12-column gutter.</summary>
+    private static string Row(string label, string value) => (label + " ").PadRight(12) + value;
+
+    private const string RowIndent = "            ";
+
     private static ServerController? Resolve(ServerManager manager, string? name)
     {
         var profiles = manager.Profiles;
@@ -67,8 +76,8 @@ internal static class CliApp
         if (match is null)
         {
             Console.Error.WriteLine(name is null
-                ? "Informe --profile (há mais de um perfil ou nenhum selecionado)."
-                : $"Perfil \"{name}\" não encontrado. Use 'vsm profiles'.");
+                ? CliStrings.Resolve_ProfileRequired
+                : F(CliStrings.Resolve_ProfileNotFound, name));
             return null;
         }
 
@@ -92,22 +101,26 @@ internal static class CliApp
         Console.WriteLine(result.Message);
         foreach (var check in result.Checks.Where(c => c.Level != CheckLevel.Info))
         {
-            Console.WriteLine($"  [{(check.Level == CheckLevel.Blocker ? "BLOQUEIO" : "CONFIRMAR")}] {check.Message}");
+            Console.WriteLine($"  [{(check.Level == CheckLevel.Blocker ? CliStrings.Check_Blocker : CliStrings.Check_Confirm)}] {check.Message}");
         }
     }
+
+    private static string ModeName(bool creative) => creative ? CliStrings.Mode_Creative : CliStrings.Mode_Normal;
+
+    private static string YesNo(bool value) => value ? CliStrings.Common_Yes : CliStrings.Common_No;
 
     // ------------------------------------------------------------------ commands
 
     private static Command ProfilesCommand()
     {
-        var command = new Command("profiles", "Lista os perfis configurados.");
+        var command = new Command("profiles", CliStrings.Profiles_Description);
         command.SetAction(async (parse, ct) =>
         {
             await using var manager = CreateManager(parse.GetValue(DataDirOption));
             await manager.RefreshRunningServersAsync(ct).ConfigureAwait(false);
             if (manager.Profiles.Count == 0)
             {
-                Console.WriteLine("Nenhum perfil. Use 'vsm create' ou o app.");
+                Console.WriteLine(CliStrings.Profiles_None);
                 return 0;
             }
 
@@ -115,12 +128,13 @@ internal static class CliApp
             {
                 var p = controller.Profile;
                 var selected = p.Id == manager.Settings.SelectedProfileId ? "*" : " ";
-                Console.WriteLine($"{selected} {p.DisplayName,-24} {controller.Status.State,-9} mundo={p.WorldName,-16} porta={p.Port} {(p.IsCreativeEffective ? "criativo" : "normal")}  id={p.Id.ToString()[..8]}");
+                Console.WriteLine(F(CliStrings.Profiles_Line, selected, p.DisplayName, controller.Status.State, p.WorldName, p.Port,
+                    ModeName(p.IsCreativeEffective), p.Id.ToString()[..8]));
             }
 
             foreach (var s in manager.UnmanagedServers)
             {
-                Console.WriteLine($"! fora do gerenciador: \"{s.ServerName}\" mundo={s.WorldName} PID={s.ProcessId} savedir={s.SaveDirectory}");
+                Console.WriteLine(F(CliStrings.Profiles_Unmanaged, s.ServerName, s.WorldName, s.ProcessId, s.SaveDirectory));
             }
 
             return 0;
@@ -130,20 +144,20 @@ internal static class CliApp
 
     private static Command CreateCommand()
     {
-        var name = new Option<string>("--name") { Required = true, Description = "Nome do servidor." };
-        var password = new Option<string>("--password") { Required = true, Description = "Senha (mínimo 5 caracteres)." };
-        var world = new Option<string?>("--world") { Description = "Nome do mundo novo (padrão: derivado do nome)." };
-        var seed = new Option<string?>("--seed") { Description = "Seed do mundo novo (até 10 letras/números; padrão: aleatória)." };
-        var copy = new Option<DirectoryInfo?>("--copy-world") { Description = "Em vez de mundo novo, copia este mundo existente." };
-        var port = new Option<int?>("--port") { Description = "Porta (padrão: 2456)." };
-        var priv = new Option<bool>("--private") { Description = "Não aparecer na lista pública." };
-        var noCross = new Option<bool>("--no-crossplay") { Description = "Desliga o crossplay." };
-        var saveDir = new Option<string?>("--save-dir") { Description = "Pasta de saves do servidor." };
-        var serverDir = new Option<string?>("--server-dir") { Description = "Instalação do Valheim Dedicated Server (padrão: detectada)." };
-        var preset = new Option<string?>("--preset") { Description = "normal, casual, easy, hard, hardcore, immersive ou hammer." };
-        var creative = new Option<bool>("--creative") { Description = "Começa em modo criativo." };
+        var name = new Option<string>("--name") { Required = true, Description = CliStrings.Create_Name_Description };
+        var password = new Option<string>("--password") { Required = true, Description = CliStrings.Create_Password_Description };
+        var world = new Option<string?>("--world") { Description = CliStrings.Create_World_Description };
+        var seed = new Option<string?>("--seed") { Description = CliStrings.Create_Seed_Description };
+        var copy = new Option<DirectoryInfo?>("--copy-world") { Description = CliStrings.Create_CopyWorld_Description };
+        var port = new Option<int?>("--port") { Description = CliStrings.Create_Port_Description };
+        var priv = new Option<bool>("--private") { Description = CliStrings.Create_Private_Description };
+        var noCross = new Option<bool>("--no-crossplay") { Description = CliStrings.Create_NoCrossplay_Description };
+        var saveDir = new Option<string?>("--save-dir") { Description = CliStrings.Create_SaveDir_Description };
+        var serverDir = new Option<string?>("--server-dir") { Description = CliStrings.Create_ServerDir_Description };
+        var preset = new Option<string?>("--preset") { Description = CliStrings.Create_Preset_Description };
+        var creative = new Option<bool>("--creative") { Description = CliStrings.Create_Creative_Description };
 
-        var command = new Command("create", "Cria um servidor com mundo novo (seed escolhida) ou copiando um mundo existente.");
+        var command = new Command("create", CliStrings.Create_Description);
         foreach (var option in new Option[] { name, password, world, seed, copy, port, priv, noCross, saveDir, serverDir, preset, creative })
         {
             command.Options.Add(option);
@@ -171,7 +185,7 @@ internal static class CliApp
             {
                 if (!ModifierCatalog.TryParse(ModifierCatalog.Presets, presetName, out WorldPreset p))
                 {
-                    Console.Error.WriteLine($"Preset desconhecido: {presetName}");
+                    Console.Error.WriteLine(F(CliStrings.Create_UnknownPreset, presetName));
                     return 2;
                 }
 
@@ -193,7 +207,7 @@ internal static class CliApp
 
             if (errors.Count > 0)
             {
-                errors.ForEach(e => Console.Error.WriteLine($"  [erro] {e}"));
+                errors.ForEach(e => Console.Error.WriteLine("  " + F(CliStrings.Common_ErrorLine, e)));
                 return 1;
             }
 
@@ -201,7 +215,7 @@ internal static class CliApp
             if (manager.Profiles.Any(o => o.WorldName.Equals(profile.WorldName, StringComparison.OrdinalIgnoreCase) &&
                                           Core.Platform.ValheimPaths.SameDirectory(o.SaveDirectory, profile.SaveDirectory)))
             {
-                Console.Error.WriteLine("Outro perfil já usa esse mundo nessa pasta de saves.");
+                Console.Error.WriteLine(CliStrings.Create_WorldInUse);
                 return 1;
             }
 
@@ -209,16 +223,16 @@ internal static class CliApp
             if (source is not null)
             {
                 var copied = WorldCreator.CopyExisting(source.FullName, profile.SaveDirectory);
-                Console.WriteLine($"Mundo {copied.WorldName} copiado (save {copied.LatestSave!.Number}, seed {copied.Metadata!.SeedName}).");
+                Console.WriteLine(F(CliStrings.Create_WorldCopied, copied.WorldName, copied.LatestSave!.Number, copied.Metadata!.SeedName));
             }
             else
             {
                 WorldCreator.CreateSeeded(profile.SaveDirectory, profile.WorldName, seedName);
-                Console.WriteLine($"Mundo novo {profile.WorldName} com a seed {seedName} (gerado no primeiro início).");
+                Console.WriteLine(F(CliStrings.Create_WorldNew, profile.WorldName, seedName));
             }
 
             manager.AddProfile(profile);
-            Console.WriteLine($"Servidor \"{profile.DisplayName}\" criado (id {profile.Id.ToString()[..8]}, porta {profile.Port}).");
+            Console.WriteLine(F(CliStrings.Create_Created, profile.DisplayName, profile.Id.ToString()[..8], profile.Port));
             await Task.CompletedTask.ConfigureAwait(false);
             return 0;
         });
@@ -227,7 +241,7 @@ internal static class CliApp
 
     private static Command StatusCommand()
     {
-        var command = new Command("status", "Estado do servidor e do mundo.");
+        var command = new Command("status", CliStrings.Status_Description);
         command.Options.Add(ProfileOption);
         command.SetAction(async (parse, ct) =>
         {
@@ -240,17 +254,19 @@ internal static class CliApp
 
             var p = controller.Profile;
             var s = controller.Status;
-            Console.WriteLine($"Perfil:     {p.DisplayName}");
-            Console.WriteLine($"Servidor:   {p.ServerName} (porta {p.Port}, {(p.Public ? "público" : "privado")}{(p.Crossplay ? ", crossplay" : string.Empty)})");
-            Console.WriteLine($"Estado:     {s.State}{(s.ProcessId is { } pid ? $" (PID {pid})" : string.Empty)}{(s.IsActive ? $", {s.PlayerCount} jogador(es)" : string.Empty)}");
-            Console.WriteLine($"Modo:       {((s.IsActive ? s.CreativeActive : p.IsCreativeEffective) ? "criativo" : "normal")}");
+            Console.WriteLine(Row(CliStrings.Status_ProfileLabel, p.DisplayName));
+            Console.WriteLine(Row(CliStrings.Status_ServerLabel, F(CliStrings.Status_ServerValue, p.ServerName, p.Port,
+                p.Public ? CliStrings.Status_Public : CliStrings.Status_Private, p.Crossplay ? ", crossplay" : string.Empty)));
+            Console.WriteLine(Row(CliStrings.Status_StateLabel,
+                $"{s.State}{(s.ProcessId is { } pid ? $" (PID {pid})" : string.Empty)}{(s.IsActive ? ", " + F(CliStrings.Common_Players, s.PlayerCount) : string.Empty)}"));
+            Console.WriteLine(Row(CliStrings.Status_ModeLabel, ModeName(s.IsActive ? s.CreativeActive : p.IsCreativeEffective)));
             foreach (var line in ProfileSummary.Describe(p))
             {
                 Console.WriteLine($"{line.Label + ":",-18}{line.Value}");
             }
             if (s.JoinCode is not null)
             {
-                Console.WriteLine($"Convite:    {s.JoinCode}");
+                Console.WriteLine(Row(CliStrings.Status_InviteLabel, s.JoinCode));
             }
 
             if (s.IsActive)
@@ -259,23 +275,26 @@ internal static class CliApp
                 var diffs = controller.Status.ConfigDifferences;
                 if (diffs is { Count: 0 })
                 {
-                    Console.WriteLine($"Config:     em uso confere com o perfil ({controller.Status.ConfigCheckedCount} opções)");
+                    Console.WriteLine(Row(CliStrings.Status_ConfigLabel, F(CliStrings.Status_ConfigMatches, controller.Status.ConfigCheckedCount)));
                 }
                 else if (diffs is not null)
                 {
-                    Console.WriteLine("Config:     O SERVIDOR NÃO USA A CONFIGURAÇÃO SALVA (reinicie para aplicar):");
+                    Console.WriteLine(Row(CliStrings.Status_ConfigLabel, CliStrings.Status_ConfigMismatch));
                     foreach (var d in diffs)
                     {
-                        Console.WriteLine($"            {d.Setting}: em uso {d.Actual}; salvo {d.Expected}");
+                        Console.WriteLine(RowIndent + F(CliStrings.Status_ConfigDifference, d.Setting, d.Actual, d.Expected));
                     }
                 }
             }
 
             var report = WorldInspector.Inspect(p.SaveDirectory, p.WorldName);
-            Console.WriteLine($"Mundo:      {p.WorldName} — {(report.IsHealthy ? "íntegro" : report.IsNewWorld ? "não existe" : "COM PROBLEMA")}");
+            var health = report.IsHealthy ? CliStrings.Status_WorldHealthy
+                : report.IsNewWorld ? CliStrings.Status_WorldMissing
+                : CliStrings.World_HasProblem;
+            Console.WriteLine(Row(CliStrings.Status_WorldLabel, $"{p.WorldName} — {health}"));
             if (report.LatestSave is { } save)
             {
-                Console.WriteLine($"            save {save.Number}, {report.ChunkCount} chunks, {report.TotalZdos:N0} objetos, seed {report.Metadata?.SeedName}");
+                Console.WriteLine(RowIndent + F(CliStrings.Status_WorldSave, save.Number, report.ChunkCount, report.TotalZdos, report.Metadata?.SeedName));
             }
 
             foreach (var issue in report.Issues.Where(i => i.Severity != IssueSeverity.Info))
@@ -290,12 +309,12 @@ internal static class CliApp
 
     private static Command SetCommand()
     {
-        var crossplay = new Option<bool?>("--crossplay") { Description = "Liga ou desliga o crossplay (true/false)." };
-        var isPublic = new Option<bool?>("--public") { Description = "Aparecer na lista pública (true/false)." };
-        var port = new Option<int?>("--port") { Description = "Porta do servidor." };
-        var password = new Option<string?>("--password") { Description = "Nova senha." };
-        var fixWorld = new Option<bool?>("--fix-world-after-stop") { Description = "Corrigir o mundo ao parar (true/false)." };
-        var command = new Command("set", "Altera opções do perfil (o app precisa estar fechado para não sobrescrever).");
+        var crossplay = new Option<bool?>("--crossplay") { Description = CliStrings.Set_Crossplay_Description };
+        var isPublic = new Option<bool?>("--public") { Description = CliStrings.Set_Public_Description };
+        var port = new Option<int?>("--port") { Description = CliStrings.Set_Port_Description };
+        var password = new Option<string?>("--password") { Description = CliStrings.Set_Password_Description };
+        var fixWorld = new Option<bool?>("--fix-world-after-stop") { Description = CliStrings.Set_FixWorld_Description };
+        var command = new Command("set", CliStrings.Set_Description);
         command.Options.Add(ProfileOption);
         foreach (var option in new Option[] { crossplay, isPublic, port, password, fixWorld })
         {
@@ -316,51 +335,51 @@ internal static class CliApp
             if (parse.GetValue(crossplay) is { } cross && cross != profile.Crossplay)
             {
                 profile.Crossplay = cross;
-                changes.Add($"crossplay: {(cross ? "ligado" : "desligado")}");
+                changes.Add(F(CliStrings.Set_ChangeCrossplay, cross ? CliStrings.Common_On : CliStrings.Common_Off));
             }
 
             if (parse.GetValue(isPublic) is { } pub && pub != profile.Public)
             {
                 profile.Public = pub;
-                changes.Add($"público: {(pub ? "sim" : "não")}");
+                changes.Add(F(CliStrings.Set_ChangePublic, YesNo(pub)));
             }
 
             if (parse.GetValue(port) is { } p && p != profile.Port)
             {
                 profile.Port = p;
-                changes.Add($"porta: {p}");
+                changes.Add(F(CliStrings.Set_ChangePort, p));
             }
 
             if (parse.GetValue(password) is { } pw && pw != profile.Password)
             {
                 profile.Password = pw;
-                changes.Add("senha alterada");
+                changes.Add(CliStrings.Set_ChangePassword);
             }
 
             if (parse.GetValue(fixWorld) is { } fix && fix != profile.FixWorldAfterStop)
             {
                 profile.FixWorldAfterStop = fix;
-                changes.Add($"corrigir o mundo ao parar: {(fix ? "sim" : "não")}");
+                changes.Add(F(CliStrings.Set_ChangeFixWorld, YesNo(fix)));
             }
 
             if (changes.Count == 0)
             {
-                Console.WriteLine("Nada a alterar.");
+                Console.WriteLine(CliStrings.Set_NothingToChange);
                 return 0;
             }
 
             var errors = ProfileValidator.Validate(profile).Where(i => i.Severity == ValidationSeverity.Error).ToList();
             if (errors.Count > 0)
             {
-                errors.ForEach(e => Console.Error.WriteLine($"  [erro] {e.Message}"));
+                errors.ForEach(e => Console.Error.WriteLine("  " + F(CliStrings.Common_ErrorLine, e.Message)));
                 return 1;
             }
 
             manager.SaveProfile(profile);
-            Console.WriteLine($"Perfil \"{profile.DisplayName}\" atualizado: {string.Join(", ", changes)}.");
+            Console.WriteLine(F(CliStrings.Set_Updated, profile.DisplayName, string.Join(", ", changes)));
             if (controller.Status.IsActive)
             {
-                Console.WriteLine("O servidor está rodando com a configuração antiga; reinicie para aplicar.");
+                Console.WriteLine(CliStrings.Set_RestartToApply);
             }
 
             return 0;
@@ -370,9 +389,9 @@ internal static class CliApp
 
     private static Command StartCommand()
     {
-        var yes = new Option<bool>("--yes", "-y") { Description = "Aceita avisos e criação de mundo novo." };
-        var wait = new Option<bool>("--wait") { Description = "Aguarda o servidor ficar online." };
-        var command = new Command("start", "Inicia o servidor (sem janela) com todas as verificações.");
+        var yes = new Option<bool>("--yes", "-y") { Description = CliStrings.Start_Yes_Description };
+        var wait = new Option<bool>("--wait") { Description = CliStrings.Start_Wait_Description };
+        var command = new Command("start", CliStrings.Start_Description);
         command.Options.Add(ProfileOption);
         command.Options.Add(yes);
         command.Options.Add(wait);
@@ -396,7 +415,7 @@ internal static class CliApp
 
             if (!parse.GetValue(wait))
             {
-                Console.WriteLine($"Iniciado (PID {controller.Status.ProcessId}). Ele continua rodando depois que este comando termina.");
+                Console.WriteLine(F(CliStrings.Start_Started, controller.Status.ProcessId));
                 return 0;
             }
 
@@ -405,7 +424,7 @@ internal static class CliApp
                 await Task.Delay(500, ct).ConfigureAwait(false);
             }
 
-            Console.WriteLine($"Estado: {controller.Status.State}");
+            Console.WriteLine(F(CliStrings.Common_State, controller.Status.State));
             return controller.Status.State == ServerRunState.Running ? 0 : 1;
         });
         return command;
@@ -413,7 +432,7 @@ internal static class CliApp
 
     private static Command StopCommand()
     {
-        var command = new Command("stop", "Desliga com segurança (Ctrl+C) e espera o save.");
+        var command = new Command("stop", CliStrings.Stop_Description);
         command.Options.Add(ProfileOption);
         command.SetAction(async (parse, ct) =>
         {
@@ -426,7 +445,7 @@ internal static class CliApp
 
             if (!controller.Status.IsActive)
             {
-                Console.WriteLine("O servidor não está rodando.");
+                Console.WriteLine(CliStrings.Stop_NotRunning);
                 return 0;
             }
 
@@ -440,8 +459,8 @@ internal static class CliApp
 
     private static Command RestartCommand()
     {
-        var yes = new Option<bool>("--yes", "-y") { Description = "Aceita avisos ao iniciar de novo." };
-        var command = new Command("restart", "Para com segurança, corrige o mundo e inicia de novo.");
+        var yes = new Option<bool>("--yes", "-y") { Description = CliStrings.Restart_Yes_Description };
+        var command = new Command("restart", CliStrings.Restart_Description);
         command.Options.Add(ProfileOption);
         command.Options.Add(yes);
         command.SetAction(async (parse, ct) =>
@@ -467,7 +486,7 @@ internal static class CliApp
                 await Task.Delay(500, ct).ConfigureAwait(false);
             }
 
-            Console.WriteLine($"Estado: {controller.Status.State}");
+            Console.WriteLine(F(CliStrings.Common_State, controller.Status.State));
             return controller.Status.State == ServerRunState.Running ? 0 : 1;
         });
         return command;
@@ -475,8 +494,8 @@ internal static class CliApp
 
     private static Command BackupCommand()
     {
-        var note = new Option<string?>("--note") { Description = "Anotação do backup." };
-        var command = new Command("backup", "Faz um backup verificado do mundo (pode ser com o servidor rodando).");
+        var note = new Option<string?>("--note") { Description = CliStrings.Backup_Note_Description };
+        var command = new Command("backup", CliStrings.Backup_Description);
         command.Options.Add(ProfileOption);
         command.Options.Add(note);
         command.SetAction(async (parse, ct) =>
@@ -488,7 +507,7 @@ internal static class CliApp
             }
 
             var entry = await manager.Backups.CreateAsync(controller.Profile, BackupKind.Manual, parse.GetValue(note), ct).ConfigureAwait(false);
-            Console.WriteLine($"Backup verificado: {entry.Directory}");
+            Console.WriteLine(F(CliStrings.Backup_Done, entry.Directory));
             return 0;
         });
         return command;
@@ -496,7 +515,7 @@ internal static class CliApp
 
     private static Command BackupsCommand()
     {
-        var command = new Command("backups", "Lista os backups do mundo.");
+        var command = new Command("backups", CliStrings.Backups_Description);
         command.Options.Add(ProfileOption);
         command.SetAction(async (parse, _) =>
         {
@@ -508,7 +527,8 @@ internal static class CliApp
 
             foreach (var b in manager.Backups.List(controller.Profile))
             {
-                Console.WriteLine($"{b.CreatedAt.LocalDateTime:dd/MM/yyyy HH:mm:ss}  save {b.SaveNumber?.ToString(CultureInfo.InvariantCulture) ?? "-",-5} {b.Kind,-11} {b.TotalBytes / 1024,8:N0} KB  {b.Name}");
+                Console.WriteLine(F(CliStrings.Backups_Line, b.CreatedAt.LocalDateTime,
+                    b.SaveNumber?.ToString(CultureInfo.InvariantCulture) ?? "-", b.Kind, b.TotalBytes / 1024, b.Name));
             }
 
             return 0;
@@ -518,8 +538,8 @@ internal static class CliApp
 
     private static Command RestoreCommand()
     {
-        var name = new Option<string>("--backup") { Description = "Nome da pasta do backup (veja 'vsm backups').", Required = true };
-        var command = new Command("restore", "Restaura um backup (o servidor precisa estar parado).");
+        var name = new Option<string>("--backup") { Description = CliStrings.Restore_Backup_Description, Required = true };
+        var command = new Command("restore", CliStrings.Restore_Description);
         command.Options.Add(ProfileOption);
         command.Options.Add(name);
         command.SetAction(async (parse, ct) =>
@@ -533,7 +553,7 @@ internal static class CliApp
 
             if (controller.Status.IsActive)
             {
-                Console.Error.WriteLine("Pare o servidor antes ('vsm stop').");
+                Console.Error.WriteLine(CliStrings.Restore_StopFirst);
                 return 1;
             }
 
@@ -541,15 +561,15 @@ internal static class CliApp
                 .FirstOrDefault(b => b.Name.Equals(parse.GetValue(name), StringComparison.OrdinalIgnoreCase));
             if (entry is null)
             {
-                Console.Error.WriteLine("Backup não encontrado.");
+                Console.Error.WriteLine(CliStrings.Restore_NotFound);
                 return 2;
             }
 
             var result = await manager.Backups.RestoreAsync(controller.Profile, entry, ct).ConfigureAwait(false);
-            Console.WriteLine($"Restaurado: save {entry.SaveNumber} de {entry.CreatedAt.LocalDateTime:g}.");
+            Console.WriteLine(F(CliStrings.Restore_Done, entry.SaveNumber, entry.CreatedAt.LocalDateTime));
             if (result.SafetyCopy is not null)
             {
-                Console.WriteLine($"Mundo anterior guardado em: {result.SafetyCopy.Directory}");
+                Console.WriteLine(F(CliStrings.Restore_SafetyCopy, result.SafetyCopy.Directory));
             }
 
             return 0;
@@ -559,11 +579,11 @@ internal static class CliApp
 
     private static Command InspectCommand()
     {
-        var dir = new Argument<DirectoryInfo>("pasta-do-mundo") { Description = "Pasta do mundo (a que contém _main.N.*)." };
-        var pieces = new Option<bool>("--pieces") { Description = "Procura peças construídas por jogadores." };
-        var duplicates = new Option<bool>("--duplicates") { Description = "Procura objetos duplicados e zonas que o jogo vai gerar de novo." };
-        var cheats = new Option<bool>("--cheats") { Description = "Conta objetos e itens com a marca de \"feito com trapaça\"." };
-        var command = new Command("inspect", "Confere a integridade de uma pasta de mundo.");
+        var dir = new Argument<DirectoryInfo>(CliStrings.Argument_WorldFolder) { Description = CliStrings.Inspect_WorldFolder_Description };
+        var pieces = new Option<bool>("--pieces") { Description = CliStrings.Inspect_Pieces_Description };
+        var duplicates = new Option<bool>("--duplicates") { Description = CliStrings.Inspect_Duplicates_Description };
+        var cheats = new Option<bool>("--cheats") { Description = CliStrings.Inspect_Cheats_Description };
+        var command = new Command("inspect", CliStrings.Inspect_Description);
         command.Arguments.Add(dir);
         command.Options.Add(pieces);
         command.Options.Add(duplicates);
@@ -571,15 +591,19 @@ internal static class CliApp
         command.SetAction(parse =>
         {
             var report = WorldInspector.InspectDirectory(parse.GetValue(dir)!.FullName);
-            Console.WriteLine($"{report.WorldName}: {(report.IsHealthy ? "ÍNTEGRO" : report.IsNewWorld ? "sem save" : "COM PROBLEMA")}");
+            var health = report.IsHealthy ? CliStrings.Inspect_Healthy
+                : report.IsNewWorld ? CliStrings.Inspect_NoSave
+                : CliStrings.World_HasProblem;
+            Console.WriteLine($"{report.WorldName}: {health}");
             if (report.LatestSave is { } save)
             {
-                Console.WriteLine($"  save {save.Number}{(save.IsComplete ? string.Empty : " (INCOMPLETO)")}, {report.ChunkCount} chunks, {report.TotalZdos:N0} objetos, {report.SaveSetBytes / 1024:N0} KB");
+                var incomplete = save.IsComplete ? string.Empty : $" ({CliStrings.Inspect_Incomplete})";
+                Console.WriteLine("  " + F(CliStrings.Inspect_Save, save.Number, incomplete, report.ChunkCount, report.TotalZdos, report.SaveSetBytes / 1024));
             }
 
             if (report.Metadata is { } m)
             {
-                Console.WriteLine($"  nome interno {m.Name}, seed {m.SeedName}, chaves [{string.Join(", ", m.KeyNames)}], {m.Players.Count} jogador(es)");
+                Console.WriteLine("  " + F(CliStrings.Inspect_Metadata, m.Name, m.SeedName, string.Join(", ", m.KeyNames), m.Players.Count));
             }
 
             foreach (var issue in report.Issues)
@@ -603,8 +627,7 @@ internal static class CliApp
             if (parse.GetValue(cheats) && report.IsHealthy)
             {
                 var marks = WorldCheatMarks.ScanDirectory(report.Directory, report.WorldName);
-                Console.WriteLine($"  marcas de trapaça: {marks.MarkedPieces:N0} peças construídas, {marks.MarkedOthers:N0} outros objetos, " +
-                                  $"{marks.MarkedItems:N0} itens guardados");
+                Console.WriteLine("  " + F(CliStrings.Inspect_CheatMarks, marks.MarkedPieces, marks.MarkedOthers, marks.MarkedItems));
             }
 
             return report.HasErrors ? 1 : 0;
@@ -614,8 +637,7 @@ internal static class CliApp
 
     private static void PrintDuplicates(WorldDuplicateReport scan)
     {
-        Console.WriteLine($"  duplicados: {scan.ExtraCopies:N0} cópias extras em {scan.Objects:N0} objetos; " +
-                          $"{scan.ZonesWithDoubleSpawn} zonas com spawn em dobro; {scan.ZonesToMark} zonas que o jogo vai gerar de novo");
+        Console.WriteLine("  " + F(CliStrings.Duplicates_Summary, scan.ExtraCopies, scan.Objects, scan.ZonesWithDoubleSpawn, scan.ZonesToMark));
         foreach (var (category, count) in scan.ByCategory)
         {
             Console.WriteLine($"    {count,8:N0}  {category}");
@@ -624,8 +646,7 @@ internal static class CliApp
 
     private static Command RepairWorldCommand()
     {
-        var command = new Command("repair-world",
-            "Remove objetos duplicados e impede que o jogo gere de novo zonas que já existem (servidor parado; faz backup antes).");
+        var command = new Command("repair-world", CliStrings.RepairWorld_Description);
         command.Options.Add(ProfileOption);
         command.SetAction(async (parse, ct) =>
         {
@@ -652,8 +673,7 @@ internal static class CliApp
 
     private static Command CleanCheatMarksCommand()
     {
-        var command = new Command("clean-cheat-marks",
-            "Remove a marca de \"feito com trapaça\" do mundo, para os itens voltarem a empilhar (servidor parado; faz backup antes).");
+        var command = new Command("clean-cheat-marks", CliStrings.CleanCheatMarks_Description);
         command.Options.Add(ProfileOption);
         command.SetAction(async (parse, ct) =>
         {
@@ -678,25 +698,25 @@ internal static class CliApp
 
     private static Command CleanCharacterCommand()
     {
-        var file = new Argument<FileInfo>("arquivo-do-personagem") { Description = "Arquivo .fch do personagem (o jogo precisa estar fechado)." };
-        var apply = new Option<bool>("--apply") { Description = "Grava a limpeza (sem isso, só mostra o que seria feito)." };
-        var command = new Command("clean-character", "Tira a marca de \"feito com trapaça\" dos itens na mochila de um personagem.");
+        var file = new Argument<FileInfo>(CliStrings.Argument_CharacterFile) { Description = CliStrings.CleanCharacter_File_Description };
+        var apply = new Option<bool>("--apply") { Description = CliStrings.CleanCharacter_Apply_Description };
+        var command = new Command("clean-character", CliStrings.CleanCharacter_Description);
         command.Arguments.Add(file);
         command.Options.Add(apply);
         command.SetAction(parse =>
         {
             var path = parse.GetValue(file)!.FullName;
             var scan = CharacterFile.Scan(path);
-            Console.WriteLine($"{scan.Name}: {scan.Items} itens na mochila, {scan.MarkedItems} marcados.");
+            Console.WriteLine(F(CliStrings.CleanCharacter_Scan, scan.Name, scan.Items, scan.MarkedItems));
             if (!parse.GetValue(apply) || !scan.NeedsCleaning)
             {
                 return 0;
             }
 
-            var backup = path + $".antes-da-limpeza-{DateTime.Now:yyyyMMdd-HHmmss}";
+            var backup = $"{path}.{CliStrings.CleanCharacter_BackupSuffix}-{DateTime.Now:yyyyMMdd-HHmmss}";
             File.Copy(path, backup);
             var result = CharacterFile.Clean(path);
-            Console.WriteLine($"Marca removida de {result.MarkedItems} itens. Cópia do arquivo original: {Path.GetFileName(backup)}");
+            Console.WriteLine(F(CliStrings.CleanCharacter_Done, result.MarkedItems, Path.GetFileName(backup)));
             return 0;
         });
         return command;
@@ -704,10 +724,10 @@ internal static class CliApp
 
     private static Command RebuildIndexCommand()
     {
-        var dir = new Argument<DirectoryInfo>("pasta-do-mundo");
-        var number = new Option<int>("--save-number") { Description = "Número do save a gravar (_main.N.chunks).", Required = true };
-        var chunks = new Option<string[]>("--chunks") { Description = "Arquivos .chunk a incluir (padrão: todos da pasta).", AllowMultipleArgumentsPerToken = true };
-        var command = new Command("rebuild-index", "Recuperação: reconstrói _main.N.chunks a partir dos cabeçalhos dos chunks.");
+        var dir = new Argument<DirectoryInfo>(CliStrings.Argument_WorldFolder);
+        var number = new Option<int>("--save-number") { Description = CliStrings.RebuildIndex_SaveNumber_Description, Required = true };
+        var chunks = new Option<string[]>("--chunks") { Description = CliStrings.RebuildIndex_Chunks_Description, AllowMultipleArgumentsPerToken = true };
+        var command = new Command("rebuild-index", CliStrings.RebuildIndex_Description);
         command.Arguments.Add(dir);
         command.Options.Add(number);
         command.Options.Add(chunks);
@@ -721,12 +741,12 @@ internal static class CliApp
             var target = Path.Combine(folder, $"_main.{parse.GetValue(number)}.chunks");
             if (File.Exists(target))
             {
-                Console.Error.WriteLine($"{target} já existe; não vou sobrescrever.");
+                Console.Error.WriteLine(F(CliStrings.RebuildIndex_TargetExists, target));
                 return 1;
             }
 
             File.WriteAllBytes(target, index.ToBytes());
-            Console.WriteLine($"Gravado {target}: {index.Entries.Count} chunks, {index.TotalZdos:N0} objetos.");
+            Console.WriteLine(F(CliStrings.RebuildIndex_Written, target, index.Entries.Count, index.TotalZdos));
             return 0;
         });
         return command;

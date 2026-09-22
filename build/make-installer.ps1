@@ -56,6 +56,7 @@ if ($LASTEXITCODE -ne 0) { throw "O Inno Setup falhou (código $LASTEXITCODE)." 
 $outDir = if ($TestAppId) { 'artifacts\installer-test' } else { 'artifacts\installer' }
 $setup = Join-Path $repo "$outDir\ValheimServerManager-Setup-$Version.exe"
 $hash = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant()
-"$hash  $(Split-Path -Leaf $setup)" | Set-Content -Encoding ascii "$setup.sha256"
+# LF only: sha256sum -c rejects a CRLF line.
+[IO.File]::WriteAllText("$setup.sha256", "$hash  $(Split-Path -Leaf $setup)`n")
 Write-Host ("Pronto: {0} ({1:N0} MB)" -f $setup, ((Get-Item $setup).Length / 1MB)) -ForegroundColor Green
 Write-Host "SHA-256: $hash"

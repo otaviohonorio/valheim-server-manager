@@ -83,7 +83,7 @@ public sealed class AlertCenter
             }
         });
 
-        var isPlayerNews = alert.Level == AlertLevel.Info && IsPlayerTitle(alert.Title);
+        var isPlayerNews = alert.IsPlayerNews;
         if (alert.Level is AlertLevel.Warning or AlertLevel.Error or AlertLevel.Critical || (isPlayerNews && notifyPlayers))
         {
             _notifications.Show(item.FullTitle, alert.Message, alert.Level switch
@@ -101,15 +101,6 @@ public sealed class AlertCenter
     }
 
     public void Dismiss(AlertItem item) => _ui.Run(() => Items.Remove(item));
-
-    /// <summary>
-    /// Player joined/left alerts carry no type of their own, so they are recognised by the title in any
-    /// shipped language (player / jogador / jugador).
-    /// </summary>
-    private static bool IsPlayerTitle(string title) =>
-        title.Contains("Player", StringComparison.OrdinalIgnoreCase) ||
-        title.Contains("Jogador", StringComparison.OrdinalIgnoreCase) ||
-        title.Contains("Jugador", StringComparison.OrdinalIgnoreCase);
 
     private async Task DismissLaterAsync(AlertItem item)
     {

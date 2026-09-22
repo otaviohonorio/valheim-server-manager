@@ -765,7 +765,7 @@ public sealed class ServerController : IAsyncDisposable
         if (isNew && !_replaying)
         {
             AddActivity(ActivityKind.Player, Format(Strings.Controller_PlayerJoinedWorld, name));
-            Raise(AlertLevel.Info, Strings.Controller_PlayerJoinedTitle, Format(Strings.Controller_PlayerJoinedServer, name, Profile.ServerName));
+            Raise(AlertLevel.Info, Strings.Controller_PlayerJoinedTitle, Format(Strings.Controller_PlayerJoinedServer, name, Profile.ServerName), playerNews: true);
         }
     }
 
@@ -792,7 +792,7 @@ public sealed class ServerController : IAsyncDisposable
             foreach (var player in gone)
             {
                 AddActivity(ActivityKind.Player, Format(Strings.Controller_PlayerLeft, player.Name));
-                Raise(AlertLevel.Info, Strings.Controller_PlayerLeftTitle, Format(Strings.Controller_PlayerLeftServer, player.Name, Profile.ServerName));
+                Raise(AlertLevel.Info, Strings.Controller_PlayerLeftTitle, Format(Strings.Controller_PlayerLeftServer, player.Name, Profile.ServerName), playerNews: true);
             }
         }
     }
@@ -1378,8 +1378,8 @@ public sealed class ServerController : IAsyncDisposable
         ActivityAdded?.Invoke(this, item);
     }
 
-    private void Raise(AlertLevel level, string title, string message) =>
-        AlertRaised?.Invoke(this, new ServerAlert(level, title, message, _time.GetLocalNow()));
+    private void Raise(AlertLevel level, string title, string message, bool playerNews = false) =>
+        AlertRaised?.Invoke(this, new ServerAlert(level, title, message, _time.GetLocalNow()) { IsPlayerNews = playerNews });
 
     private static string Format(string format, params object?[] args) =>
         string.Format(CultureInfo.CurrentCulture, format, args);

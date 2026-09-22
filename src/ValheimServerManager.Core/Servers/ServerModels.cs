@@ -57,7 +57,11 @@ public enum AlertLevel
     Critical,
 }
 
-public sealed record ServerAlert(AlertLevel Level, string Title, string Message, DateTimeOffset At);
+public sealed record ServerAlert(AlertLevel Level, string Title, string Message, DateTimeOffset At)
+{
+    /// <summary>A player joined or left: shown as a notification only when the user asked for those.</summary>
+    public bool IsPlayerNews { get; init; }
+}
 
 public enum ActivityKind
 {

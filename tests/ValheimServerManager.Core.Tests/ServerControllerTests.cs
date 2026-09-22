@@ -93,6 +93,8 @@ public sealed class ServerControllerTests : IDisposable
     public async Task Tracks_who_is_online_through_joins_deaths_and_leaves()
     {
         TestWorlds.WriteSave(WorldDir, "MeuMundo", 7, TestWorlds.DefaultChunks);
+        var alerts = new System.Collections.Concurrent.ConcurrentQueue<ServerAlert>();
+        _controller.AlertRaised += (_, a) => alerts.Enqueue(a);
         Assert.True((await _controller.StartAsync(StartOptions.Default, TestContext.Current.CancellationToken)).Success);
 
         WriteLog(
@@ -122,6 +124,10 @@ public sealed class ServerControllerTests : IDisposable
         await WaitUntil(() => _controller.Status.OnlinePlayers.Count == 1);
         Assert.Equal("Astrid", _controller.Status.OnlinePlayers[0].Name);
         Assert.Single(_controller.RecentActivity, a => a.Message == "Bjorn left.");
+
+        // Player news is flagged, not recognised by its (translated) title.
+        await WaitUntil(() => alerts.Count(a => a.IsPlayerNews) == 3);
+        Assert.All(alerts.Where(a => a.IsPlayerNews), a => Assert.Equal(AlertLevel.Info, a.Level));
 
         WriteLog(
             "09/16/2026 21:55:00: Closing socket 76561190000000002",

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using ValheimServerManager.App.Localization;
 
 namespace ValheimServerManager.App.Services;
 
@@ -176,9 +177,9 @@ public sealed partial class TrayIcon : IDisposable
         var menu = CreatePopupMenu();
         try
         {
-            AppendMenuW(menu, 0, (UIntPtr)MenuOpen, "Abrir o gerenciador");
+            AppendMenuW(menu, 0, (UIntPtr)MenuOpen, ShellStrings.Tray_Open);
             AppendMenuW(menu, 0x800 /* MF_SEPARATOR */, UIntPtr.Zero, null);
-            AppendMenuW(menu, 0, (UIntPtr)MenuExit, "Sair…");
+            AppendMenuW(menu, 0, (UIntPtr)MenuExit, ShellStrings.Tray_Exit);
             SetForegroundWindow(_hwnd);
             var chosen = TrackPopupMenuEx(menu, 0x0100 /* TPM_RETURNCMD */ | 0x0080 /* TPM_NONOTIFY */ | 0x0002 /* TPM_RIGHTBUTTON */, x, y, _hwnd, IntPtr.Zero);
             if (chosen == MenuOpen)

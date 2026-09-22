@@ -1,7 +1,9 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.App.ViewModels;
 using ValheimServerManager.App.Views;
@@ -117,7 +119,7 @@ public sealed partial class MainWindow : Window
     {
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         _tray.Initialize(hwnd, Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"), "Valheim Server Manager");
-        _logger.LogInformation("Ícone na bandeja do sistema: {Visible}", _tray.IsVisible);
+        _logger.LogInformation("System tray icon visible: {Visible}", _tray.IsVisible);
         _tray.OpenRequested += (_, _) => DispatcherQueue.TryEnqueue(BringToFront);
         _tray.ExitRequested += (_, _) => DispatcherQueue.TryEnqueue(() =>
         {
@@ -131,7 +133,7 @@ public sealed partial class MainWindow : Window
             if (e.PropertyName == nameof(ShellViewModel.ActiveCount))
             {
                 _tray.SetShutdownBlockReason(ViewModel.ActiveCount > 0
-                    ? "Servidores de Valheim rodando — o gerenciador vai salvar os mundos antes de desligar."
+                    ? ShellStrings.Tray_ShutdownBlockRunning
                     : null);
             }
 
@@ -140,8 +142,8 @@ public sealed partial class MainWindow : Window
                 _tray.SetTooltip(ViewModel.ActiveCount switch
                 {
                     0 => "Valheim Server Manager",
-                    1 => "Valheim Server Manager — 1 servidor rodando",
-                    var n => $"Valheim Server Manager — {n} servidores rodando",
+                    1 => ShellStrings.Tray_TooltipOne,
+                    var n => string.Format(CultureInfo.CurrentCulture, ShellStrings.Tray_TooltipMany, n),
                 });
             }
         };
@@ -159,19 +161,19 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        _logger.LogWarning("Windows está encerrando a sessão; desligando {Count} servidor(es) com segurança", active.Length);
-        _tray.SetShutdownBlockReason("Salvando os mundos do Valheim antes de desligar…");
+        _logger.LogWarning("Windows is ending the session; stopping {Count} server(s) safely", active.Length);
+        _tray.SetShutdownBlockReason(ShellStrings.Tray_ShutdownBlockSaving);
         try
         {
             var stops = active.Select(c => Task.Run(() => c.StopAsync())).ToArray();
             if (!Task.WaitAll(stops, TimeSpan.FromSeconds(90)))
             {
-                _logger.LogError("Nem todos os servidores confirmaram o save antes do fim da sessão");
+                _logger.LogError("Not every server confirmed its save before the session ended");
             }
         }
         catch (AggregateException ex)
         {
-            _logger.LogError(ex, "Falha ao desligar servidores no fim da sessão");
+            _logger.LogError(ex, "Failed to stop servers at the end of the session");
         }
         finally
         {
@@ -233,10 +235,10 @@ public sealed partial class MainWindow : Window
         }
 
         var choice = await _dialogs.ChooseAsync(
-            "Alterações não salvas",
-            "Você mudou configurações nesta tela e ainda não salvou. O que fazer com elas?",
-            "Salvar",
-            "Descartar");
+            ShellStrings.Dialog_UnsavedTitle,
+            ShellStrings.Dialog_UnsavedMessage,
+            ShellStrings.Dialog_Save,
+            ShellStrings.Dialog_Discard);
         switch (choice)
         {
             case 1:
@@ -281,8 +283,7 @@ public sealed partial class MainWindow : Window
             if (!_trayHintShown)
             {
                 _trayHintShown = true;
-                _tray.ShowBalloon("Continua cuidando dos servidores",
-                    "O gerenciador ficou na bandeja do sistema. Clique no ícone para abrir; use Sair no menu dele para fechar de vez.");
+                _tray.ShowBalloon(ShellStrings.Tray_HiddenTitle, ShellStrings.Tray_HiddenMessage);
             }
 
             return;
@@ -293,11 +294,11 @@ public sealed partial class MainWindow : Window
         {
             var names = string.Join(", ", active.Select(c => c.Profile.DisplayName));
             var choice = await _dialogs.ChooseAsync(
-                "Há servidores em execução",
-                $"{names} continua(m) rodando em segundo plano se você fechar o gerenciador — sem janela, mas funcionando normalmente. " +
-                "Ao abrir o gerenciador de novo, ele reconhece e volta a acompanhar.\n\nO que você prefere?",
-                "Desligar com segurança e sair",
-                "Sair e deixar rodando");
+                ShellStrings.Exit_RunningTitle,
+                string.Format(CultureInfo.CurrentCulture,
+                    active.Length == 1 ? ShellStrings.Exit_RunningMessageOne : ShellStrings.Exit_RunningMessageMany, names),
+                ShellStrings.Exit_StopAndExit,
+                ShellStrings.Exit_KeepRunning);
             if (choice == 0)
             {
                 return;
@@ -306,7 +307,7 @@ public sealed partial class MainWindow : Window
             if (choice == 1)
             {
                 Content.IsHitTestVisible = false;
-                AppTitleBar.Subtitle = "Salvando e desligando…";
+                AppTitleBar.Subtitle = ShellStrings.Exit_Stopping;
                 foreach (var controller in active)
                 {
                     try
@@ -316,14 +317,14 @@ public sealed partial class MainWindow : Window
                         {
                             Content.IsHitTestVisible = true;
                             AppTitleBar.Subtitle = string.Empty;
-                            await _dialogs.AlertAsync("Não foi possível desligar",
-                                $"\"{controller.Profile.DisplayName}\": {result.Message} O gerenciador continua aberto.");
+                            await _dialogs.AlertAsync(ShellStrings.Exit_StopFailedTitle,
+                                string.Format(CultureInfo.CurrentCulture, ShellStrings.Exit_StopFailedMessage, controller.Profile.DisplayName, result.Message));
                             return;
                         }
                     }
                     catch (Exception ex) when (ex is InvalidOperationException or IOException)
                     {
-                        _logger.LogError(ex, "Falha ao desligar {Profile} ao sair", controller.Profile.DisplayName);
+                        _logger.LogError(ex, "Failed to stop {Profile} on exit", controller.Profile.DisplayName);
                     }
                 }
             }

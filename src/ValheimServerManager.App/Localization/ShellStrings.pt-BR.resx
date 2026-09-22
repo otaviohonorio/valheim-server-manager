@@ -24,4 +24,398 @@
   <data name="About_LanguageRestart" xml:space="preserve">
     <value>Feche o app pelo ícone da bandeja (Sair… &gt; "Sair e deixar rodando") e abra de novo para ver o novo idioma. Os servidores continuam ligados.</value>
   </data>
+  <data name="Shell_SelectedServer" xml:space="preserve">
+    <value>Servidor selecionado</value>
+  </data>
+  <data name="Shell_CreativeBadge" xml:space="preserve">
+    <value>criativo</value>
+  </data>
+  <data name="Shell_ManageProfiles" xml:space="preserve">
+    <value>Gerenciar perfis</value>
+  </data>
+  <data name="Shell_Profiles" xml:space="preserve">
+    <value>Perfis</value>
+  </data>
+  <data name="Shell_NewServer" xml:space="preserve">
+    <value>Novo servidor…</value>
+  </data>
+  <data name="Shell_DuplicateProfile" xml:space="preserve">
+    <value>Duplicar perfil atual</value>
+  </data>
+  <data name="Shell_DeleteProfile" xml:space="preserve">
+    <value>Excluir perfil atual</value>
+  </data>
+  <data name="Shell_ProfileDetail" xml:space="preserve">
+    <value>{0} · porta {1}</value>
+  </data>
+  <data name="Nav_Dashboard" xml:space="preserve">
+    <value>Painel</value>
+  </data>
+  <data name="Nav_Server" xml:space="preserve">
+    <value>Servidor</value>
+  </data>
+  <data name="Nav_World" xml:space="preserve">
+    <value>Mundo</value>
+  </data>
+  <data name="Nav_Backups" xml:space="preserve">
+    <value>Backups</value>
+  </data>
+  <data name="Nav_Players" xml:space="preserve">
+    <value>Jogadores</value>
+  </data>
+  <data name="Nav_Log" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="Nav_About" xml:space="preserve">
+    <value>Proteções e sobre</value>
+  </data>
+  <data name="Unmanaged_Title" xml:space="preserve">
+    <value>Servidor fora do gerenciador</value>
+  </data>
+  <data name="Unmanaged_Adopt" xml:space="preserve">
+    <value>Gerenciar este servidor</value>
+  </data>
+  <data name="Unmanaged_Many" xml:space="preserve">
+    <value>{0} servidores Valheim estão rodando fora do gerenciador.</value>
+  </data>
+  <data name="Unmanaged_One" xml:space="preserve">
+    <value>O servidor "{0}" (mundo {1}, PID {2}) está rodando fora do gerenciador.</value>
+  </data>
+  <data name="Unmanaged_NoName" xml:space="preserve">
+    <value>sem nome</value>
+  </data>
+  <data name="Unmanaged_SharedFolder" xml:space="preserve">
+    <value>Ele grava na MESMA pasta do jogo — não abra esse mundo no jogo enquanto ele roda.</value>
+  </data>
+  <data name="Unmanaged_AdoptMessage" xml:space="preserve">
+    <value>Criar um perfil a partir do servidor "{0}" que já está rodando? O gerenciador passa a acompanhar e pode desligá-lo com segurança.</value>
+  </data>
+  <data name="Unmanaged_AdoptConfirm" xml:space="preserve">
+    <value>Criar perfil</value>
+  </data>
+  <data name="Unmanaged_SaveFolderTitle" xml:space="preserve">
+    <value>Atenção à pasta de saves</value>
+  </data>
+  <data name="Unmanaged_SaveFolderMessage" xml:space="preserve">
+    <value>Este servidor usa a pasta de saves do próprio jogo. O perfil foi criado para acompanhá-lo, mas o gerenciador não vai deixar iniciá-lo assim: pare com segurança, escolha uma pasta só do servidor em "Servidor" e mova o mundo para lá.</value>
+  </data>
+  <data name="Profile_DuplicateTitle" xml:space="preserve">
+    <value>Duplicar perfil</value>
+  </data>
+  <data name="Profile_DuplicatePrompt" xml:space="preserve">
+    <value>Nome do novo perfil:</value>
+  </data>
+  <data name="Profile_DuplicatePlaceholder" xml:space="preserve">
+    <value>Nome</value>
+  </data>
+  <data name="Profile_CopyName" xml:space="preserve">
+    <value>{0} (cópia)</value>
+  </data>
+  <data name="Profile_DuplicatedTitle" xml:space="preserve">
+    <value>Perfil duplicado</value>
+  </data>
+  <data name="Profile_DuplicatedMessage" xml:space="preserve">
+    <value>A porta foi trocada para {0} para os dois poderem rodar juntos. Se for usar outro mundo, troque o nome do mundo em "Mundo".</value>
+  </data>
+  <data name="Profile_DeleteRunningTitle" xml:space="preserve">
+    <value>Servidor em execução</value>
+  </data>
+  <data name="Profile_DeleteRunningMessage" xml:space="preserve">
+    <value>Pare o servidor antes de excluir o perfil.</value>
+  </data>
+  <data name="Profile_DeleteTitle" xml:space="preserve">
+    <value>Excluir perfil</value>
+  </data>
+  <data name="Profile_DeleteMessage" xml:space="preserve">
+    <value>Excluir o perfil "{0}"? Mundos e backups no disco NÃO são apagados.</value>
+  </data>
+  <data name="Profile_DeleteConfirm" xml:space="preserve">
+    <value>Excluir</value>
+  </data>
+  <data name="Welcome_Title" xml:space="preserve">
+    <value>Bem-vindo</value>
+  </data>
+  <data name="Welcome_Intro" xml:space="preserve">
+    <value>Este app cuida dos seus servidores dedicados de Valheim: liga, desliga salvando o mundo, troca entre modo normal e criativo, faz backups verificados e impede que o servidor e o jogo mexam nos mesmos arquivos.</value>
+  </data>
+  <data name="Welcome_CreateFirst" xml:space="preserve">
+    <value>Criar meu primeiro servidor</value>
+  </data>
+  <data name="Welcome_Hint" xml:space="preserve">
+    <value>Dá para criar um mundo novo com a seed que você quiser ou usar um mundo que você já joga. Se um servidor já estiver rodando, ele aparece num aviso acima e pode ser adotado com um clique.</value>
+  </data>
+  <data name="Dialog_Confirm" xml:space="preserve">
+    <value>Confirmar</value>
+  </data>
+  <data name="Dialog_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Dialog_Close" xml:space="preserve">
+    <value>Fechar</value>
+  </data>
+  <data name="Dialog_Save" xml:space="preserve">
+    <value>Salvar</value>
+  </data>
+  <data name="Dialog_Discard" xml:space="preserve">
+    <value>Descartar</value>
+  </data>
+  <data name="Dialog_UnsavedTitle" xml:space="preserve">
+    <value>Alterações não salvas</value>
+  </data>
+  <data name="Dialog_UnsavedMessage" xml:space="preserve">
+    <value>Você mudou configurações nesta tela e ainda não salvou. O que fazer com elas?</value>
+  </data>
+  <data name="Tray_Open" xml:space="preserve">
+    <value>Abrir o gerenciador</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Sair…</value>
+  </data>
+  <data name="Tray_TooltipOne" xml:space="preserve">
+    <value>Valheim Server Manager — 1 servidor rodando</value>
+  </data>
+  <data name="Tray_TooltipMany" xml:space="preserve">
+    <value>Valheim Server Manager — {0} servidores rodando</value>
+  </data>
+  <data name="Tray_ShutdownBlockRunning" xml:space="preserve">
+    <value>Servidores de Valheim rodando — o gerenciador vai salvar os mundos antes de desligar.</value>
+  </data>
+  <data name="Tray_ShutdownBlockSaving" xml:space="preserve">
+    <value>Salvando os mundos do Valheim antes de desligar…</value>
+  </data>
+  <data name="Tray_HiddenTitle" xml:space="preserve">
+    <value>Continua cuidando dos servidores</value>
+  </data>
+  <data name="Tray_HiddenMessage" xml:space="preserve">
+    <value>O gerenciador ficou na bandeja do sistema. Clique no ícone para abrir; use Sair no menu dele para fechar de vez.</value>
+  </data>
+  <data name="Exit_RunningTitle" xml:space="preserve">
+    <value>Há servidores em execução</value>
+  </data>
+  <data name="Exit_RunningMessageOne" xml:space="preserve">
+    <value>{0} continua(m) rodando em segundo plano se você fechar o gerenciador — sem janela, mas funcionando normalmente. Ao abrir o gerenciador de novo, ele reconhece e volta a acompanhar.
+
+O que você prefere?</value>
+  </data>
+  <data name="Exit_RunningMessageMany" xml:space="preserve">
+    <value>{0} continua(m) rodando em segundo plano se você fechar o gerenciador — sem janela, mas funcionando normalmente. Ao abrir o gerenciador de novo, ele reconhece e volta a acompanhar.
+
+O que você prefere?</value>
+  </data>
+  <data name="Exit_StopAndExit" xml:space="preserve">
+    <value>Desligar com segurança e sair</value>
+  </data>
+  <data name="Exit_KeepRunning" xml:space="preserve">
+    <value>Sair e deixar rodando</value>
+  </data>
+  <data name="Exit_Stopping" xml:space="preserve">
+    <value>Salvando e desligando…</value>
+  </data>
+  <data name="Exit_StopFailedTitle" xml:space="preserve">
+    <value>Não foi possível desligar</value>
+  </data>
+  <data name="Exit_StopFailedMessage" xml:space="preserve">
+    <value>"{0}": {1} O gerenciador continua aberto.</value>
+  </data>
+  <data name="App_UnexpectedError" xml:space="preserve">
+    <value>Erro inesperado</value>
+  </data>
+  <data name="State_Online" xml:space="preserve">
+    <value>Online</value>
+  </data>
+  <data name="State_Starting" xml:space="preserve">
+    <value>Iniciando</value>
+  </data>
+  <data name="State_Stopping" xml:space="preserve">
+    <value>Desligando</value>
+  </data>
+  <data name="State_Crashed" xml:space="preserve">
+    <value>Parou inesperadamente</value>
+  </data>
+  <data name="State_Stopped" xml:space="preserve">
+    <value>Parado</value>
+  </data>
+  <data name="BackupKind_Manual" xml:space="preserve">
+    <value>Manual</value>
+  </data>
+  <data name="BackupKind_PreStart" xml:space="preserve">
+    <value>Antes de iniciar</value>
+  </data>
+  <data name="BackupKind_PostStop" xml:space="preserve">
+    <value>Depois de parar</value>
+  </data>
+  <data name="BackupKind_PreRestore" xml:space="preserve">
+    <value>Antes de restaurar</value>
+  </data>
+  <data name="BackupKind_Quarantine" xml:space="preserve">
+    <value>Quarentena (mundo com defeito)</value>
+  </data>
+  <data name="BackupKind_GameAuto" xml:space="preserve">
+    <value>Automático do Valheim</value>
+  </data>
+  <data name="BackupKind_Imported" xml:space="preserve">
+    <value>Importado</value>
+  </data>
+  <data name="Time_Today" xml:space="preserve">
+    <value>hoje, {0:HH:mm:ss}</value>
+  </data>
+  <data name="Time_Yesterday" xml:space="preserve">
+    <value>ontem, {0:HH:mm}</value>
+  </data>
+  <data name="Time_Never" xml:space="preserve">
+    <value>nunca</value>
+  </data>
+  <data name="Time_JustNow" xml:space="preserve">
+    <value>agora há pouco</value>
+  </data>
+  <data name="Time_MinutesAgo" xml:space="preserve">
+    <value>há {0} min</value>
+  </data>
+  <data name="Time_HoursAgo" xml:space="preserve">
+    <value>há {0} h {1} min</value>
+  </data>
+  <data name="Time_DayAgo" xml:space="preserve">
+    <value>há {0} dia(s)</value>
+  </data>
+  <data name="Time_DaysAgo" xml:space="preserve">
+    <value>há {0} dia(s)</value>
+  </data>
+  <data name="Log_Title" xml:space="preserve">
+    <value>Log do servidor</value>
+  </data>
+  <data name="Log_AllLines" xml:space="preserve">
+    <value>Todas as linhas</value>
+  </data>
+  <data name="Log_OnlyImportant" xml:space="preserve">
+    <value>Só eventos importantes</value>
+  </data>
+  <data name="Log_FreeScroll" xml:space="preserve">
+    <value>Rolagem livre</value>
+  </data>
+  <data name="Log_FollowTail" xml:space="preserve">
+    <value>Acompanhar o fim</value>
+  </data>
+  <data name="Log_OpenFile" xml:space="preserve">
+    <value>Abrir arquivo</value>
+  </data>
+  <data name="Log_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Log_PreviousSessions" xml:space="preserve">
+    <value>Sessões anteriores</value>
+  </data>
+  <data name="Log_PreviousSessionsHint" xml:space="preserve">
+    <value>O servidor recria o log a cada início; o gerenciador arquiva o anterior aqui.</value>
+  </data>
+  <data name="Log_Waiting" xml:space="preserve">
+    <value>Aguardando mensagens do servidor…</value>
+  </data>
+  <data name="Log_NoLogFile" xml:space="preserve">
+    <value>Este servidor foi iniciado sem arquivo de log.</value>
+  </data>
+  <data name="Log_Empty" xml:space="preserve">
+    <value>O log aparece aqui enquanto o servidor estiver rodando. Logs de sessões anteriores ficam na lista ao lado.</value>
+  </data>
+  <data name="About_Version" xml:space="preserve">
+    <value>Versão</value>
+  </data>
+  <data name="About_ProtectionsHeader" xml:space="preserve">
+    <value>Proteções ativas</value>
+  </data>
+  <data name="About_ProtectionsIntro" xml:space="preserve">
+    <value>Nasceram do incidente de 16/09/2026, quando servidor e jogo abriram o mesmo mundo, um save ficou pela metade e o Valheim gerou um mundo novo por cima — apagando as construções.</value>
+  </data>
+  <data name="About_GuardSaveFolderTitle" xml:space="preserve">
+    <value>🛡 Pasta de saves separada do jogo</value>
+  </data>
+  <data name="About_GuardSaveFolderText" xml:space="preserve">
+    <value>O servidor sempre recebe -savedir. Um perfil que aponte para a pasta do jogo (LocalLow\IronGate\Valheim) é recusado, então servidor e jogo nunca disputam os mesmos arquivos.</value>
+  </data>
+  <data name="About_GuardStopTitle" xml:space="preserve">
+    <value>🛡 Desligar sempre salvando</value>
+  </data>
+  <data name="About_GuardStopText" xml:space="preserve">
+    <value>O servidor roda sem janela (não há um X para fechar sem querer). Parar envia Ctrl+C e espera o log confirmar o save. Encerrar à força só com confirmação explícita.</value>
+  </data>
+  <data name="About_GuardCheckTitle" xml:space="preserve">
+    <value>🛡 Verificação antes de iniciar</value>
+  </data>
+  <data name="About_GuardCheckText" xml:space="preserve">
+    <value>Se o save mais recente estiver incompleto (por exemplo, sem o .db2) ou faltar algum chunk, o servidor nem sobe. Um mundo inexistente só é criado depois de você confirmar.</value>
+  </data>
+  <data name="About_GuardBrakeTitle" xml:space="preserve">
+    <value>🛡 Freio de emergência</value>
+  </data>
+  <data name="About_GuardBrakeText" xml:space="preserve">
+    <value>Se mesmo assim o log mostrar que o Valheim não encontrou os dados do mundo e começou a gerar outro, o servidor é encerrado na hora, antes de gravar qualquer coisa por cima.</value>
+  </data>
+  <data name="About_GuardBackupsTitle" xml:space="preserve">
+    <value>🛡 Backups verificados</value>
+  </data>
+  <data name="About_GuardBackupsText" xml:space="preserve">
+    <value>Antes de iniciar e depois de parar, o save completo é copiado e conferido por SHA-256. Restaurar copia o mundo atual antes, move a pasta antiga para _substituidos e nunca mistura arquivos.</value>
+  </data>
+  <data name="About_GuardCreativeTitle" xml:space="preserve">
+    <value>🛡 Modo criativo que desliga de verdade</value>
+  </data>
+  <data name="About_GuardCreativeText" xml:space="preserve">
+    <value>O preset sempre vai na linha de comando, então as chaves do mundo são refeitas a cada início. Depois do primeiro save, o app confere no arquivo do mundo se nobuildcost está como deveria.</value>
+  </data>
+  <data name="About_GuardLogTitle" xml:space="preserve">
+    <value>🛡 Log sempre guardado</value>
+  </data>
+  <data name="About_GuardLogText" xml:space="preserve">
+    <value>O servidor sempre grava -logFile, e o log de cada sessão é arquivado antes do próximo início. Se algo der errado, dá para saber o que aconteceu.</value>
+  </data>
+  <data name="About_GuardOneServerTitle" xml:space="preserve">
+    <value>🛡 Um servidor por mundo e por porta</value>
+  </data>
+  <data name="About_GuardOneServerText" xml:space="preserve">
+    <value>O app procura valheim_server em execução e recusa iniciar outro no mesmo mundo ou na mesma porta. Servidores abertos fora do app são detectados e podem ser adotados.</value>
+  </data>
+  <data name="About_PreferencesHeader" xml:space="preserve">
+    <value>Preferências</value>
+  </data>
+  <data name="About_NotifyJoinsHeader" xml:space="preserve">
+    <value>Avisar quando um jogador entrar</value>
+  </data>
+  <data name="About_NotifyJoinsDescription" xml:space="preserve">
+    <value>Mostra uma notificação (pela bandeja do sistema) quando alguém aparece no mundo.</value>
+  </data>
+  <data name="About_TrayHeader" xml:space="preserve">
+    <value>Manter na bandeja ao fechar</value>
+  </data>
+  <data name="About_TrayDescription" xml:space="preserve">
+    <value>Com servidores rodando, fechar a janela deixa o gerenciador na bandeja do sistema (perto do relógio). Desligado, fechar pergunta se deve parar os servidores.</value>
+  </data>
+  <data name="About_DataHeader" xml:space="preserve">
+    <value>Dados do aplicativo</value>
+  </data>
+  <data name="About_DataCardHeader" xml:space="preserve">
+    <value>Configurações e log do gerenciador</value>
+  </data>
+  <data name="About_OpenFolder" xml:space="preserve">
+    <value>Abrir pasta</value>
+  </data>
+  <data name="About_AppLogs" xml:space="preserve">
+    <value>Logs do app</value>
+  </data>
+  <data name="About_SupportHeader" xml:space="preserve">
+    <value>Apoie o projeto</value>
+  </data>
+  <data name="About_SupportText" xml:space="preserve">
+    <value>O app é gratuito. Se ele salvou o seu mundo, dá para apoiar:</value>
+  </data>
+  <data name="About_SupportKofi" xml:space="preserve">
+    <value>Ko-fi (sem precisar de conta)</value>
+  </data>
+  <data name="About_SupportGitHubSponsors" xml:space="preserve">
+    <value>GitHub Sponsors</value>
+  </data>
+  <data name="About_ProjectPage" xml:space="preserve">
+    <value>Página do projeto no GitHub</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:loc="using:ValheimServerManager.App.Localization"
     xmlns:vm="using:ValheimServerManager.App.ViewModels">
 
     <Grid Padding="{StaticResource PagePadding}" ColumnSpacing="16" RowSpacing="12">
@@ -17,13 +18,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.ColumnSpan="2" Style="{StaticResource PageTitleStyle}" Text="Log do servidor" />
+        <TextBlock Grid.ColumnSpan="2" Style="{StaticResource PageTitleStyle}" Text="{x:Bind loc:ShellStrings.Log_Title}" />
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="16">
-            <ToggleSwitch IsOn="{x:Bind ViewModel.OnlyImportant, Mode=TwoWay}" OffContent="Todas as linhas" OnContent="Só eventos importantes" />
-            <ToggleSwitch IsOn="{x:Bind ViewModel.FollowTail, Mode=TwoWay}" OffContent="Rolagem livre" OnContent="Acompanhar o fim" />
-            <Button VerticalAlignment="Center" Command="{x:Bind ViewModel.OpenCurrentLogCommand}" Content="Abrir arquivo" />
-            <Button VerticalAlignment="Center" Command="{x:Bind ViewModel.CopyAllCommand}" Content="Copiar" />
+            <ToggleSwitch IsOn="{x:Bind ViewModel.OnlyImportant, Mode=TwoWay}" OffContent="{x:Bind loc:ShellStrings.Log_AllLines}" OnContent="{x:Bind loc:ShellStrings.Log_OnlyImportant}" />
+            <ToggleSwitch IsOn="{x:Bind ViewModel.FollowTail, Mode=TwoWay}" OffContent="{x:Bind loc:ShellStrings.Log_FreeScroll}" OnContent="{x:Bind loc:ShellStrings.Log_FollowTail}" />
+            <Button VerticalAlignment="Center" Command="{x:Bind ViewModel.OpenCurrentLogCommand}" Content="{x:Bind loc:ShellStrings.Log_OpenFile}" />
+            <Button VerticalAlignment="Center" Command="{x:Bind ViewModel.CopyAllCommand}" Content="{x:Bind loc:ShellStrings.Log_Copy}" />
         </StackPanel>
 
         <Border Grid.Row="2" Padding="4" Style="{StaticResource CardBorderStyle}">
@@ -58,10 +59,12 @@
         </Border>
 
         <StackPanel Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Spacing="8">
-            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Sessões anteriores" />
-            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap">
-                O servidor recria o log a cada início; o gerenciador arquiva o anterior aqui.
-            </TextBlock>
+            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="{x:Bind loc:ShellStrings.Log_PreviousSessions}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind loc:ShellStrings.Log_PreviousSessionsHint}"
+                TextWrapping="Wrap" />
             <ListView IsItemClickEnabled="True" ItemClick="OnArchivedClick" ItemsSource="{x:Bind ViewModel.ArchivedLogs}" SelectionMode="None" />
         </StackPanel>
     </Grid>

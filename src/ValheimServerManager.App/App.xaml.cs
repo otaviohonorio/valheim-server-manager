@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Serilog;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.App.ViewModels;
 using ValheimServerManager.App.Views;
@@ -70,7 +71,7 @@ public partial class App : Application
         UnhandledException += OnUnhandledException;
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
-            Services.GetService<ILogger<App>>()?.LogError(e.Exception, "Tarefa com exceção não observada");
+            Services.GetService<ILogger<App>>()?.LogError(e.Exception, "Unobserved task exception");
             e.SetObserved();
         };
     }
@@ -81,12 +82,12 @@ public partial class App : Application
 
     public static T GetService<T>()
         where T : class =>
-        Current?.Services.GetRequiredService<T>() ?? throw new InvalidOperationException("App não inicializado.");
+        Current?.Services.GetRequiredService<T>() ?? throw new InvalidOperationException("App not initialized.");
 
     protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         await _host.StartAsync();
-        Services.GetRequiredService<ILogger<App>>().LogInformation("Valheim Server Manager iniciado");
+        Services.GetRequiredService<ILogger<App>>().LogInformation("Valheim Server Manager started");
         _window = Services.GetRequiredService<MainWindow>();
         _window.Activate();
     }
@@ -111,9 +112,9 @@ public partial class App : Application
 
     private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        Services.GetService<ILogger<App>>()?.LogCritical(e.Exception, "Erro não tratado na interface");
+        Services.GetService<ILogger<App>>()?.LogCritical(e.Exception, "Unhandled UI error");
         e.Handled = true;
         Services.GetService<AlertCenter>()?.Publish(new ServerAlert(
-            AlertLevel.Error, "Erro inesperado", e.Message, DateTimeOffset.Now));
+            AlertLevel.Error, ShellStrings.App_UnexpectedError, e.Message, DateTimeOffset.Now));
     }
 }

@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Players;
 using ValheimServerManager.Core.Servers;
@@ -112,7 +114,9 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
 
     protected override void OnServerStatusChanged(ServerStatus status)
     {
-        OnlineText = status.IsActive ? $"{status.PlayerCount} jogador(es) online agora." : "Servidor parado.";
+        OnlineText = status.IsActive
+            ? string.Format(CultureInfo.CurrentCulture, WorldStrings.Players_OnlineCount, status.PlayerCount)
+            : WorldStrings.Players_ServerStopped;
         UpdateOnline(status);
     }
 
@@ -136,10 +140,10 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
                 parts.Add(platform);
             }
 
-            parts.Add($"no mundo desde {player.Since.ToLocalTime():HH:mm}");
+            parts.Add(string.Format(CultureInfo.CurrentCulture, WorldStrings.Players_InWorldSince, player.Since.ToLocalTime()));
             if (player.SteamId is { } id && admins.Contains(id))
             {
-                parts.Add("admin");
+                parts.Add(WorldStrings.Players_AdminTag);
             }
 
             Online.Add(new OnlinePlayerRow(player.Name, string.Join(" · ", parts)));
@@ -186,7 +190,7 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
 
         foreach (var id in admins.Concat(banned).Concat(permitted))
         {
-            known.TryAdd(id, ("ID sem nome", id));
+            known.TryAdd(id, (WorldStrings.Players_UnnamedId, id));
         }
 
         foreach (var (id, info) in known.OrderBy(k => k.Value.Name, StringComparer.CurrentCultureIgnoreCase))
@@ -212,9 +216,9 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
     {
         if (kind == PlayerListKind.Permitted && value && !AllowListActive &&
             !await _dialogs.ConfirmAsync(
-                "Ativar lista de permitidos?",
-                "Assim que houver alguém na lista de permitidos, SÓ quem estiver nela consegue entrar. Adicione todos os seus amigos.",
-                "Ativar"))
+                WorldStrings.Players_EnableAllowListTitle,
+                WorldStrings.Players_EnableAllowListMessage,
+                WorldStrings.Players_EnableAllowListConfirm))
         {
             row.IsPermitted = false;
             return;
@@ -228,7 +232,7 @@ public sealed partial class PlayersViewModel : ProfilePageViewModel
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            await _dialogs.AlertAsync("Não foi possível salvar", ex.Message);
+            await _dialogs.AlertAsync(WorldStrings.Players_SaveFailedTitle, ex.Message);
         }
     }
 

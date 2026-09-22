@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:helpers="using:ValheimServerManager.App.Helpers"
+    xmlns:loc="using:ValheimServerManager.App.Localization"
     xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
     xmlns:vm="using:ValheimServerManager.App.ViewModels">
 
@@ -23,8 +24,8 @@
 
         <ScrollViewer>
             <StackPanel MaxWidth="{StaticResource PageMaxWidth}" Padding="{StaticResource PagePadding}" Spacing="{StaticResource SettingsCardSpacing}">
-                <TextBlock Style="{StaticResource PageTitleStyle}" Text="Mundo" />
-                <TextBlock Style="{StaticResource PageSubtitleStyle}" Text="Qual mundo o servidor carrega, as regras dele e o estado dos arquivos." />
+                <TextBlock Style="{StaticResource PageTitleStyle}" Text="{x:Bind loc:WorldStrings.World_Title}" />
+                <TextBlock Style="{StaticResource PageSubtitleStyle}" Text="{x:Bind loc:WorldStrings.World_Subtitle}" />
 
                 <ItemsControl ItemsSource="{x:Bind ViewModel.Issues}">
                     <ItemsControl.ItemTemplate>
@@ -34,29 +35,29 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <toolkit:SettingsCard Description="Nome da pasta dentro de worlds_local (maiúsculas contam). Um nome que não existe cria um mundo novo — o app pede confirmação antes." Header="Mundo carregado">
+                <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_LoadedWorldDescription}" Header="{x:Bind loc:WorldStrings.World_LoadedWorldHeader}">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE909;" />
                     </toolkit:SettingsCard.HeaderIcon>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <AutoSuggestBox
                             MinWidth="240"
-                            AutomationProperties.Name="Mundo carregado"
+                            AutomationProperties.Name="{x:Bind loc:WorldStrings.World_LoadedWorldHeader}"
                             GotFocus="OnWorldBoxFocused"
                             ItemsSource="{x:Bind ViewModel.Worlds}"
-                            PlaceholderText="Nome do mundo"
+                            PlaceholderText="{x:Bind loc:WorldStrings.World_WorldNamePlaceholder}"
                             SuggestionChosen="OnWorldChosen"
                             Text="{x:Bind ViewModel.WorldName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Button AutomationProperties.Name="Abrir pasta dos mundos" Command="{x:Bind ViewModel.OpenWorldFolderCommand}" ToolTipService.ToolTip="Abrir worlds_local">
+                        <Button AutomationProperties.Name="{x:Bind loc:WorldStrings.World_OpenWorldsFolder}" Command="{x:Bind ViewModel.OpenWorldFolderCommand}" ToolTipService.ToolTip="{x:Bind loc:WorldStrings.World_OpenWorldsLocalTooltip}">
                             <FontIcon FontSize="14" Glyph="&#xE838;" />
                         </Button>
-                        <Button AutomationProperties.Name="Atualizar" Command="{x:Bind ViewModel.RefreshWorldInfoCommand}" ToolTipService.ToolTip="Atualizar">
+                        <Button AutomationProperties.Name="{x:Bind loc:WorldStrings.World_Refresh}" Command="{x:Bind ViewModel.RefreshWorldInfoCommand}" ToolTipService.ToolTip="{x:Bind loc:WorldStrings.World_Refresh}">
                             <FontIcon FontSize="14" Glyph="&#xE72C;" />
                         </Button>
                     </StackPanel>
                 </toolkit:SettingsCard>
 
-                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Estado dos arquivos" />
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:WorldStrings.World_FilesStateHeader}" />
                 <ItemsControl ItemsSource="{x:Bind ViewModel.Health}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:IssueItem">
@@ -81,94 +82,92 @@
                     </ItemsControl>
                 </Border>
 
-                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Regras do mundo" />
-                <toolkit:SettingsCard Description="{x:Bind ViewModel.PresetDescription, Mode=OneWay}" Header="Preset">
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:WorldStrings.World_RulesHeader}" />
+                <toolkit:SettingsCard Description="{x:Bind ViewModel.PresetDescription, Mode=OneWay}" Header="{x:Bind loc:WorldStrings.World_PresetHeader}">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE790;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ComboBox AutomationProperties.Name="Preset" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PresetItems}" SelectedIndex="{x:Bind ViewModel.PresetIndex, Mode=TwoWay}" />
+                    <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_PresetHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PresetItems}" SelectedIndex="{x:Bind ViewModel.PresetIndex, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
-                <toolkit:SettingsExpander Description="{x:Bind ViewModel.OverrideHint, Mode=OneWay}" Header="Ajustes finos" IsExpanded="True">
+                <toolkit:SettingsExpander Description="{x:Bind ViewModel.OverrideHint, Mode=OneWay}" Header="{x:Bind loc:WorldStrings.World_FineTuningHeader}" IsExpanded="True">
                     <toolkit:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE9E9;" />
                     </toolkit:SettingsExpander.HeaderIcon>
                     <toolkit:SettingsExpander.Items>
-                        <toolkit:SettingsCard Description="Dano causado pelos inimigos." Header="Combate">
-                            <ComboBox AutomationProperties.Name="Combate" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.CombatItems}" SelectedIndex="{x:Bind ViewModel.CombatIndex, Mode=TwoWay}" />
+                        <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_CombatDescription}" Header="{x:Bind loc:WorldStrings.World_CombatHeader}">
+                            <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_CombatHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.CombatItems}" SelectedIndex="{x:Bind ViewModel.CombatIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
-                        <toolkit:SettingsCard Description="O que acontece com itens e habilidades ao morrer. Passe o mouse nas opções para detalhes." Header="Penalidade de morte">
-                            <ComboBox AutomationProperties.Name="Penalidade de morte" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.DeathItems}" SelectedIndex="{x:Bind ViewModel.DeathIndex, Mode=TwoWay}" />
+                        <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_DeathPenaltyDescription}" Header="{x:Bind loc:WorldStrings.World_DeathPenaltyHeader}">
+                            <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_DeathPenaltyHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.DeathItems}" SelectedIndex="{x:Bind ViewModel.DeathIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
-                        <toolkit:SettingsCard Description="Multiplicador de coleta (arredonda para cima)." Header="Recursos">
-                            <ComboBox AutomationProperties.Name="Recursos" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.ResourceItems}" SelectedIndex="{x:Bind ViewModel.ResourceIndex, Mode=TwoWay}" />
+                        <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_ResourcesDescription}" Header="{x:Bind loc:WorldStrings.World_ResourcesHeader}">
+                            <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_ResourcesHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.ResourceItems}" SelectedIndex="{x:Bind ViewModel.ResourceIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
-                        <toolkit:SettingsCard Description="Frequência dos ataques à base." Header="Raids">
-                            <ComboBox AutomationProperties.Name="Raids" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.RaidItems}" SelectedIndex="{x:Bind ViewModel.RaidIndex, Mode=TwoWay}" />
+                        <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_RaidsDescription}" Header="{x:Bind loc:WorldStrings.World_RaidsHeader}">
+                            <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_RaidsHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.RaidItems}" SelectedIndex="{x:Bind ViewModel.RaidIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
-                        <toolkit:SettingsCard Description="O que pode passar pelos portais." Header="Portais">
-                            <ComboBox AutomationProperties.Name="Portais" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PortalItems}" SelectedIndex="{x:Bind ViewModel.PortalIndex, Mode=TwoWay}" />
+                        <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_PortalsDescription}" Header="{x:Bind loc:WorldStrings.World_PortalsHeader}">
+                            <ComboBox AutomationProperties.Name="{x:Bind loc:WorldStrings.World_PortalsHeader}" MinWidth="220" ItemTemplate="{StaticResource OptionTemplate}" ItemsSource="{x:Bind ViewModel.PortalItems}" SelectedIndex="{x:Bind ViewModel.PortalIndex, Mode=TwoWay}" />
                         </toolkit:SettingsCard>
                     </toolkit:SettingsExpander.Items>
                 </toolkit:SettingsExpander>
-                <toolkit:SettingsCard Description="Raids e eventos acontecem conforme o progresso de cada jogador, não do mundo." Header="Eventos por jogador">
+                <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_PlayerEventsDescription}" Header="{x:Bind loc:WorldStrings.World_PlayerEventsHeader}">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE77B;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch AutomationProperties.Name="Eventos por jogador" IsOn="{x:Bind ViewModel.PlayerEvents, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="{x:Bind loc:WorldStrings.World_PlayerEventsHeader}" IsOn="{x:Bind ViewModel.PlayerEvents, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
-                <toolkit:SettingsCard Description="Inimigos só atacam se forem provocados." Header="Inimigos passivos">
+                <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_PassiveMobsDescription}" Header="{x:Bind loc:WorldStrings.World_PassiveMobsHeader}">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE9CE;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch AutomationProperties.Name="Inimigos passivos" IsOn="{x:Bind ViewModel.PassiveMobs, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="{x:Bind loc:WorldStrings.World_PassiveMobsHeader}" IsOn="{x:Bind ViewModel.PassiveMobs, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
-                <toolkit:SettingsCard Description="Desativa o mapa e o minimapa." Header="Sem mapa">
+                <toolkit:SettingsCard Description="{x:Bind loc:WorldStrings.World_NoMapDescription}" Header="{x:Bind loc:WorldStrings.World_NoMapHeader}">
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE826;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch AutomationProperties.Name="Sem mapa" IsOn="{x:Bind ViewModel.NoMap, Mode=TwoWay}" />
+                    <ToggleSwitch AutomationProperties.Name="{x:Bind loc:WorldStrings.World_NoMapHeader}" IsOn="{x:Bind ViewModel.NoMap, Mode=TwoWay}" />
                 </toolkit:SettingsCard>
 
-                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Modo criativo" />
-                <InfoBar IsClosable="False" IsOpen="{x:Bind ViewModel.IsHammer, Mode=OneWay}" Message="O preset Martelo já é criativo; este interruptor não o desliga." Severity="Informational" />
-                <toolkit:SettingsCard Header="Construção e craft sem custo">
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:WorldStrings.World_CreativeModeHeader}" />
+                <InfoBar IsClosable="False" IsOpen="{x:Bind ViewModel.IsHammer, Mode=OneWay}" Message="{x:Bind loc:WorldStrings.World_HammerIsCreative}" Severity="Informational" />
+                <toolkit:SettingsCard Header="{x:Bind loc:WorldStrings.World_NoCostHeader}">
                     <toolkit:SettingsCard.Description>
-                        <TextBlock TextWrapping="Wrap">
-                            Vale para todos que estiverem no servidor e bloqueia conquistas enquanto estiver ligado. Com o preset sempre presente na linha de comando, desligar remove a chave do mundo no próximo início — o app confere isso no primeiro save.
-                        </TextBlock>
+                        <TextBlock Text="{x:Bind loc:WorldStrings.World_NoCostDescription}" TextWrapping="Wrap" />
                     </toolkit:SettingsCard.Description>
                     <toolkit:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE70F;" />
                     </toolkit:SettingsCard.HeaderIcon>
-                    <ToggleSwitch AutomationProperties.Name="Construção e craft sem custo" IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="Normal" OnContent="Criativo" />
+                    <ToggleSwitch AutomationProperties.Name="{x:Bind loc:WorldStrings.World_NoCostHeader}" IsOn="{x:Bind ViewModel.CreativeMode, Mode=TwoWay}" OffContent="{x:Bind loc:WorldStrings.World_CreativeOff}" OnContent="{x:Bind loc:WorldStrings.World_CreativeOn}" />
                 </toolkit:SettingsCard>
 
-                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Manutenção do mundo" />
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:WorldStrings.World_MaintenanceHeader}" />
                 <toolkit:SettingsCard
                     ContentAlignment="Vertical"
-                    Description="Remove objetos que o jogo gerou duas vezes (os que precisam ser quebrados duas vezes) e a marca de &quot;feito com trapaça&quot; dos itens, que impede o empilhamento. Faz backup antes. O gerenciador também faz isso sozinho a cada parada; use aqui depois que alguém guardar itens nos baús."
-                    Header="Conferir e corrigir agora"
+                    Description="{x:Bind loc:WorldStrings.World_CheckAndFixDescription}"
+                    Header="{x:Bind loc:WorldStrings.World_CheckAndFixHeader}"
                     HorizontalContentAlignment="Stretch">
                     <StackPanel Spacing="8">
                         <ProgressBar IsIndeterminate="True" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsBusy), Mode=OneWay}" />
                         <TextBlock Text="{x:Bind ViewModel.MaintenanceSummary, Mode=OneWay}" TextWrapping="Wrap" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button
-                                AutomationProperties.Name="Corrigir o mundo agora"
+                                AutomationProperties.Name="{x:Bind loc:WorldStrings.World_FixWorldNowName}"
                                 Command="{x:Bind ViewModel.FixWorldNowCommand}"
-                                Content="Corrigir agora"
+                                Content="{x:Bind loc:WorldStrings.World_FixNow}"
                                 Style="{StaticResource AccentButtonStyle}" />
-                            <Button AutomationProperties.Name="Conferir de novo" Command="{x:Bind ViewModel.CheckMaintenanceCommand}" Content="Conferir de novo" />
+                            <Button AutomationProperties.Name="{x:Bind loc:WorldStrings.World_CheckAgain}" Command="{x:Bind ViewModel.CheckMaintenanceCommand}" Content="{x:Bind loc:WorldStrings.World_CheckAgain}" />
                         </StackPanel>
                     </StackPanel>
                 </toolkit:SettingsCard>
 
-                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Diagnóstico" />
-                <toolkit:SettingsExpander Description="Procura nos chunks peças que só jogadores constroem (bancadas, baús, portais, fornalhas…). Útil para confirmar que um mundo restaurado é o seu." Header="Construções encontradas">
+                <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="{x:Bind loc:WorldStrings.World_DiagnosticsHeader}" />
+                <toolkit:SettingsExpander Description="{x:Bind loc:WorldStrings.World_BuildingsDescription}" Header="{x:Bind loc:WorldStrings.World_BuildingsHeader}">
                     <toolkit:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE80F;" />
                     </toolkit:SettingsExpander.HeaderIcon>
-                    <Button Command="{x:Bind ViewModel.ScanBuildingsCommand}" Content="Analisar" />
+                    <Button Command="{x:Bind ViewModel.ScanBuildingsCommand}" Content="{x:Bind loc:WorldStrings.World_Analyze}" />
                     <toolkit:SettingsExpander.Items>
                         <toolkit:SettingsCard ContentAlignment="Vertical" HorizontalContentAlignment="Stretch">
                             <StackPanel Spacing="8">
@@ -209,10 +208,10 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
                     <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.SavedMessage, Mode=OneWay}" />
-                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource VsmAmberBrush}" Text="Alterações não salvas" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsDirty), Mode=OneWay}" />
+                    <TextBlock VerticalAlignment="Center" Foreground="{ThemeResource VsmAmberBrush}" Text="{x:Bind loc:WorldStrings.World_UnsavedChanges}" Visibility="{x:Bind helpers:Ui.Visible(ViewModel.IsDirty), Mode=OneWay}" />
                 </StackPanel>
-                <Button Grid.Column="1" Command="{x:Bind ViewModel.DiscardCommand}" Content="Descartar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" />
-                <Button Grid.Column="2" MinWidth="120" Command="{x:Bind ViewModel.SaveCommand}" Content="Salvar" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
+                <Button Grid.Column="1" Command="{x:Bind ViewModel.DiscardCommand}" Content="{x:Bind loc:WorldStrings.World_Discard}" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" />
+                <Button Grid.Column="2" MinWidth="120" Command="{x:Bind ViewModel.SaveCommand}" Content="{x:Bind loc:WorldStrings.World_Save}" IsEnabled="{x:Bind ViewModel.IsDirty, Mode=OneWay}" Style="{StaticResource AccentButtonStyle}" />
             </Grid>
         </Border>
     </Grid>

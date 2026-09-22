@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Profiles;
 using ValheimServerManager.Core.Servers;
@@ -125,7 +127,7 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
         FixWorldNowCommand.NotifyCanExecuteChanged();
         if (status.IsActive)
         {
-            MaintenanceSummary = "Pare o servidor para conferir e corrigir o mundo.";
+            MaintenanceSummary = WorldStrings.World_StopServerToCheck;
             CanFixWorld = false;
         }
         else
@@ -140,8 +142,8 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
         PresetDescription = preset.Description;
         IsHammer = preset.Value == WorldPreset.Hammer;
         OverrideHint = preset.Value == WorldPreset.Normal
-            ? "Os ajustes abaixo mudam só o que for diferente de \"Padrão\"."
-            : $"\"Padrão\" abaixo significa \"o que o preset {preset.Label} definir\". Qualquer outra escolha substitui o preset.";
+            ? WorldStrings.World_OverrideHintNormal
+            : string.Format(CultureInfo.CurrentCulture, WorldStrings.World_OverrideHintPreset, preset.Label);
     }
 
     private void RefreshWorlds(ServerProfile p)
@@ -190,32 +192,34 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
 
         if (report.IsHealthy && !report.HasWarnings)
         {
-            Health.Insert(0, new IssueItem($"Save {report.LatestSave!.Number} completo e consistente.", Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success));
+            Health.Insert(0, new IssueItem(
+                string.Format(CultureInfo.CurrentCulture, WorldStrings.World_SaveHealthy, report.LatestSave!.Number.ToString(CultureInfo.InvariantCulture)),
+                Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success));
         }
 
-        Details.Add(new("Pasta", report.Directory));
+        Details.Add(new(WorldStrings.World_DetailFolder, report.Directory));
         if (report.LatestSave is { } save)
         {
-            Details.Add(new("Save atual", save.Number.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            Details.Add(new(WorldStrings.World_DetailCurrentSave, save.Number.ToString(CultureInfo.InvariantCulture)));
         }
 
         if (report.LastSavedUtc is { } saved)
         {
-            Details.Add(new("Gravado em", Helpers.Ui.When(new DateTimeOffset(saved))));
+            Details.Add(new(WorldStrings.World_DetailSavedAt, Helpers.Ui.When(new DateTimeOffset(saved))));
         }
 
         if (report.Index is not null)
         {
-            Details.Add(new("Chunks / objetos", $"{report.ChunkCount} / {Helpers.Ui.Number(report.TotalZdos)}"));
-            Details.Add(new("Tamanho do save", Helpers.Ui.Size(report.SaveSetBytes)));
+            Details.Add(new(WorldStrings.World_DetailChunksObjects, $"{report.ChunkCount} / {Helpers.Ui.Number(report.TotalZdos)}"));
+            Details.Add(new(WorldStrings.World_DetailSaveSize, Helpers.Ui.Size(report.SaveSetBytes)));
         }
 
         if (report.Metadata is { } meta)
         {
-            Details.Add(new("Nome interno", meta.Name));
-            Details.Add(new("Seed", meta.SeedName));
-            Details.Add(new("Chaves gravadas", meta.KeyNames.Any() ? string.Join(", ", meta.KeyNames) : "nenhuma"));
-            Details.Add(new("Jogadores registrados", meta.Players.Count > 0 ? string.Join(", ", meta.Players.Select(x => x.Name)) : "nenhum"));
+            Details.Add(new(WorldStrings.World_DetailInternalName, meta.Name));
+            Details.Add(new(WorldStrings.World_DetailSeed, meta.SeedName));
+            Details.Add(new(WorldStrings.World_DetailStoredKeys, meta.KeyNames.Any() ? string.Join(", ", meta.KeyNames) : WorldStrings.World_DetailNoKeys));
+            Details.Add(new(WorldStrings.World_DetailRegisteredPlayers, meta.Players.Count > 0 ? string.Join(", ", meta.Players.Select(x => x.Name)) : WorldStrings.World_DetailNoPlayers));
         }
     }
 
@@ -231,7 +235,7 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
     {
         if (Draft() is not { } draft || string.IsNullOrWhiteSpace(draft.SaveDirectory) || string.IsNullOrWhiteSpace(draft.WorldName))
         {
-            MaintenanceSummary = "Configure a pasta de saves e o mundo.";
+            MaintenanceSummary = WorldStrings.World_ConfigureSaveFolderAndWorld;
             CanFixWorld = false;
             return;
         }
@@ -245,27 +249,28 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
             var parts = new List<string>();
             if (duplicates.ExtraCopies > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(duplicates.ExtraCopies)} objetos duplicados");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, WorldStrings.World_MaintenanceDuplicates, Helpers.Ui.Number(duplicates.ExtraCopies)));
             }
 
             if (duplicates.ZonesToMark > 0)
             {
-                parts.Add($"{duplicates.ZonesToMark} regiões que o jogo geraria de novo");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, WorldStrings.World_MaintenanceZones, duplicates.ZonesToMark));
             }
 
             if (marks.Total > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(marks.MarkedItems)} itens e {Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers)} objetos com marca de trapaça");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, WorldStrings.World_MaintenanceCheatMarks,
+                    Helpers.Ui.Number(marks.MarkedItems), Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers)));
             }
 
             CanFixWorld = parts.Count > 0 && !Status.IsActive;
             MaintenanceSummary = parts.Count == 0
-                ? "Nada a corrigir: sem duplicados e sem itens marcados."
-                : "A corrigir: " + string.Join(", ", parts) + ".";
+                ? WorldStrings.World_MaintenanceNothingToFix
+                : string.Format(CultureInfo.CurrentCulture, WorldStrings.World_MaintenanceToFix, string.Join(", ", parts));
         }
         catch (Exception ex) when (ex is IOException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException)
         {
-            MaintenanceSummary = "Não consegui conferir o mundo: " + ex.Message;
+            MaintenanceSummary = string.Format(CultureInfo.CurrentCulture, WorldStrings.World_MaintenanceCheckFailed, ex.Message);
             CanFixWorld = false;
         }
 
@@ -283,14 +288,14 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
             return;
         }
 
-        await RunBusyAsync("Corrigindo o mundo…", async () =>
+        await RunBusyAsync(WorldStrings.World_FixingWorld, async () =>
         {
             var messages = new List<string>();
             var repair = await controller.RepairWorldAsync();
             messages.Add(repair.Message);
             var clean = await controller.CleanCheatMarksAsync();
             messages.Add(clean.Message);
-            await Dialogs.AlertAsync(repair.Success && clean.Success ? "Mundo conferido" : "Correção incompleta",
+            await Dialogs.AlertAsync(repair.Success && clean.Success ? WorldStrings.World_FixDoneTitle : WorldStrings.World_FixIncompleteTitle,
                 string.Join("\n\n", messages));
         });
 
@@ -318,7 +323,7 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
 
         Buildings.Clear();
         BuildingsSummary = string.Empty;
-        await RunBusyAsync("Procurando construções nos chunks…", async () =>
+        await RunBusyAsync(WorldStrings.World_ScanningBuildings, async () =>
         {
             var counts = await Task.Run(() =>
             {
@@ -328,7 +333,7 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
 
             if (counts is null)
             {
-                BuildingsSummary = "O mundo precisa estar íntegro para ser analisado.";
+                BuildingsSummary = WorldStrings.World_BuildingsNeedsHealthyWorld;
                 return;
             }
 
@@ -338,8 +343,8 @@ public sealed partial class WorldViewModel : ProfileEditorViewModel
             }
 
             BuildingsSummary = counts.Count == 0
-                ? "Nenhuma peça que só jogadores constroem (bancadas, baús, portais…) foi encontrada."
-                : $"{Helpers.Ui.Number(counts.Values.Sum())} peças feitas por jogadores encontradas.";
+                ? WorldStrings.World_BuildingsNoneFound
+                : string.Format(CultureInfo.CurrentCulture, WorldStrings.World_BuildingsFound, Helpers.Ui.Number(counts.Values.Sum()));
         });
     }
 

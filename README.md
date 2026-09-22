@@ -18,7 +18,7 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 |---|---|
 | **Iniciar / parar com segurança** | O servidor roda sem janela (não há um "X" para fechar sem salvar). Parar envia Ctrl+C e espera o log confirmar o save. |
 | **Modo criativo de verdade** | Um botão liga/desliga construção sem custo. O preset vai sempre na linha de comando, então desligar remove a chave do mundo — e o app confere no arquivo depois do primeiro save. |
-| **Verificação antes de iniciar** | Save incompleto, chunk faltando, pasta compartilhada com o jogo, porta ocupada, mundo em uso: o servidor nem sobe. Mundo inexistente só é criado com confirmação. |
+| **Verificação antes de iniciar** | Save incompleto, chunk faltando, pasta compartilhada com o jogo (mesmo por atalho ou junção), porta ocupada, mundo em uso: o servidor nem sobe. Pasta de saves no OneDrive/Dropbox exige confirmação. Mundo inexistente só é criado com confirmação. |
 | **Freio de emergência** | Se o log mostrar que o Valheim não achou os dados e começou a gerar outro mundo, o servidor é encerrado na hora, antes de gravar por cima. |
 | **Backups verificados** | Antes de iniciar e depois de parar (e quando você quiser). Cada backup guarda um save completo, conferido por SHA-256, com manifesto e retenção. |
 | **Restauração segura** | Copia o mundo atual antes (ou guarda em quarentena), move a pasta antiga para `_substituidos`, nunca mistura arquivos. |
@@ -36,12 +36,48 @@ save ficou pela metade e o Valheim gerou um mundo novo por cima da base
 
 ## Instalação
 
-Rode `build/install.ps1 -Publish` (instala em `%LOCALAPPDATA%\Programs\Valheim Server Manager` e
-cria atalhos) ou copie a pasta publicada e execute `ValheimServerManager.exe`. Não é preciso instalar .NET nem
-Windows App SDK (a publicação é autocontida). Requer Windows 10 2004+ ou Windows 11, x64, e o
-**Valheim Dedicated Server** instalado pela Steam (Biblioteca → Ferramentas).
+1. Baixe o **`ValheimServerManager-Setup-x.y.z.exe`** na página de
+   [Releases](https://github.com/otaviohonorio/valheim-server-manager/releases/latest).
+2. Abra e siga o assistente: você escolhe a pasta de instalação e se quer atalho na Área de Trabalho.
+   Não pede senha de administrador.
+3. No primeiro uso, clique em **Criar meu primeiro servidor**. Se um servidor já estiver rodando por
+   um `.bat`, o app o detecta e oferece adotá-lo.
 
-No primeiro uso, clique em **Criar meu primeiro servidor**. Se um servidor já estiver rodando por um `.bat`, o app o detecta e oferece adotá-lo.
+Requer Windows 10 2004+ ou Windows 11 (x64) e o **Valheim Dedicated Server**, instalado pela Steam
+(Biblioteca → Ferramentas). Não é preciso instalar .NET nem Windows App SDK.
+
+> **"O Windows protegeu o computador"?** O instalador ainda não tem assinatura digital, então o
+> SmartScreen avisa nos primeiros downloads. Clique em **Mais informações → Executar assim mesmo**.
+> O arquivo `.sha256` ao lado do instalador na página de Releases permite conferir que ele é o original.
+
+**Atualizar** é só rodar o instalador novo: ele usa a mesma pasta, mantém tudo e os servidores
+ligados continuam ligados (feche o app pela bandeja com "Sair e deixar rodando" antes).
+**Desinstalar** fica em Configurações → Aplicativos. Nenhum dos dois mexe em mundos, backups ou
+configurações (`%LOCALAPPDATA%\ValheimServerManager`), e a desinstalação só acontece com os servidores
+desligados, para que nenhum fique rodando sem ter como salvar.
+
+### Jogo e servidor nunca dividem o mesmo mundo
+
+Cada servidor criado pelo app tem a **própria pasta de saves**, separada da pasta do jogo
+(`AppData\LocalLow\IronGate\Valheim`). O app recusa usar a pasta do jogo, inclusive por atalhos,
+links ou junções que apontem para ela, e avisa se a pasta estiver no OneDrive, Dropbox ou Google Drive,
+que travam arquivos no meio do save.
+
+Se você criar o servidor a partir de um mundo que já joga, ele recebe uma **cópia**. O mundo que
+aparece no jogo em "Iniciar jogo" continua existindo, mas não recebe o que for feito no servidor.
+Para jogar no mundo do servidor, mesmo sozinho, entre por **"Entrar no jogo"** (IP ou código de
+entrada).
+
+### Instalar a partir do código
+
+`build/make-installer.ps1` gera o instalador (precisa do .NET SDK 10 e do
+[Inno Setup 6](https://jrsoftware.org/isinfo.php)); `build/install.ps1 -Publish` instala direto,
+sem instalador.
+
+## Apoie o projeto
+
+O app é gratuito e de código aberto. Se ele salvou o seu mundo (ou a sua paciência), considere
+[apoiar pelo GitHub Sponsors](https://github.com/sponsors/otaviohonorio) ❤️
 
 ## Linha de comando
 
@@ -69,7 +105,8 @@ vsm e2e ...                       teste de ponta a ponta com o servidor real
 - .NET 10 · WinUI 3 (Windows App SDK 2.4) · CommunityToolkit.Mvvm · Generic Host · Serilog
 - `Core` sem dependência de interface, coberto por testes xUnit v3
 - `dotnet build ValheimServerManager.slnx` · `dotnet test --project tests/ValheimServerManager.Core.Tests`
-- `build/publish.ps1` gera a versão autocontida em `dist/`
+- `build/publish.ps1` gera a versão autocontida em `dist/`; `build/make-installer.ps1`, o instalador em `artifacts/installer/`
+- Tag `vX.Y.Z` no GitHub → o workflow `release.yml` testa, gera e publica o instalador em Releases
 
 Veja [docs/architecture.md](docs/architecture.md) e as skills em `.claude/skills/`.
 

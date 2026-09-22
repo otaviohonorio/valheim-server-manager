@@ -11,7 +11,9 @@
 param(
     [string]$Configuration = 'Release',
     [string]$Output,
-    [switch]$SkipTests
+    [switch]$SkipTests,
+    # Overrides <Version> from Directory.Build.props (the release workflow passes the git tag).
+    [string]$Version
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,6 +21,12 @@ $repo = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 if (-not $Output) { $Output = Join-Path $repo 'dist' }
 
 $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
+if ($dotnet) {
+    # A dotnet on PATH may be a runtime-only or older install that cannot satisfy global.json.
+    Push-Location $repo
+    try { cmd /c "`"$($dotnet.Source)`" --version >nul 2>&1"; if ($LASTEXITCODE -ne 0) { $dotnet = $null } }
+    finally { Pop-Location }
+}
 if (-not $dotnet) {
     $userDotnet = Join-Path $env:LOCALAPPDATA 'Microsoft\dotnet\dotnet.exe'
     if (Test-Path $userDotnet) {
@@ -41,15 +49,17 @@ try {
     }
 
     if (Test-Path $Output) { Remove-Item $Output -Recurse -Force }
+    $versionArgs = @()
+    if ($Version) { $versionArgs += "-p:Version=$Version" }
 
     Write-Host '== App ==' -ForegroundColor Cyan
     dotnet publish src/ValheimServerManager.App -c $Configuration -o $Output `
-        -p:PublishReadyToRun=true -p:DebugType=none
+        -p:PublishReadyToRun=true -p:DebugType=none @versionArgs
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao publicar o app.' }
 
     Write-Host '== CLI ==' -ForegroundColor Cyan
     dotnet publish src/ValheimServerManager.Cli -c $Configuration -o (Join-Path $Output 'cli') `
-        --self-contained true -p:PublishSingleFile=true -p:DebugType=none
+        --self-contained true -p:PublishSingleFile=true -p:DebugType=none @versionArgs
     if ($LASTEXITCODE -ne 0) { throw 'Falha ao publicar o CLI.' }
 
     $size = (Get-ChildItem $Output -Recurse | Measure-Object Length -Sum).Sum / 1MB

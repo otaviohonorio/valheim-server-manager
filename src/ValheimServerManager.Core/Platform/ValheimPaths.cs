@@ -26,14 +26,101 @@ public static partial class ValheimPaths
     public static string NormalizeDirectory(string path) =>
         Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
 
+    /// <summary>
+    /// Compares folders by the path Windows really opens, so a junction, symbolic link, subst drive
+    /// or 8.3 name pointing at the game's folder is still recognised as the game's folder.
+    /// </summary>
     public static bool SameDirectory(string a, string b) =>
-        string.Equals(NormalizeDirectory(a), NormalizeDirectory(b), StringComparison.OrdinalIgnoreCase);
+        string.Equals(Canonical(a), Canonical(b), StringComparison.OrdinalIgnoreCase);
 
     public static bool IsInside(string path, string parent)
     {
-        var p = NormalizeDirectory(path) + Path.DirectorySeparatorChar;
-        var root = NormalizeDirectory(parent) + Path.DirectorySeparatorChar;
+        var p = Canonical(path) + Path.DirectorySeparatorChar;
+        var root = Canonical(parent) + Path.DirectorySeparatorChar;
         return p.StartsWith(root, StringComparison.OrdinalIgnoreCase) && p.Length > root.Length;
+    }
+
+    private static string Canonical(string path) =>
+        Path.TrimEndingDirectorySeparator(FinalPath.Resolve(NormalizeDirectory(path)));
+
+    /// <summary>
+    /// The folder this program was installed to (where ValheimServerManager.exe lives; the CLI sits in
+    /// its "cli" subfolder), or null when it cannot be told. Updates and uninstalls rewrite it.
+    /// </summary>
+    public static string? AppInstallDirectory
+    {
+        get
+        {
+            var dir = NormalizeDirectory(AppContext.BaseDirectory);
+            foreach (var candidate in new[] { dir, Path.GetDirectoryName(dir) })
+            {
+                if (candidate is not null && File.Exists(Path.Combine(candidate, "ValheimServerManager.exe")))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Name of the sync service that owns <paramref name="path"/> (OneDrive, Dropbox, Google Drive,
+    /// iCloud), or null. Sync clients lock and swap files while the server writes a save, and can leave
+    /// older saves "online only".
+    /// </summary>
+    public static string? CloudSyncProvider(string path, IEnumerable<string>? oneDriveRoots = null)
+    {
+        oneDriveRoots ??= new[] { "OneDrive", "OneDriveConsumer", "OneDriveCommercial" }
+            .Select(System.Environment.GetEnvironmentVariable)
+            .OfType<string>()
+            .Where(Path.IsPathFullyQualified);
+        if (oneDriveRoots.Any(root => SameDirectory(path, root) || IsInside(path, root)))
+        {
+            return "OneDrive";
+        }
+
+        foreach (var segment in NormalizeDirectory(path).Split(Path.DirectorySeparatorChar))
+        {
+            if (segment.StartsWith("OneDrive", StringComparison.OrdinalIgnoreCase))
+            {
+                return "OneDrive";
+            }
+
+            if (segment.Equals("Dropbox", StringComparison.OrdinalIgnoreCase) || segment.StartsWith("Dropbox (", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Dropbox";
+            }
+
+            if (segment.Equals("Google Drive", StringComparison.OrdinalIgnoreCase) || segment.Equals("My Drive", StringComparison.OrdinalIgnoreCase) ||
+                segment.Equals("Meu Drive", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Google Drive";
+            }
+
+            if (segment.Equals("iCloudDrive", StringComparison.OrdinalIgnoreCase) || segment.Equals("iCloud Drive", StringComparison.OrdinalIgnoreCase))
+            {
+                return "iCloud";
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Where new servers go by default: Documents, unless Documents is synced to the cloud (Windows 11
+    /// often moves it into OneDrive) — then the user folder, which is never synced.
+    /// </summary>
+    public static string DefaultServersRoot
+    {
+        get
+        {
+            var documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+            var root = string.IsNullOrEmpty(documents) || CloudSyncProvider(documents) is not null
+                ? System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile)
+                : documents;
+            return Path.Combine(root, "Valheim Servers");
+        }
     }
 
     public static string? FindSteamDirectory()

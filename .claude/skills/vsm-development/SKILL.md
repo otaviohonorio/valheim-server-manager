@@ -26,6 +26,7 @@ dotnet test --project tests/ValheimServerManager.Core.Tests          # MTP runne
 dotnet run --project src/ValheimServerManager.Cli -- --help
 powershell -File build/publish.ps1                                  # self-contained app + CLI in dist/ (~350 MB)
 powershell -File build/install.ps1 -Publish                          # %LOCALAPPDATA%\Programs + shortcuts
+powershell -File build/make-installer.ps1                            # Inno Setup installer in artifacts/installer/
 ```
 
 PowerShell scripts must be saved as UTF-8 **with BOM** (Windows PowerShell 5.1 reads BOM-less files
@@ -97,6 +98,22 @@ tests/ValheimServerManager.Core.Tests  xUnit v3; synthetic worlds only (TestWorl
 - Simulate Windows shutdown by sending `WM_QUERYENDSESSION` (0x11) then `WM_ENDSESSION` (0x16,
   wParam=1) to the `WinUIDesktopWin32WindowClass` window; the app must stop servers before
   `WM_ENDSESSION` returns.
+
+## Installer and releases
+
+- `build/installer.iss` (Inno Setup 6, per-user, pt-BR) packages `dist/`. `build/make-installer.ps1`
+  publishes, compiles and writes a `.sha256`; `-TestAppId <guid>` builds a side-by-side test
+  installer ("Valheim Server Manager Teste", `artifacts/installer-test/`) whose shortcuts and
+  uninstall entry never collide with the real install — use it for install/uninstall tests.
+- Rules it enforces (keep them): the app holds the `ValheimServerManager.Running` mutex
+  (`Program.RunningMutexName`) and setup waits for it to be gone; `CloseApplications=no` because
+  Restart Manager's session-end message makes the app stop every server; the target folder must be
+  empty or a previous install (checked in `PrepareToInstall`, which also runs in silent mode — a
+  check only in `NextButtonClick` is skipped by `/VERYSILENT` and by the hidden dir page on
+  upgrades); uninstall refuses while any `valheim_server.exe` runs; nothing under
+  `%LOCALAPPDATA%\ValheimServerManager` or any save/backup folder is ever deleted.
+- Release: push a tag `vX.Y.Z` → `.github/workflows/release.yml` tests, builds the installer and
+  creates the GitHub release. `ci.yml` builds and tests every push to main.
 
 ## Platform notes
 

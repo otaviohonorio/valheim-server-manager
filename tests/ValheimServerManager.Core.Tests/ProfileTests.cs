@@ -1,4 +1,5 @@
 using ValheimServerManager.Core.Profiles;
+using ValheimServerManager.Core.Platform;
 
 namespace ValheimServerManager.Core.Tests;
 
@@ -135,6 +136,79 @@ public class ProfileValidatorTests
         var issues = ProfileValidator.Validate(profile, gameDir);
 
         Assert.Contains(issues, i => i.Field == nameof(ServerProfile.SaveDirectory) && i.Severity == ValidationSeverity.Error);
+    }
+
+    /// <summary>A junction is another spelling of the same folder: it must not sneak past the rule.</summary>
+    [Fact]
+    public void Save_folder_reaching_the_game_folder_through_a_junction_is_refused()
+    {
+        using var tmp = new TempDir();
+        var gameDir = tmp.Combine("LocalLow", "IronGate", "Valheim");
+        Directory.CreateDirectory(gameDir);
+        var junction = tmp.Combine("atalho");
+        CreateJunction(junction, gameDir);
+        var profile = tmp.Profile();
+        profile.SaveDirectory = junction;
+
+        var issues = ProfileValidator.Validate(profile, gameDir);
+
+        Assert.Contains(issues, i => i.Field == nameof(ServerProfile.SaveDirectory) && i.Severity == ValidationSeverity.Error);
+    }
+
+    [Fact]
+    public void Saves_and_backups_inside_the_program_folder_are_refused()
+    {
+        using var tmp = new TempDir();
+        var appDir = tmp.Combine("Programa");
+        var profile = tmp.Profile();
+        profile.SaveDirectory = Path.Combine(appDir, "ServerSave");
+
+        var issues = ProfileValidator.Validate(profile, tmp.Combine("game"), appDir);
+
+        Assert.Contains(issues, i => i.Field == nameof(ServerProfile.SaveDirectory) && i.Severity == ValidationSeverity.Error);
+
+        profile.SaveDirectory = tmp.Combine("ServerSave");
+        profile.BackupDirectory = Path.Combine(appDir, "backups");
+        issues = ProfileValidator.Validate(profile, tmp.Combine("game"), appDir);
+
+        Assert.Contains(issues, i => i.Field == nameof(ServerProfile.BackupDirectory) && i.Severity == ValidationSeverity.Error);
+    }
+
+    [Fact]
+    public void Save_folder_in_a_synced_folder_is_a_warning()
+    {
+        using var tmp = new TempDir();
+        var profile = tmp.Profile();
+        profile.SaveDirectory = tmp.Combine("OneDrive", "Documentos", "ServerSave");
+
+        var issue = Assert.Single(ProfileValidator.Validate(profile, tmp.Combine("game")), i => i.Field == nameof(ServerProfile.SaveDirectory));
+
+        Assert.Equal(ValidationSeverity.Warning, issue.Severity);
+        Assert.Contains("OneDrive", issue.Message);
+    }
+
+    [Theory]
+    [InlineData(@"C:\Users\Viking\OneDrive - Empresa\Valheim", "OneDrive")]
+    [InlineData(@"D:\Dropbox\Valheim", "Dropbox")]
+    [InlineData(@"G:\Meu Drive\Valheim", "Google Drive")]
+    [InlineData(@"D:\Games\Valheim\ServerSave", null)]
+    public void Recognises_synced_folders(string path, string? expected) =>
+        Assert.Equal(expected, ValheimPaths.CloudSyncProvider(path, []));
+
+    [Fact]
+    public void Recognises_a_redirected_onedrive_root() =>
+        Assert.Equal("OneDrive", ValheimPaths.CloudSyncProvider(@"E:\Nuvem\Valheim", [@"E:\Nuvem"]));
+
+    private static void CreateJunction(string link, string target)
+    {
+        using var mklink = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", $"/c mklink /J \"{link}\" \"{target}\"")
+        {
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+        })!;
+        mklink.WaitForExit();
+        Assert.True(Directory.Exists(link), "mklink /J falhou");
     }
 
     [Theory]

@@ -18,10 +18,11 @@ public static class ProfileValidator
 {
     public const int MinPasswordLength = 5;
 
-    public static IReadOnlyList<ValidationIssue> Validate(ServerProfile profile, string? gameDataDirectory = null)
+    public static IReadOnlyList<ValidationIssue> Validate(ServerProfile profile, string? gameDataDirectory = null, string? appInstallDirectory = null)
     {
         ArgumentNullException.ThrowIfNull(profile);
         gameDataDirectory ??= ValheimPaths.GameDataDirectory;
+        appInstallDirectory ??= ValheimPaths.AppInstallDirectory;
         var issues = new List<ValidationIssue>();
 
         void Error(string field, string message) => issues.Add(new(field, ValidationSeverity.Error, message));
@@ -57,6 +58,18 @@ public static class ProfileValidator
             Warn(nameof(profile.SaveDirectory),
                 "A pasta de saves fica dentro da pasta do jogo. Funciona, mas é fácil confundir os dois. Prefira outro lugar.");
         }
+        else if (appInstallDirectory is not null && IsSameOrInside(profile.SaveDirectory, appInstallDirectory))
+        {
+            Error(nameof(profile.SaveDirectory),
+                "A pasta de saves fica dentro da pasta do programa, que é trocada a cada atualização e apagada ao desinstalar. " +
+                "Use uma pasta só do servidor.");
+        }
+        else if (ValheimPaths.CloudSyncProvider(profile.SaveDirectory) is { } cloud)
+        {
+            Warn(nameof(profile.SaveDirectory),
+                $"A pasta de saves fica no {cloud}. Ele trava e troca arquivos enquanto o servidor salva e pode deixar saves " +
+                $"antigos só na nuvem. Use uma pasta fora do {cloud} (os backups podem ficar lá).");
+        }
 
         // Backups
         if (!string.IsNullOrWhiteSpace(profile.SaveDirectory) && Path.IsPathFullyQualified(profile.SaveDirectory))
@@ -67,6 +80,11 @@ public static class ProfileValidator
             {
                 Error(nameof(profile.BackupDirectory),
                     "Os backups não podem ficar dentro de worlds_local: o Valheim trataria cada backup como um mundo.");
+            }
+            else if (appInstallDirectory is not null && IsSameOrInside(backups, appInstallDirectory))
+            {
+                Error(nameof(profile.BackupDirectory),
+                    "Os backups não podem ficar dentro da pasta do programa: ela é trocada a cada atualização e apagada ao desinstalar.");
             }
         }
 
@@ -174,6 +192,9 @@ public static class ProfileValidator
 
         return issues;
     }
+
+    private static bool IsSameOrInside(string path, string parent) =>
+        ValheimPaths.SameDirectory(path, parent) || ValheimPaths.IsInside(path, parent);
 
     public static bool HasErrors(this IEnumerable<ValidationIssue> issues) =>
         issues.Any(i => i.Severity == ValidationSeverity.Error);

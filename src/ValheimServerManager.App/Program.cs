@@ -7,6 +7,11 @@ namespace ValheimServerManager.App;
 
 public static class Program
 {
+    /// <summary>Held while the app runs; the installer checks it before replacing files (AppMutex in build/installer.iss).</summary>
+    public const string RunningMutexName = "ValheimServerManager.Running";
+
+    private static Mutex? _runningMutex;
+
     private static string InstanceKey
     {
         get
@@ -32,6 +37,8 @@ public static class Program
         {
             return 0;
         }
+
+        _runningMutex = new Mutex(false, RunningMutexName);
 
         Application.Start(callbackParams =>
         {

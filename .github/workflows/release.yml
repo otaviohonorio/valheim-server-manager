@@ -1,0 +1,35 @@
+name: Release
+
+# Push a tag like v1.2.0 to build, test and publish the installer on the Releases page.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+      - name: Build installer (tests run first)
+        shell: pwsh
+        run: ./build/make-installer.ps1 -Version '${{ github.ref_name }}'
+      - name: Publish release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $setup = "artifacts/installer/ValheimServerManager-Setup-$version.exe"
+          gh release create '${{ github.ref_name }}' $setup "$setup.sha256" `
+            --title "Valheim Server Manager $version" --generate-notes

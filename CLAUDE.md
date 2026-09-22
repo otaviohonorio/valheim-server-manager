@@ -29,4 +29,5 @@ dotnet build ValheimServerManager.slnx
 dotnet test --project tests/ValheimServerManager.Core.Tests
 powershell -File build/publish.ps1
 powershell -File build/install.ps1 -Publish   # installs to %LOCALAPPDATA%\Programs + shortcuts
+powershell -File build/make-installer.ps1     # Setup .exe in artifacts/installer (tag vX.Y.Z releases it on GitHub)
 ```

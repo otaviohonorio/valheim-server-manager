@@ -1,10 +1,11 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Platform;
+using ValheimServerManager.Core.Processes;
 using ValheimServerManager.Core.Profiles;
 using ValheimServerManager.Core.Servers;
 using ValheimServerManager.Core.Worlds;
@@ -24,18 +25,21 @@ public sealed partial class NewServerViewModel : ObservableObject
     private readonly ProfileContext _context;
     private readonly IPickerService _pickers;
     private readonly IDialogService _dialogs;
+    private readonly IServerProcessLocator _locator;
     private readonly ILogger<NewServerViewModel> _logger;
     private bool _saveDirectoryTouched;
     private bool _worldNameTouched;
     private bool _updatingDefaults;
 
     public NewServerViewModel(
-        ServerManager manager, ProfileContext context, IPickerService pickers, IDialogService dialogs, ILogger<NewServerViewModel> logger)
+        ServerManager manager, ProfileContext context, IPickerService pickers, IDialogService dialogs, IServerProcessLocator locator,
+        ILogger<NewServerViewModel> logger)
     {
         _manager = manager;
         _context = context;
         _pickers = pickers;
         _dialogs = dialogs;
+        _locator = locator;
         _logger = logger;
 
         _updatingDefaults = true;
@@ -126,9 +130,7 @@ public sealed partial class NewServerViewModel : ObservableObject
                 var folder = string.Concat(ServerName.Trim().Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
                 SaveDirectory = string.IsNullOrWhiteSpace(folder)
                     ? string.Empty
-                    : Path.Combine(
-                        System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments),
-                        "Valheim Servers", folder, "ServerSave");
+                    : Path.Combine(ValheimPaths.DefaultServersRoot, folder, "ServerSave");
             }
         }
         finally
@@ -330,6 +332,15 @@ public sealed partial class NewServerViewModel : ObservableObject
             return;
         }
 
+        if (!IsNewWorld && _locator.IsGameRunning() && !await _dialogs.ConfirmAsync(
+                "O Valheim está aberto",
+                "O servidor recebe uma cópia do último save do mundo. O que você jogou depois dele não vai junto. " +
+                "Para levar tudo, saia do mundo no jogo (ele salva ao sair) e depois crie o servidor.",
+                "Copiar mesmo assim", "Voltar"))
+        {
+            return;
+        }
+
         var profile = BuildProfile();
         IsBusy = true;
         CanCreate = false;
@@ -353,6 +364,17 @@ public sealed partial class NewServerViewModel : ObservableObject
             _context.SelectedProfileId = profile.Id;
             _logger.LogInformation("Servidor {Name} criado (mundo {World})", profile.DisplayName, profile.WorldName);
             NavigateRequested?.Invoke(this, "dashboard");
+
+            if (!IsNewWorld)
+            {
+                await _dialogs.AlertAsync(
+                    "Agora são dois mundos separados",
+                    $"O servidor tem a própria cópia de \"{profile.WorldName}\". O mundo que aparece no jogo em \"Iniciar jogo\" " +
+                    "continua sendo o antigo e não recebe nada do que for feito no servidor (nem o contrário).\n\n" +
+                    "Para jogar no mundo do servidor, entre por \"Entrar no jogo\" (IP ou código de entrada), mesmo jogando sozinho. " +
+                    "Nunca copie arquivos entre as duas pastas com o servidor ligado.",
+                    "Entendi");
+            }
 
             if (start)
             {

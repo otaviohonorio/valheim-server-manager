@@ -28,6 +28,13 @@ if ($Publish -or -not (Test-Path (Join-Path $dist 'ValheimServerManager.exe'))) 
     if ($LASTEXITCODE -ne 0) { throw 'A publicação falhou.' }
 }
 
+# robocopy /MIR deletes whatever the folder had that dist\ does not: only an empty folder or a
+# previous install may be mirrored.
+if ((Test-Path $InstallDir) -and -not (Test-Path (Join-Path $InstallDir 'ValheimServerManager.exe')) -and
+    (Get-ChildItem -Force $InstallDir | Select-Object -First 1)) {
+    throw "A pasta $InstallDir já tem outros arquivos e eles seriam apagados. Escolha uma pasta vazia ou a de uma instalação anterior."
+}
+
 New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 robocopy $dist $InstallDir /MIR /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "Falha ao copiar os arquivos (robocopy $LASTEXITCODE)." }

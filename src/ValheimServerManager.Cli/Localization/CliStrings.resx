@@ -259,7 +259,7 @@
     <value>Lists the world's backups.</value>
   </data>
   <data name="Backups_Line" xml:space="preserve">
-    <value>{0:dd/MM/yyyy HH:mm:ss}  save {1,-5} {2,-11} {3,8:N0} KB  {4}</value>
+    <value>{0:yyyy-MM-dd HH:mm:ss}  save {1,-5} {2,-11} {3,8:N0} KB  {4}</value>
   </data>
   <data name="Restore_Description" xml:space="preserve">
     <value>Restores a backup (the server must be stopped).</value>

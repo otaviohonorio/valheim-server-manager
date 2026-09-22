@@ -12,4 +12,388 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Dashboard_Start" xml:space="preserve">
+    <value>Iniciar</value>
+  </data>
+  <data name="Dashboard_StopSafely" xml:space="preserve">
+    <value>Detener de forma segura</value>
+  </data>
+  <data name="Dashboard_StopTooltip" xml:space="preserve">
+    <value>Envía Ctrl+C: el servidor guarda el mundo y se apaga.</value>
+  </data>
+  <data name="Dashboard_Restart" xml:space="preserve">
+    <value>Reiniciar</value>
+  </data>
+  <data name="Dashboard_RestartTooltip" xml:space="preserve">
+    <value>Guardar, apagar e iniciar de nuevo</value>
+  </data>
+  <data name="Dashboard_Adjust" xml:space="preserve">
+    <value>Ajustar</value>
+  </data>
+  <data name="Dashboard_EmergencyTitle" xml:space="preserve">
+    <value>Servidor cerrado para proteger el mundo</value>
+  </data>
+  <data name="Dashboard_GoToBackups" xml:space="preserve">
+    <value>Ir a Copias de seguridad</value>
+  </data>
+  <data name="Dashboard_DuplicatesTitle" xml:space="preserve">
+    <value>Mundo con objetos duplicados</value>
+  </data>
+  <data name="Dashboard_RepairWorld" xml:space="preserve">
+    <value>Reparar mundo</value>
+  </data>
+  <data name="Dashboard_CheatMarksTitle" xml:space="preserve">
+    <value>Ítems marcados como hechos con trampa</value>
+  </data>
+  <data name="Dashboard_CleanMarks" xml:space="preserve">
+    <value>Limpiar marcas</value>
+  </data>
+  <data name="Dashboard_LastStopTitle" xml:space="preserve">
+    <value>Última detención</value>
+  </data>
+  <data name="Dashboard_AttachedTitle" xml:space="preserve">
+    <value>Servidor iniciado fuera del administrador</value>
+  </data>
+  <data name="Dashboard_AttachedMessage" xml:space="preserve">
+    <value>El administrador está siguiendo este servidor, pero su ventana todavía se puede cerrar con la X (sin guardar). Usa Reiniciar: se apaga de forma segura y vuelve sin ventana, con todas las protecciones.</value>
+  </data>
+  <data name="Dashboard_PendingConfigTitle" xml:space="preserve">
+    <value>El servidor no está usando la configuración guardada</value>
+  </data>
+  <data name="Dashboard_RestartNow" xml:space="preserve">
+    <value>Reiniciar ahora</value>
+  </data>
+  <data name="Dashboard_ConfigConfirmedTitle" xml:space="preserve">
+    <value>Configuración verificada</value>
+  </data>
+  <data name="Dashboard_StopSlowTitle" xml:space="preserve">
+    <value>El apagado está tardando</value>
+  </data>
+  <data name="Dashboard_StopSlowMessage" xml:space="preserve">
+    <value>El servidor todavía no confirmó el guardado. Espera; forzar el cierre pierde el progreso no guardado.</value>
+  </data>
+  <data name="Dashboard_PlayersOnline" xml:space="preserve">
+    <value>Jugadores en línea</value>
+  </data>
+  <data name="Dashboard_WhoIsOnline" xml:space="preserve">
+    <value>Quién está en línea</value>
+  </data>
+  <data name="Dashboard_JoinCode" xml:space="preserve">
+    <value>Código para unirse (crossplay)</value>
+  </data>
+  <data name="Dashboard_CopyCode" xml:space="preserve">
+    <value>Copiar código</value>
+  </data>
+  <data name="Dashboard_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Dashboard_Uptime" xml:space="preserve">
+    <value>Tiempo en línea</value>
+  </data>
+  <data name="Dashboard_LastSave" xml:space="preserve">
+    <value>Último guardado</value>
+  </data>
+  <data name="Dashboard_LastBackup" xml:space="preserve">
+    <value>Última copia de seguridad</value>
+  </data>
+  <data name="Dashboard_Address" xml:space="preserve">
+    <value>Dirección</value>
+  </data>
+  <data name="Dashboard_BackupNow" xml:space="preserve">
+    <value>Copia de seguridad ahora</value>
+  </data>
+  <data name="Dashboard_WorldFolder" xml:space="preserve">
+    <value>Carpeta del mundo</value>
+  </data>
+  <data name="Dashboard_OpenLog" xml:space="preserve">
+    <value>Abrir registro</value>
+  </data>
+  <data name="Dashboard_Activity" xml:space="preserve">
+    <value>Actividad</value>
+  </data>
+  <data name="Dashboard_ActivityEmpty" xml:space="preserve">
+    <value>Nada por aquí todavía. Los eventos del servidor (inicio, guardados, jugadores, copias de seguridad) aparecen en esta lista.</value>
+  </data>
+  <data name="Dashboard_AddressPort" xml:space="preserve">
+    <value>puerto {0}</value>
+  </data>
+  <data name="Dashboard_PlayersLoading" xml:space="preserve">
+    <value>{0} entrando…</value>
+  </data>
+  <data name="Dashboard_PlayersAndLoading" xml:space="preserve">
+    <value>{0} + {1} entrando…</value>
+  </data>
+  <data name="Dashboard_Subtitle" xml:space="preserve">
+    <value>{0} · mundo {1}</value>
+  </data>
+  <data name="Dashboard_ConfigMatches" xml:space="preserve">
+    <value>El servidor está usando exactamente la configuración guardada ({0} opciones verificadas en la línea de comandos y en el registro).</value>
+  </data>
+  <data name="Dashboard_ConfigDifference" xml:space="preserve">
+    <value>• {0}: en uso {1}; guardado {2}</value>
+  </data>
+  <data name="Dashboard_ModeCreative" xml:space="preserve">
+    <value>Modo creativo</value>
+  </data>
+  <data name="Dashboard_ModeNormal" xml:space="preserve">
+    <value>Modo normal</value>
+  </data>
+  <data name="Dashboard_ModeCreativeDetail" xml:space="preserve">
+    <value>Construcción y fabricación sin costo para todos. Los logros quedan bloqueados mientras esté activado.</value>
+  </data>
+  <data name="Dashboard_ModeNormalDetail" xml:space="preserve">
+    <value>Costos normales. Logros habilitados (si el personaje y el mundo no tienen marca de trampa).</value>
+  </data>
+  <data name="Dashboard_ModeVerified" xml:space="preserve">
+    <value>✓ Confirmado en el archivo del mundo.</value>
+  </data>
+  <data name="Dashboard_ModeNotVerified" xml:space="preserve">
+    <value>✗ ¡El archivo del mundo NO coincide!</value>
+  </data>
+  <data name="Dashboard_BackToNormal" xml:space="preserve">
+    <value>Volver al modo normal</value>
+  </data>
+  <data name="Dashboard_EnableCreative" xml:space="preserve">
+    <value>Activar modo creativo</value>
+  </data>
+  <data name="Dashboard_NoSaveThisSession" xml:space="preserve">
+    <value>Ningún guardado en esta sesión</value>
+  </data>
+  <data name="Dashboard_SaveNumberAgo" xml:space="preserve">
+    <value>Guardado {0} · {1}</value>
+  </data>
+  <data name="Dashboard_NoBackupYet" xml:space="preserve">
+    <value>Todavía no hay copias de seguridad</value>
+  </data>
+  <data name="Dashboard_ConfigureServerTitle" xml:space="preserve">
+    <value>Configura el servidor</value>
+  </data>
+  <data name="Dashboard_ConfigureServerMessage" xml:space="preserve">
+    <value>Define la carpeta de guardados y el nombre del mundo en "Servidor" y "Mundo".</value>
+  </data>
+  <data name="Dashboard_WorldUnreadableTitle" xml:space="preserve">
+    <value>No se pudo leer el mundo</value>
+  </data>
+  <data name="Dashboard_WorldBrokenTitle" xml:space="preserve">
+    <value>Mundo con problemas — no lo inicies</value>
+  </data>
+  <data name="Dashboard_NewWorldSeededTitle" xml:space="preserve">
+    <value>Mundo nuevo listo para generarse</value>
+  </data>
+  <data name="Dashboard_WorldMissingTitle" xml:space="preserve">
+    <value>El mundo todavía no existe</value>
+  </data>
+  <data name="Dashboard_WorldMissingMessage" xml:space="preserve">
+    <value>El servidor va a crear un mundo nuevo.</value>
+  </data>
+  <data name="Dashboard_WorldHealthyTitle" xml:space="preserve">
+    <value>Mundo íntegro</value>
+  </data>
+  <data name="Dashboard_WorldHealthyMessage" xml:space="preserve">
+    <value>Guardado {0} completo, {1} chunks verificados. Último guardado en disco: {2}.</value>
+  </data>
+  <data name="Dashboard_WorldSummary" xml:space="preserve">
+    <value>Semilla {0} · {1} objetos · {2}</value>
+  </data>
+  <data name="Dashboard_BusyChecking" xml:space="preserve">
+    <value>Verificando y haciendo copia de seguridad…</value>
+  </data>
+  <data name="Dashboard_NewWorldTitle" xml:space="preserve">
+    <value>¿Crear un mundo nuevo?</value>
+  </data>
+  <data name="Dashboard_ConfirmStartTitle" xml:space="preserve">
+    <value>Confirma antes de iniciar</value>
+  </data>
+  <data name="Dashboard_NewWorldMessage" xml:space="preserve">
+    <value>No existe el mundo "{0}" en esta carpeta de guardados. Si esperabas encontrar un mundo aquí, cancela y revisa el nombre y la carpeta.</value>
+  </data>
+  <data name="Dashboard_ReadWarnings" xml:space="preserve">
+    <value>Lee las advertencias de abajo:</value>
+  </data>
+  <data name="Dashboard_CreateAndStart" xml:space="preserve">
+    <value>Crear mundo nuevo e iniciar</value>
+  </data>
+  <data name="Dashboard_StartAnyway" xml:space="preserve">
+    <value>Iniciar de todos modos</value>
+  </data>
+  <data name="Dashboard_NotStartedTitle" xml:space="preserve">
+    <value>El servidor no se inició</value>
+  </data>
+  <data name="Dashboard_PlayersOnlineTitle" xml:space="preserve">
+    <value>Hay jugadores en línea</value>
+  </data>
+  <data name="Dashboard_StopPlayersMessage" xml:space="preserve">
+    <value>{0} jugador(es) conectado(s) serán desconectados. El mundo se guardará antes de apagar.</value>
+  </data>
+  <data name="Dashboard_ShutDown" xml:space="preserve">
+    <value>Apagar</value>
+  </data>
+  <data name="Dashboard_BusyStopping" xml:space="preserve">
+    <value>Guardando el mundo y apagando…</value>
+  </data>
+  <data name="Dashboard_ShutdownTitle" xml:space="preserve">
+    <value>Apagado</value>
+  </data>
+  <data name="Dashboard_NotStoppedTitle" xml:space="preserve">
+    <value>El servidor todavía no se apagó</value>
+  </data>
+  <data name="Dashboard_NotStoppedMessage" xml:space="preserve">
+    <value>Normalmente el guardado tarda segundos, pero los mundos grandes pueden tardar más. Forzar el cierre pierde todo desde el último guardado.</value>
+  </data>
+  <data name="Dashboard_Wait2Minutes" xml:space="preserve">
+    <value>Esperar 2 minutos más</value>
+  </data>
+  <data name="Dashboard_ForceClose" xml:space="preserve">
+    <value>Forzar cierre</value>
+  </data>
+  <data name="Dashboard_KeepRunning" xml:space="preserve">
+    <value>Dejar funcionando</value>
+  </data>
+  <data name="Dashboard_BusyWaitingSave" xml:space="preserve">
+    <value>Esperando a que el servidor guarde…</value>
+  </data>
+  <data name="Dashboard_ForceCloseTitle" xml:space="preserve">
+    <value>¿Forzar cierre?</value>
+  </data>
+  <data name="Dashboard_ForceCloseMessage" xml:space="preserve">
+    <value>Se perderá el progreso desde el último guardado. ¿Continuar?</value>
+  </data>
+  <data name="Dashboard_Force" xml:space="preserve">
+    <value>Forzar</value>
+  </data>
+  <data name="Dashboard_RestartWithPlayersTitle" xml:space="preserve">
+    <value>¿Reiniciar con jugadores en línea?</value>
+  </data>
+  <data name="Dashboard_RestartPlayersMessage" xml:space="preserve">
+    <value>{0} jugador(es) serán desconectados por unos segundos.</value>
+  </data>
+  <data name="Dashboard_BusyRestarting" xml:space="preserve">
+    <value>Reiniciando de forma segura…</value>
+  </data>
+  <data name="Dashboard_RestartFailedTitle" xml:space="preserve">
+    <value>Reinicio no completado</value>
+  </data>
+  <data name="Dashboard_HammerTitle" xml:space="preserve">
+    <value>Preset Martillo</value>
+  </data>
+  <data name="Dashboard_HammerMessage" xml:space="preserve">
+    <value>El preset Martillo siempre es creativo. Cambia el preset en "Mundo" para usar el modo normal.</value>
+  </data>
+  <data name="Dashboard_CreativeOnMessage" xml:space="preserve">
+    <value>La construcción y la fabricación pasan a ser GRATIS para todos los que estén en el servidor, y nadie gana logros mientras el modo esté activado.</value>
+  </data>
+  <data name="Dashboard_CreativeOffMessage" xml:space="preserve">
+    <value>La construcción y la fabricación vuelven a costar recursos. La clave nobuildcost se quita del mundo en el próximo inicio.</value>
+  </data>
+  <data name="Dashboard_ModeRestartPlayers" xml:space="preserve">
+    <value>El servidor se reiniciará ahora y {0} jugador(es) serán desconectados por unos segundos.</value>
+  </data>
+  <data name="Dashboard_ModeRestart" xml:space="preserve">
+    <value>El servidor se reiniciará ahora (el mundo se guarda antes).</value>
+  </data>
+  <data name="Dashboard_EnableCreativeTitle" xml:space="preserve">
+    <value>¿Activar modo creativo?</value>
+  </data>
+  <data name="Dashboard_BackToNormalTitle" xml:space="preserve">
+    <value>¿Volver al modo normal?</value>
+  </data>
+  <data name="Dashboard_SaveAndRestart" xml:space="preserve">
+    <value>Guardar y reiniciar</value>
+  </data>
+  <data name="Dashboard_Confirm" xml:space="preserve">
+    <value>Confirmar</value>
+  </data>
+  <data name="Dashboard_BusyRestartingCreative" xml:space="preserve">
+    <value>Reiniciando en modo creativo…</value>
+  </data>
+  <data name="Dashboard_BusyRestartingNormal" xml:space="preserve">
+    <value>Reiniciando en modo normal…</value>
+  </data>
+  <data name="Dashboard_DuplicateCopies" xml:space="preserve">
+    <value>{0} objetos existen por duplicado ({1})</value>
+  </data>
+  <data name="Dashboard_DoubleSpawnZones" xml:space="preserve">
+    <value>{0} regiones generan el doble de enemigos</value>
+  </data>
+  <data name="Dashboard_ZonesToMark" xml:space="preserve">
+    <value>{0} regiones todavía se van a generar de nuevo cuando alguien pase por ahí</value>
+  </data>
+  <data name="Dashboard_DuplicatesExplanation" xml:space="preserve">
+    <value>Por eso los objetos recogidos "vuelven", el mineral se rompe dos veces y aparecen demasiados enemigos.</value>
+  </data>
+  <data name="Dashboard_StopToRepair" xml:space="preserve">
+    <value>Detén el servidor para reparar.</value>
+  </data>
+  <data name="Dashboard_RepairMakesBackup" xml:space="preserve">
+    <value>La reparación hace una copia de seguridad antes y graba un guardado nuevo.</value>
+  </data>
+  <data name="Dashboard_RepairConfirmWhat" xml:space="preserve">
+    <value>Quita {0} copias creadas cuando el juego generó regiones de nuevo encima del mundo y marca {1} regiones como ya generadas, para que no vuelva a pasar.</value>
+  </data>
+  <data name="Dashboard_RepairConfirmSafety" xml:space="preserve">
+    <value>Las construcciones, los cofres de los jugadores, el terreno y los inventarios no se modifican. Antes de la reparación se hace una copia de seguridad; si algo parece estar mal, solo tienes que restaurarla en la pantalla Copias de seguridad.</value>
+  </data>
+  <data name="Dashboard_RepairWorldTitle" xml:space="preserve">
+    <value>¿Reparar mundo?</value>
+  </data>
+  <data name="Dashboard_Repair" xml:space="preserve">
+    <value>Reparar</value>
+  </data>
+  <data name="Dashboard_BusyRepairing" xml:space="preserve">
+    <value>Reparando el mundo…</value>
+  </data>
+  <data name="Dashboard_WorldRepairedTitle" xml:space="preserve">
+    <value>Mundo reparado</value>
+  </data>
+  <data name="Dashboard_WorldNotRepairedTitle" xml:space="preserve">
+    <value>El mundo no se reparó</value>
+  </data>
+  <data name="Dashboard_MarkedPieces" xml:space="preserve">
+    <value>{0} piezas construidas</value>
+  </data>
+  <data name="Dashboard_MarkedItems" xml:space="preserve">
+    <value>{0} ítems en cofres y en el suelo</value>
+  </data>
+  <data name="Dashboard_MarkedOthers" xml:space="preserve">
+    <value>{0} otros objetos</value>
+  </data>
+  <data name="Dashboard_CheatMarksSentence" xml:space="preserve">
+    <value>{0} están marcados por el juego como "hechos con trampa". Un ítem marcado nunca se apila con uno igual sin marca, y desmontar una pieza marcada devuelve material marcado.</value>
+  </data>
+  <data name="Dashboard_StopToClean" xml:space="preserve">
+    <value>Detén el servidor para limpiar.</value>
+  </data>
+  <data name="Dashboard_CleanMakesBackup" xml:space="preserve">
+    <value>La limpieza hace una copia de seguridad antes y no cambia lo que existe, solo quita la marca.</value>
+  </data>
+  <data name="Dashboard_CleanConfirmWhat" xml:space="preserve">
+    <value>Quita la marca de "hecho con trampa" de {0} objetos y {1} ítems del mundo.</value>
+  </data>
+  <data name="Dashboard_CleanConfirmDetails" xml:space="preserve">
+    <value>Nada más cambia: los ítems conservan la misma cantidad, calidad y dueño. Después de eso vuelven a apilarse y los logros dejan de estar bloqueados por su culpa. Lo que esté en la mochila de los jugadores no se modifica; guárdalo en un cofre para limpiarlo también. Antes de la limpieza se hace una copia de seguridad.</value>
+  </data>
+  <data name="Dashboard_CleanMarksTitle" xml:space="preserve">
+    <value>¿Limpiar marcas de trampa?</value>
+  </data>
+  <data name="Dashboard_Clean" xml:space="preserve">
+    <value>Limpiar</value>
+  </data>
+  <data name="Dashboard_BusyCleaning" xml:space="preserve">
+    <value>Limpiando las marcas…</value>
+  </data>
+  <data name="Dashboard_MarksRemovedTitle" xml:space="preserve">
+    <value>Marcas quitadas</value>
+  </data>
+  <data name="Dashboard_MarksNotRemovedTitle" xml:space="preserve">
+    <value>Las marcas no se quitaron</value>
+  </data>
+  <data name="Dashboard_BusyBackingUp" xml:space="preserve">
+    <value>Copiando y verificando el mundo…</value>
+  </data>
+  <data name="Dashboard_ManualBackupNote" xml:space="preserve">
+    <value>Copia de seguridad manual desde el panel</value>
+  </data>
+  <data name="Dashboard_BackupFailedTitle" xml:space="preserve">
+    <value>No se hizo la copia de seguridad</value>
+  </data>
 </root>

@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using ValheimServerManager.App.Helpers;
+using ValheimServerManager.App.Localization;
 using ValheimServerManager.App.Services;
 using ValheimServerManager.Core.Backups;
 using ValheimServerManager.Core.Servers;
@@ -121,7 +123,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
     public string JoinCodeText => Status.JoinCode ?? "—";
 
-    public string AddressText => Status.PublicAddress ?? (Profile is { } p ? $"porta {p.Port}" : "—");
+    public string AddressText => Status.PublicAddress ?? (Profile is { } p ? string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_AddressPort, p.Port) : "—");
 
     public string PlayersText => Status.IsActive ? Status.PlayerCount.ToString(System.Globalization.CultureInfo.InvariantCulture) : "—";
 
@@ -138,8 +140,8 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             var names = string.Join(", ", Status.OnlinePlayers.Select(p => p.Name));
             var loading = Status.PlayerCount - Status.OnlinePlayers.Count;
             return loading <= 0 ? names
-                : names.Length == 0 ? $"{loading} entrando…"
-                : $"{names} + {loading} entrando…";
+                : names.Length == 0 ? string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_PlayersLoading, loading)
+                : string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_PlayersAndLoading, names, loading);
         }
     }
 
@@ -170,7 +172,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         var profile = Profile;
         RefreshSummary(profile);
         Title = profile?.DisplayName ?? string.Empty;
-        Subtitle = profile is null ? string.Empty : $"{profile.ServerName} · mundo {profile.WorldName}";
+        Subtitle = profile is null ? string.Empty : string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_Subtitle, profile.ServerName, profile.WorldName);
         IsRunning = status.State == ServerRunState.Running;
         CanStart = profile is not null && !status.IsActive && !IsBusy;
         CanStop = status.State is ServerRunState.Running or ServerRunState.Starting && !IsBusy;
@@ -180,25 +182,25 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         ConfigText = diffs switch
         {
             null => string.Empty,
-            { Count: 0 } => $"O servidor está usando exatamente a configuração salva ({status.ConfigCheckedCount} opções conferidas na linha de comando e no log).",
-            _ => string.Join("\n", diffs.Select(d => $"• {d.Setting}: em uso {d.Actual}; salvo {d.Expected}")),
+            { Count: 0 } => string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_ConfigMatches, status.ConfigCheckedCount),
+            _ => string.Join("\n", diffs.Select(d => string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_ConfigDifference, d.Setting, d.Actual, d.Expected))),
         };
 
         IsCreative = status.IsActive ? status.CreativeActive : profile?.IsCreativeEffective ?? false;
-        ModeText = IsCreative ? "Modo criativo" : "Modo normal";
+        ModeText = IsCreative ? DashboardStrings.Dashboard_ModeCreative : DashboardStrings.Dashboard_ModeNormal;
         ModeDetail = IsCreative
-            ? "Construção e craft sem custo para todos. Conquistas bloqueadas enquanto estiver ligado."
-            : "Custos normais. Conquistas liberadas (se personagem e mundo não tiverem marca de trapaça).";
+            ? DashboardStrings.Dashboard_ModeCreativeDetail
+            : DashboardStrings.Dashboard_ModeNormalDetail;
         if (status.IsActive && status.ModeVerified is { } verified)
         {
-            ModeDetail += verified ? " ✓ Confirmado no arquivo do mundo." : " ✗ O arquivo do mundo NÃO confere!";
+            ModeDetail += " " + (verified ? DashboardStrings.Dashboard_ModeVerified : DashboardStrings.Dashboard_ModeNotVerified);
         }
 
-        ToggleModeText = IsCreative ? "Voltar ao modo normal" : "Ativar modo criativo";
+        ToggleModeText = IsCreative ? DashboardStrings.Dashboard_BackToNormal : DashboardStrings.Dashboard_EnableCreative;
 
         LastSaveText = status.LastSaveAt is null
-            ? "Nenhum save nesta sessão"
-            : $"Save {status.LastSaveNumber} · {Helpers.Ui.Ago(status.LastSaveAt)}";
+            ? DashboardStrings.Dashboard_NoSaveThisSession
+            : SaveText(status.LastSaveNumber, status.LastSaveAt);
         LastBackupText = status.LastBackupAt is null ? LastBackupFromDisk() : $"{Helpers.Ui.Ago(status.LastBackupAt)}";
 
         LastExitWasBad = status is { IsActive: false, LastExit.Clean: false };
@@ -258,9 +260,12 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         Uptime = Status is { IsActive: true, StartedAt: { } started } ? Helpers.Ui.Duration(DateTimeOffset.Now - started) : "—";
         if (Status.LastSaveAt is not null)
         {
-            LastSaveText = $"Save {Status.LastSaveNumber} · {Helpers.Ui.Ago(Status.LastSaveAt)}";
+            LastSaveText = SaveText(Status.LastSaveNumber, Status.LastSaveAt);
         }
     }
+
+    private static string SaveText(object? number, DateTimeOffset? at) =>
+        string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_SaveNumberAgo, number, Helpers.Ui.Ago(at));
 
     private string LastBackupFromDisk()
     {
@@ -273,7 +278,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         {
             var last = Manager.Backups.List(profile, includeGameAutoBackups: false)
                 .FirstOrDefault(b => b.WorldName.Equals(profile.WorldName, StringComparison.OrdinalIgnoreCase) && b.Kind != BackupKind.Quarantine);
-            return last is null ? "Nenhum backup ainda" : $"{Helpers.Ui.Ago(last.CreatedAt)} ({Helpers.Ui.KindText(last.Kind).ToLowerInvariant()})";
+            return last is null ? DashboardStrings.Dashboard_NoBackupYet : $"{Helpers.Ui.Ago(last.CreatedAt)} ({Helpers.Ui.KindText(last.Kind).ToLowerInvariant()})";
         }
         catch (IOException)
         {
@@ -285,8 +290,8 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
     {
         if (Profile is not { } profile || string.IsNullOrWhiteSpace(profile.SaveDirectory) || string.IsNullOrWhiteSpace(profile.WorldName))
         {
-            WorldHealthTitle = "Configure o servidor";
-            WorldHealthMessage = "Defina a pasta de saves e o nome do mundo em \"Servidor\" e \"Mundo\".";
+            WorldHealthTitle = DashboardStrings.Dashboard_ConfigureServerTitle;
+            WorldHealthMessage = DashboardStrings.Dashboard_ConfigureServerMessage;
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
             WorldSummary = string.Empty;
             return;
@@ -299,7 +304,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            WorldHealthTitle = "Não foi possível ler o mundo";
+            WorldHealthTitle = DashboardStrings.Dashboard_WorldUnreadableTitle;
             WorldHealthMessage = ex.Message;
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning;
             return;
@@ -307,27 +312,31 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
         if (report.HasErrors)
         {
-            WorldHealthTitle = "Mundo com problema — não inicie";
+            WorldHealthTitle = DashboardStrings.Dashboard_WorldBrokenTitle;
             WorldHealthMessage = string.Join(" ", report.Issues.Where(i => i.Severity == IssueSeverity.Error).Select(i => i.Message));
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error;
         }
         else if (report.Issues.Any(i => i.Code == "NEW_WORLD_SEEDED"))
         {
-            WorldHealthTitle = "Mundo novo pronto para gerar";
+            WorldHealthTitle = DashboardStrings.Dashboard_NewWorldSeededTitle;
             WorldHealthMessage = report.Issues.First(i => i.Code == "NEW_WORLD_SEEDED").Message;
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational;
         }
         else if (report.IsNewWorld)
         {
-            WorldHealthTitle = "Mundo ainda não existe";
-            WorldHealthMessage = report.Issues.FirstOrDefault()?.Message ?? "O servidor vai criar um mundo novo.";
+            WorldHealthTitle = DashboardStrings.Dashboard_WorldMissingTitle;
+            WorldHealthMessage = report.Issues.FirstOrDefault()?.Message ?? DashboardStrings.Dashboard_WorldMissingMessage;
             WorldHealthSeverity = Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning;
         }
         else
         {
-            WorldHealthTitle = "Mundo íntegro";
-            WorldHealthMessage = $"Save {report.LatestSave!.Number} completo, {report.ChunkCount} chunks conferidos. " +
-                                 $"Último save em disco: {Helpers.Ui.When(report.LastSavedUtc is { } u ? new DateTimeOffset(u) : null)}.";
+            WorldHealthTitle = DashboardStrings.Dashboard_WorldHealthyTitle;
+            WorldHealthMessage = string.Format(
+                CultureInfo.CurrentCulture,
+                DashboardStrings.Dashboard_WorldHealthyMessage,
+                report.LatestSave!.Number,
+                report.ChunkCount,
+                Helpers.Ui.When(report.LastSavedUtc is { } u ? new DateTimeOffset(u) : null));
             WorldHealthSeverity = report.HasWarnings
                 ? Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning
                 : Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success;
@@ -345,7 +354,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         WorldSummary = report.Metadata is { } meta
-            ? $"Seed {meta.SeedName} · {Helpers.Ui.Number(report.TotalZdos)} objetos · {Helpers.Ui.Size(report.SaveSetBytes)}"
+            ? string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_WorldSummary, meta.SeedName, Helpers.Ui.Number(report.TotalZdos), Helpers.Ui.Size(report.SaveSetBytes))
             : string.Empty;
         LastBackupText = Status.LastBackupAt is null ? LastBackupFromDisk() : Helpers.Ui.Ago(Status.LastBackupAt);
     }
@@ -377,7 +386,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             return;
         }
 
-        await RunBusyAsync("Verificando e fazendo backup…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyChecking, async () =>
         {
             var result = await controller.StartAsync(StartOptions.Default);
             if (result.Success)
@@ -389,13 +398,13 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             {
                 var isNewWorld = result.Checks.Any(c => c.Code == "WORLD_NEW_WORLD");
                 var proceed = await _dialogs.ShowChecksAsync(
-                    isNewWorld ? "Criar um mundo novo?" : "Confirme antes de iniciar",
+                    isNewWorld ? DashboardStrings.Dashboard_NewWorldTitle : DashboardStrings.Dashboard_ConfirmStartTitle,
                     isNewWorld
-                        ? $"Não existe o mundo \"{controller.Profile.WorldName}\" nesta pasta de saves. Se você esperava encontrar um mundo aqui, cancele e confira o nome e a pasta."
-                        : "Leia os avisos abaixo:",
+                        ? string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_NewWorldMessage, controller.Profile.WorldName)
+                        : DashboardStrings.Dashboard_ReadWarnings,
                     result.Checks,
                     canProceed: true,
-                    proceedText: isNewWorld ? "Criar mundo novo e iniciar" : "Iniciar mesmo assim");
+                    proceedText: isNewWorld ? DashboardStrings.Dashboard_CreateAndStart : DashboardStrings.Dashboard_StartAnyway);
                 if (proceed)
                 {
                     result = await controller.StartAsync(StartOptions.Confirmed);
@@ -411,7 +420,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             }
 
             var worldBroken = result.Checks.Any(c => c.Code.StartsWith("WORLD_", StringComparison.Ordinal) && c.Level == CheckLevel.Blocker);
-            await _dialogs.ShowChecksAsync("O servidor não foi iniciado", result.Message, result.Checks, canProceed: false, proceedText: string.Empty);
+            await _dialogs.ShowChecksAsync(DashboardStrings.Dashboard_NotStartedTitle,result.Message, result.Checks, canProceed: false, proceedText: string.Empty);
             if (worldBroken)
             {
                 NavigateRequested?.Invoke(this, "backups");
@@ -428,14 +437,14 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         if (Status.PlayerCount > 0 && !await _dialogs.ConfirmAsync(
-                "Há jogadores online",
-                $"{Status.PlayerCount} jogador(es) conectado(s) serão desconectados. O mundo será salvo antes de desligar.",
-                "Desligar"))
+                DashboardStrings.Dashboard_PlayersOnlineTitle,
+                string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_StopPlayersMessage, Status.PlayerCount),
+                DashboardStrings.Dashboard_ShutDown))
         {
             return;
         }
 
-        await RunBusyAsync("Salvando o mundo e desligando…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyStopping, async () =>
         {
             var result = await controller.StopAsync();
             if (!result.Success && controller.Status.StopTimedOut)
@@ -444,7 +453,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             }
             else if (!result.Success)
             {
-                await _dialogs.AlertAsync("Desligamento", result.Message);
+                await _dialogs.AlertAsync(DashboardStrings.Dashboard_ShutdownTitle, result.Message);
             }
         });
     }
@@ -454,14 +463,14 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         while (controller.Status.IsActive)
         {
             var choice = await _dialogs.ChooseAsync(
-                "O servidor ainda não desligou",
-                "Normalmente o save leva segundos, mas mundos grandes podem demorar. Forçar o encerramento perde tudo desde o último save.",
-                "Esperar mais 2 minutos",
-                "Forçar encerramento",
-                "Deixar rodando");
+                DashboardStrings.Dashboard_NotStoppedTitle,
+                DashboardStrings.Dashboard_NotStoppedMessage,
+                DashboardStrings.Dashboard_Wait2Minutes,
+                DashboardStrings.Dashboard_ForceClose,
+                DashboardStrings.Dashboard_KeepRunning);
             if (choice == 1)
             {
-                BusyText = "Aguardando o servidor salvar…";
+                BusyText = DashboardStrings.Dashboard_BusyWaitingSave;
                 var result = await controller.WaitForStopAsync(TimeSpan.FromMinutes(2));
                 if (result.Success || !controller.Status.IsActive)
                 {
@@ -470,7 +479,7 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             }
             else if (choice == 2)
             {
-                if (await _dialogs.ConfirmAsync("Forçar encerramento?", "O progresso desde o último save será perdido. Continuar?", "Forçar", destructive: true))
+                if (await _dialogs.ConfirmAsync(DashboardStrings.Dashboard_ForceCloseTitle, DashboardStrings.Dashboard_ForceCloseMessage, DashboardStrings.Dashboard_Force, destructive: true))
                 {
                     await controller.ForceKillAsync();
                     await controller.WaitForStopAsync(TimeSpan.FromSeconds(30));
@@ -493,19 +502,19 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         if (Status.PlayerCount > 0 && !await _dialogs.ConfirmAsync(
-                "Reiniciar com jogadores online?",
-                $"{Status.PlayerCount} jogador(es) serão desconectados por alguns segundos.",
-                "Reiniciar"))
+                DashboardStrings.Dashboard_RestartWithPlayersTitle,
+                string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_RestartPlayersMessage, Status.PlayerCount),
+                DashboardStrings.Dashboard_Restart))
         {
             return;
         }
 
-        await RunBusyAsync("Reiniciando com segurança…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyRestarting, async () =>
         {
             var result = await controller.RestartAsync(StartOptions.Default);
             if (!result.Success)
             {
-                await _dialogs.ShowChecksAsync("Reinício não concluído", result.Message, result.Checks, false, string.Empty);
+                await _dialogs.ShowChecksAsync(DashboardStrings.Dashboard_RestartFailedTitle,result.Message, result.Checks, false, string.Empty);
             }
         });
     }
@@ -522,22 +531,22 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         var goingCreative = !IsCreative;
         if (profile.Preset == Core.Profiles.WorldPreset.Hammer)
         {
-            await _dialogs.AlertAsync("Preset Martelo", "O preset Martelo é sempre criativo. Troque o preset em \"Mundo\" para usar o modo normal.");
+            await _dialogs.AlertAsync(DashboardStrings.Dashboard_HammerTitle, DashboardStrings.Dashboard_HammerMessage);
             return;
         }
 
         var message = goingCreative
-            ? "Construção e craft ficam SEM CUSTO para todos que estiverem no servidor, e ninguém ganha conquistas enquanto o modo estiver ligado."
-            : "Construção e craft voltam a custar recursos. A chave nobuildcost é removida do mundo no próximo início.";
+            ? DashboardStrings.Dashboard_CreativeOnMessage
+            : DashboardStrings.Dashboard_CreativeOffMessage;
         if (Status.IsActive)
         {
-            message += Status.PlayerCount > 0
-                ? $"\n\nO servidor será reiniciado agora e {Status.PlayerCount} jogador(es) serão desconectados por alguns segundos."
-                : "\n\nO servidor será reiniciado agora (o mundo é salvo antes).";
+            message += "\n\n" + (Status.PlayerCount > 0
+                ? string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_ModeRestartPlayers, Status.PlayerCount)
+                : DashboardStrings.Dashboard_ModeRestart);
         }
 
-        if (!await _dialogs.ConfirmAsync(goingCreative ? "Ativar modo criativo?" : "Voltar ao modo normal?", message,
-                Status.IsActive ? "Salvar e reiniciar" : "Confirmar"))
+        if (!await _dialogs.ConfirmAsync(goingCreative ? DashboardStrings.Dashboard_EnableCreativeTitle : DashboardStrings.Dashboard_BackToNormalTitle, message,
+                Status.IsActive ? DashboardStrings.Dashboard_SaveAndRestart : DashboardStrings.Dashboard_Confirm))
         {
             return;
         }
@@ -547,12 +556,12 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
 
         if (Status.IsActive)
         {
-            await RunBusyAsync(goingCreative ? "Reiniciando em modo criativo…" : "Reiniciando em modo normal…", async () =>
+            await RunBusyAsync(goingCreative ? DashboardStrings.Dashboard_BusyRestartingCreative : DashboardStrings.Dashboard_BusyRestartingNormal, async () =>
             {
                 var result = await controller.RestartAsync(StartOptions.Default);
                 if (!result.Success)
                 {
-                    await _dialogs.ShowChecksAsync("Reinício não concluído", result.Message, result.Checks, false, string.Empty);
+                    await _dialogs.ShowChecksAsync(DashboardStrings.Dashboard_RestartFailedTitle,result.Message, result.Checks, false, string.Empty);
                 }
             });
         }
@@ -588,22 +597,22 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             var parts = new List<string>();
             if (d.ExtraCopies > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(d.ExtraCopies)} objetos existem em dobro ({d.Summary})");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_DuplicateCopies, Helpers.Ui.Number(d.ExtraCopies), d.Summary));
             }
 
             if (d.ZonesWithDoubleSpawn > 0)
             {
-                parts.Add($"{d.ZonesWithDoubleSpawn} regiões geram inimigos em dobro");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_DoubleSpawnZones, d.ZonesWithDoubleSpawn));
             }
 
             if (d.ZonesToMark > 0)
             {
-                parts.Add($"{d.ZonesToMark} regiões ainda vão ser geradas de novo quando alguém passar por lá");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_ZonesToMark, d.ZonesToMark));
             }
 
-            DuplicatesText = string.Join("; ", parts) +
-                ". É por isso que itens coletados \"voltam\", minério quebra duas vezes e aparecem inimigos demais. " +
-                (Status.IsActive ? "Pare o servidor para reparar." : "O reparo faz um backup antes e grava um save novo.");
+            DuplicatesText = string.Join("; ", parts) + ". " +
+                DashboardStrings.Dashboard_DuplicatesExplanation + " " +
+                (Status.IsActive ? DashboardStrings.Dashboard_StopToRepair : DashboardStrings.Dashboard_RepairMakesBackup);
         }
         else
         {
@@ -624,25 +633,23 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         var message =
-            $"Remove {Helpers.Ui.Number(scan.ExtraCopies)} cópias criadas quando o jogo gerou regiões de novo por cima do mundo " +
-            $"e marca {scan.ZonesToMark} regiões como já geradas, para isso não voltar a acontecer.\n\n" +
-            "Construções, baús dos jogadores, terreno e inventários não são alterados. Antes do reparo é feito um backup; " +
-            "se algo parecer errado, é só restaurá-lo na tela Backups.";
-        if (!await _dialogs.ConfirmAsync("Reparar mundo?", message, "Reparar"))
+            string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_RepairConfirmWhat, Helpers.Ui.Number(scan.ExtraCopies), scan.ZonesToMark) +
+            "\n\n" + DashboardStrings.Dashboard_RepairConfirmSafety;
+        if (!await _dialogs.ConfirmAsync(DashboardStrings.Dashboard_RepairWorldTitle, message, DashboardStrings.Dashboard_Repair))
         {
             return;
         }
 
-        await RunBusyAsync("Reparando o mundo…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyRepairing, async () =>
         {
             var result = await controller.RepairWorldAsync();
             if (result.Success)
             {
-                await _dialogs.AlertAsync("Mundo reparado", result.Message);
+                await _dialogs.AlertAsync(DashboardStrings.Dashboard_WorldRepairedTitle, result.Message);
             }
             else
             {
-                await _dialogs.ShowChecksAsync("O mundo não foi reparado", result.Message, result.Checks, false, string.Empty);
+                await _dialogs.ShowChecksAsync(DashboardStrings.Dashboard_WorldNotRepairedTitle,result.Message, result.Checks, false, string.Empty);
             }
         });
 
@@ -677,23 +684,21 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             var parts = new List<string>();
             if (marks.MarkedPieces > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(marks.MarkedPieces)} peças construídas");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_MarkedPieces, Helpers.Ui.Number(marks.MarkedPieces)));
             }
 
             if (marks.MarkedItems > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(marks.MarkedItems)} itens em baús e no chão");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_MarkedItems, Helpers.Ui.Number(marks.MarkedItems)));
             }
 
             if (marks.MarkedOthers > 0)
             {
-                parts.Add($"{Helpers.Ui.Number(marks.MarkedOthers)} outros objetos");
+                parts.Add(string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_MarkedOthers, Helpers.Ui.Number(marks.MarkedOthers)));
             }
 
-            CheatMarksText = string.Join(", ", parts) +
-                " estão marcados pelo jogo como \"feitos com trapaça\". Item marcado nunca se junta a um igual sem marca, " +
-                "e desmontar uma peça marcada devolve material marcado. " +
-                (Status.IsActive ? "Pare o servidor para limpar." : "A limpeza faz backup antes e não altera o que existe, só tira a marca.");
+            CheatMarksText = string.Format(CultureInfo.CurrentCulture, DashboardStrings.Dashboard_CheatMarksSentence, string.Join(", ", parts)) + " " +
+                (Status.IsActive ? DashboardStrings.Dashboard_StopToClean : DashboardStrings.Dashboard_CleanMakesBackup);
         }
         else
         {
@@ -714,26 +719,27 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
         }
 
         var message =
-            $"Tira a marca de \"feito com trapaça\" de {Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers)} objetos e " +
-            $"{Helpers.Ui.Number(marks.MarkedItems)} itens do mundo.\n\n" +
-            "Nada mais muda: os itens continuam com a mesma quantidade, qualidade e dono. Depois disso eles voltam a empilhar " +
-            "e as conquistas deixam de ser bloqueadas por causa deles. O que estiver na mochila dos jogadores não é alterado; " +
-            "guarde num baú para limpar também. Antes da limpeza é feito um backup.";
-        if (!await _dialogs.ConfirmAsync("Limpar marcas de trapaça?", message, "Limpar"))
+            string.Format(
+                CultureInfo.CurrentCulture,
+                DashboardStrings.Dashboard_CleanConfirmWhat,
+                Helpers.Ui.Number(marks.MarkedPieces + marks.MarkedOthers),
+                Helpers.Ui.Number(marks.MarkedItems)) +
+            "\n\n" + DashboardStrings.Dashboard_CleanConfirmDetails;
+        if (!await _dialogs.ConfirmAsync(DashboardStrings.Dashboard_CleanMarksTitle, message, DashboardStrings.Dashboard_Clean))
         {
             return;
         }
 
-        await RunBusyAsync("Limpando as marcas…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyCleaning, async () =>
         {
             var result = await controller.CleanCheatMarksAsync();
             if (result.Success)
             {
-                await _dialogs.AlertAsync("Marcas removidas", result.Message);
+                await _dialogs.AlertAsync(DashboardStrings.Dashboard_MarksRemovedTitle, result.Message);
             }
             else
             {
-                await _dialogs.ShowChecksAsync("As marcas não foram removidas", result.Message, result.Checks, false, string.Empty);
+                await _dialogs.ShowChecksAsync(DashboardStrings.Dashboard_MarksNotRemovedTitle,result.Message, result.Checks, false, string.Empty);
             }
         });
 
@@ -748,17 +754,17 @@ public sealed partial class DashboardViewModel : ProfilePageViewModel
             return;
         }
 
-        await RunBusyAsync("Copiando e verificando o mundo…", async () =>
+        await RunBusyAsync(DashboardStrings.Dashboard_BusyBackingUp, async () =>
         {
             try
             {
-                var entry = await Manager.Backups.CreateAsync(controller.Profile, BackupKind.Manual, "Backup manual pelo painel");
+                var entry = await Manager.Backups.CreateAsync(controller.Profile, BackupKind.Manual, DashboardStrings.Dashboard_ManualBackupNote);
                 controller.RecordBackup(entry);
                 RefreshWorld();
             }
             catch (Exception ex) when (ex is IOException or InvalidOperationException or UnauthorizedAccessException)
             {
-                await _dialogs.AlertAsync("Backup não realizado", ex.Message);
+                await _dialogs.AlertAsync(DashboardStrings.Dashboard_BackupFailedTitle, ex.Message);
             }
         });
     }

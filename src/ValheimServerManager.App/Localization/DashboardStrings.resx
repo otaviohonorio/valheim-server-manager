@@ -12,4 +12,388 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Dashboard_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Dashboard_StopSafely" xml:space="preserve">
+    <value>Stop safely</value>
+  </data>
+  <data name="Dashboard_StopTooltip" xml:space="preserve">
+    <value>Sends Ctrl+C: the server saves the world and shuts down.</value>
+  </data>
+  <data name="Dashboard_Restart" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="Dashboard_RestartTooltip" xml:space="preserve">
+    <value>Save, shut down and start again</value>
+  </data>
+  <data name="Dashboard_Adjust" xml:space="preserve">
+    <value>Adjust</value>
+  </data>
+  <data name="Dashboard_EmergencyTitle" xml:space="preserve">
+    <value>Server shut down to protect the world</value>
+  </data>
+  <data name="Dashboard_GoToBackups" xml:space="preserve">
+    <value>Go to Backups</value>
+  </data>
+  <data name="Dashboard_DuplicatesTitle" xml:space="preserve">
+    <value>World has duplicate objects</value>
+  </data>
+  <data name="Dashboard_RepairWorld" xml:space="preserve">
+    <value>Repair world</value>
+  </data>
+  <data name="Dashboard_CheatMarksTitle" xml:space="preserve">
+    <value>Items marked as made with cheats</value>
+  </data>
+  <data name="Dashboard_CleanMarks" xml:space="preserve">
+    <value>Clear marks</value>
+  </data>
+  <data name="Dashboard_LastStopTitle" xml:space="preserve">
+    <value>Last stop</value>
+  </data>
+  <data name="Dashboard_AttachedTitle" xml:space="preserve">
+    <value>Server started outside the manager</value>
+  </data>
+  <data name="Dashboard_AttachedMessage" xml:space="preserve">
+    <value>The manager is tracking this server, but its window can still be closed with the X (without saving). Use Restart: it shuts down safely and comes back without a window, with every protection.</value>
+  </data>
+  <data name="Dashboard_PendingConfigTitle" xml:space="preserve">
+    <value>The server isn't using the saved settings</value>
+  </data>
+  <data name="Dashboard_RestartNow" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="Dashboard_ConfigConfirmedTitle" xml:space="preserve">
+    <value>Settings verified</value>
+  </data>
+  <data name="Dashboard_StopSlowTitle" xml:space="preserve">
+    <value>Shutdown taking a while</value>
+  </data>
+  <data name="Dashboard_StopSlowMessage" xml:space="preserve">
+    <value>The server hasn't confirmed the save yet. Please wait; forcing it to close loses unsaved progress.</value>
+  </data>
+  <data name="Dashboard_PlayersOnline" xml:space="preserve">
+    <value>Players online</value>
+  </data>
+  <data name="Dashboard_WhoIsOnline" xml:space="preserve">
+    <value>Who's online</value>
+  </data>
+  <data name="Dashboard_JoinCode" xml:space="preserve">
+    <value>Join code (crossplay)</value>
+  </data>
+  <data name="Dashboard_CopyCode" xml:space="preserve">
+    <value>Copy code</value>
+  </data>
+  <data name="Dashboard_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Dashboard_Uptime" xml:space="preserve">
+    <value>Uptime</value>
+  </data>
+  <data name="Dashboard_LastSave" xml:space="preserve">
+    <value>Last save</value>
+  </data>
+  <data name="Dashboard_LastBackup" xml:space="preserve">
+    <value>Last backup</value>
+  </data>
+  <data name="Dashboard_Address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Dashboard_BackupNow" xml:space="preserve">
+    <value>Back up now</value>
+  </data>
+  <data name="Dashboard_WorldFolder" xml:space="preserve">
+    <value>World folder</value>
+  </data>
+  <data name="Dashboard_OpenLog" xml:space="preserve">
+    <value>Open log</value>
+  </data>
+  <data name="Dashboard_Activity" xml:space="preserve">
+    <value>Activity</value>
+  </data>
+  <data name="Dashboard_ActivityEmpty" xml:space="preserve">
+    <value>Nothing here yet. Server events (start, saves, players, backups) show up in this list.</value>
+  </data>
+  <data name="Dashboard_AddressPort" xml:space="preserve">
+    <value>port {0}</value>
+  </data>
+  <data name="Dashboard_PlayersLoading" xml:space="preserve">
+    <value>{0} joining…</value>
+  </data>
+  <data name="Dashboard_PlayersAndLoading" xml:space="preserve">
+    <value>{0} + {1} joining…</value>
+  </data>
+  <data name="Dashboard_Subtitle" xml:space="preserve">
+    <value>{0} · world {1}</value>
+  </data>
+  <data name="Dashboard_ConfigMatches" xml:space="preserve">
+    <value>The server is using exactly the saved settings ({0} options checked in the command line and the log).</value>
+  </data>
+  <data name="Dashboard_ConfigDifference" xml:space="preserve">
+    <value>• {0}: in use {1}; saved {2}</value>
+  </data>
+  <data name="Dashboard_ModeCreative" xml:space="preserve">
+    <value>Creative mode</value>
+  </data>
+  <data name="Dashboard_ModeNormal" xml:space="preserve">
+    <value>Normal mode</value>
+  </data>
+  <data name="Dashboard_ModeCreativeDetail" xml:space="preserve">
+    <value>Free building and crafting for everyone. Achievements are blocked while it's on.</value>
+  </data>
+  <data name="Dashboard_ModeNormalDetail" xml:space="preserve">
+    <value>Normal costs. Achievements unlocked (if the character and world have no cheat mark).</value>
+  </data>
+  <data name="Dashboard_ModeVerified" xml:space="preserve">
+    <value>✓ Confirmed in the world file.</value>
+  </data>
+  <data name="Dashboard_ModeNotVerified" xml:space="preserve">
+    <value>✗ The world file does NOT match!</value>
+  </data>
+  <data name="Dashboard_BackToNormal" xml:space="preserve">
+    <value>Back to normal mode</value>
+  </data>
+  <data name="Dashboard_EnableCreative" xml:space="preserve">
+    <value>Turn on creative mode</value>
+  </data>
+  <data name="Dashboard_NoSaveThisSession" xml:space="preserve">
+    <value>No save this session</value>
+  </data>
+  <data name="Dashboard_SaveNumberAgo" xml:space="preserve">
+    <value>Save {0} · {1}</value>
+  </data>
+  <data name="Dashboard_NoBackupYet" xml:space="preserve">
+    <value>No backups yet</value>
+  </data>
+  <data name="Dashboard_ConfigureServerTitle" xml:space="preserve">
+    <value>Set up the server</value>
+  </data>
+  <data name="Dashboard_ConfigureServerMessage" xml:space="preserve">
+    <value>Set the save folder and the world name under "Server" and "World".</value>
+  </data>
+  <data name="Dashboard_WorldUnreadableTitle" xml:space="preserve">
+    <value>Couldn't read the world</value>
+  </data>
+  <data name="Dashboard_WorldBrokenTitle" xml:space="preserve">
+    <value>World has a problem — don't start it</value>
+  </data>
+  <data name="Dashboard_NewWorldSeededTitle" xml:space="preserve">
+    <value>New world ready to generate</value>
+  </data>
+  <data name="Dashboard_WorldMissingTitle" xml:space="preserve">
+    <value>World doesn't exist yet</value>
+  </data>
+  <data name="Dashboard_WorldMissingMessage" xml:space="preserve">
+    <value>The server will create a new world.</value>
+  </data>
+  <data name="Dashboard_WorldHealthyTitle" xml:space="preserve">
+    <value>World is intact</value>
+  </data>
+  <data name="Dashboard_WorldHealthyMessage" xml:space="preserve">
+    <value>Save {0} complete, {1} chunks checked. Last save on disk: {2}.</value>
+  </data>
+  <data name="Dashboard_WorldSummary" xml:space="preserve">
+    <value>Seed {0} · {1} objects · {2}</value>
+  </data>
+  <data name="Dashboard_BusyChecking" xml:space="preserve">
+    <value>Checking and backing up…</value>
+  </data>
+  <data name="Dashboard_NewWorldTitle" xml:space="preserve">
+    <value>Create a new world?</value>
+  </data>
+  <data name="Dashboard_ConfirmStartTitle" xml:space="preserve">
+    <value>Confirm before starting</value>
+  </data>
+  <data name="Dashboard_NewWorldMessage" xml:space="preserve">
+    <value>There's no world "{0}" in this save folder. If you expected to find a world here, cancel and check the name and the folder.</value>
+  </data>
+  <data name="Dashboard_ReadWarnings" xml:space="preserve">
+    <value>Read the warnings below:</value>
+  </data>
+  <data name="Dashboard_CreateAndStart" xml:space="preserve">
+    <value>Create new world and start</value>
+  </data>
+  <data name="Dashboard_StartAnyway" xml:space="preserve">
+    <value>Start anyway</value>
+  </data>
+  <data name="Dashboard_NotStartedTitle" xml:space="preserve">
+    <value>The server was not started</value>
+  </data>
+  <data name="Dashboard_PlayersOnlineTitle" xml:space="preserve">
+    <value>There are players online</value>
+  </data>
+  <data name="Dashboard_StopPlayersMessage" xml:space="preserve">
+    <value>{0} connected player(s) will be disconnected. The world will be saved before shutting down.</value>
+  </data>
+  <data name="Dashboard_ShutDown" xml:space="preserve">
+    <value>Shut down</value>
+  </data>
+  <data name="Dashboard_BusyStopping" xml:space="preserve">
+    <value>Saving the world and shutting down…</value>
+  </data>
+  <data name="Dashboard_ShutdownTitle" xml:space="preserve">
+    <value>Shutdown</value>
+  </data>
+  <data name="Dashboard_NotStoppedTitle" xml:space="preserve">
+    <value>The server hasn't shut down yet</value>
+  </data>
+  <data name="Dashboard_NotStoppedMessage" xml:space="preserve">
+    <value>Saving usually takes seconds, but large worlds can take longer. Forcing it to close loses everything since the last save.</value>
+  </data>
+  <data name="Dashboard_Wait2Minutes" xml:space="preserve">
+    <value>Wait 2 more minutes</value>
+  </data>
+  <data name="Dashboard_ForceClose" xml:space="preserve">
+    <value>Force close</value>
+  </data>
+  <data name="Dashboard_KeepRunning" xml:space="preserve">
+    <value>Keep running</value>
+  </data>
+  <data name="Dashboard_BusyWaitingSave" xml:space="preserve">
+    <value>Waiting for the server to save…</value>
+  </data>
+  <data name="Dashboard_ForceCloseTitle" xml:space="preserve">
+    <value>Force close?</value>
+  </data>
+  <data name="Dashboard_ForceCloseMessage" xml:space="preserve">
+    <value>Progress since the last save will be lost. Continue?</value>
+  </data>
+  <data name="Dashboard_Force" xml:space="preserve">
+    <value>Force</value>
+  </data>
+  <data name="Dashboard_RestartWithPlayersTitle" xml:space="preserve">
+    <value>Restart with players online?</value>
+  </data>
+  <data name="Dashboard_RestartPlayersMessage" xml:space="preserve">
+    <value>{0} player(s) will be disconnected for a few seconds.</value>
+  </data>
+  <data name="Dashboard_BusyRestarting" xml:space="preserve">
+    <value>Restarting safely…</value>
+  </data>
+  <data name="Dashboard_RestartFailedTitle" xml:space="preserve">
+    <value>Restart not completed</value>
+  </data>
+  <data name="Dashboard_HammerTitle" xml:space="preserve">
+    <value>Hammer preset</value>
+  </data>
+  <data name="Dashboard_HammerMessage" xml:space="preserve">
+    <value>The Hammer preset is always creative. Change the preset under "World" to use normal mode.</value>
+  </data>
+  <data name="Dashboard_CreativeOnMessage" xml:space="preserve">
+    <value>Building and crafting become FREE for everyone on the server, and nobody earns achievements while the mode is on.</value>
+  </data>
+  <data name="Dashboard_CreativeOffMessage" xml:space="preserve">
+    <value>Building and crafting cost resources again. The nobuildcost key is removed from the world on the next start.</value>
+  </data>
+  <data name="Dashboard_ModeRestartPlayers" xml:space="preserve">
+    <value>The server will restart now and {0} player(s) will be disconnected for a few seconds.</value>
+  </data>
+  <data name="Dashboard_ModeRestart" xml:space="preserve">
+    <value>The server will restart now (the world is saved first).</value>
+  </data>
+  <data name="Dashboard_EnableCreativeTitle" xml:space="preserve">
+    <value>Turn on creative mode?</value>
+  </data>
+  <data name="Dashboard_BackToNormalTitle" xml:space="preserve">
+    <value>Back to normal mode?</value>
+  </data>
+  <data name="Dashboard_SaveAndRestart" xml:space="preserve">
+    <value>Save and restart</value>
+  </data>
+  <data name="Dashboard_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Dashboard_BusyRestartingCreative" xml:space="preserve">
+    <value>Restarting in creative mode…</value>
+  </data>
+  <data name="Dashboard_BusyRestartingNormal" xml:space="preserve">
+    <value>Restarting in normal mode…</value>
+  </data>
+  <data name="Dashboard_DuplicateCopies" xml:space="preserve">
+    <value>{0} objects exist twice ({1})</value>
+  </data>
+  <data name="Dashboard_DoubleSpawnZones" xml:space="preserve">
+    <value>{0} zones spawn twice as many enemies</value>
+  </data>
+  <data name="Dashboard_ZonesToMark" xml:space="preserve">
+    <value>{0} zones will still be generated again when someone goes there</value>
+  </data>
+  <data name="Dashboard_DuplicatesExplanation" xml:space="preserve">
+    <value>That's why collected items "come back", ore breaks twice and too many enemies show up.</value>
+  </data>
+  <data name="Dashboard_StopToRepair" xml:space="preserve">
+    <value>Stop the server to repair.</value>
+  </data>
+  <data name="Dashboard_RepairMakesBackup" xml:space="preserve">
+    <value>The repair makes a backup first and writes a new save.</value>
+  </data>
+  <data name="Dashboard_RepairConfirmWhat" xml:space="preserve">
+    <value>Removes {0} copies created when the game generated zones again on top of the world, and marks {1} zones as already generated so this doesn't happen again.</value>
+  </data>
+  <data name="Dashboard_RepairConfirmSafety" xml:space="preserve">
+    <value>Buildings, players' chests, terrain and inventories are not changed. A backup is made before the repair; if something looks wrong, just restore it on the Backups screen.</value>
+  </data>
+  <data name="Dashboard_RepairWorldTitle" xml:space="preserve">
+    <value>Repair world?</value>
+  </data>
+  <data name="Dashboard_Repair" xml:space="preserve">
+    <value>Repair</value>
+  </data>
+  <data name="Dashboard_BusyRepairing" xml:space="preserve">
+    <value>Repairing the world…</value>
+  </data>
+  <data name="Dashboard_WorldRepairedTitle" xml:space="preserve">
+    <value>World repaired</value>
+  </data>
+  <data name="Dashboard_WorldNotRepairedTitle" xml:space="preserve">
+    <value>The world was not repaired</value>
+  </data>
+  <data name="Dashboard_MarkedPieces" xml:space="preserve">
+    <value>{0} built pieces</value>
+  </data>
+  <data name="Dashboard_MarkedItems" xml:space="preserve">
+    <value>{0} items in chests and on the ground</value>
+  </data>
+  <data name="Dashboard_MarkedOthers" xml:space="preserve">
+    <value>{0} other objects</value>
+  </data>
+  <data name="Dashboard_CheatMarksSentence" xml:space="preserve">
+    <value>{0} are marked by the game as "made with cheats". A marked item never stacks with an identical unmarked one, and dismantling a marked piece returns marked material.</value>
+  </data>
+  <data name="Dashboard_StopToClean" xml:space="preserve">
+    <value>Stop the server to clean.</value>
+  </data>
+  <data name="Dashboard_CleanMakesBackup" xml:space="preserve">
+    <value>The cleanup makes a backup first and doesn't change what exists, it only removes the mark.</value>
+  </data>
+  <data name="Dashboard_CleanConfirmWhat" xml:space="preserve">
+    <value>Removes the "made with cheats" mark from {0} objects and {1} items in the world.</value>
+  </data>
+  <data name="Dashboard_CleanConfirmDetails" xml:space="preserve">
+    <value>Nothing else changes: the items keep the same quantity, quality and owner. After that they stack again and achievements are no longer blocked because of them. Whatever is in the players' backpacks is not changed; store it in a chest to clean it too. A backup is made before the cleanup.</value>
+  </data>
+  <data name="Dashboard_CleanMarksTitle" xml:space="preserve">
+    <value>Clear cheat marks?</value>
+  </data>
+  <data name="Dashboard_Clean" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Dashboard_BusyCleaning" xml:space="preserve">
+    <value>Clearing the marks…</value>
+  </data>
+  <data name="Dashboard_MarksRemovedTitle" xml:space="preserve">
+    <value>Marks removed</value>
+  </data>
+  <data name="Dashboard_MarksNotRemovedTitle" xml:space="preserve">
+    <value>The marks were not removed</value>
+  </data>
+  <data name="Dashboard_BusyBackingUp" xml:space="preserve">
+    <value>Copying and verifying the world…</value>
+  </data>
+  <data name="Dashboard_ManualBackupNote" xml:space="preserve">
+    <value>Manual backup from the dashboard</value>
+  </data>
+  <data name="Dashboard_BackupFailedTitle" xml:space="preserve">
+    <value>Backup not made</value>
+  </data>
 </root>
